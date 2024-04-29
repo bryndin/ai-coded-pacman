@@ -40,23 +40,63 @@ function keyPressed() {
 }
 
 function createGrid() {
+  grid = [];
+  // Outer walls
   for (let y = 0; y < height / cellSize; y++) {
     grid[y] = [];
     for (let x = 0; x < width / cellSize; x++) {
-      if (
-        (x === 1 && y > 0 && y < height / cellSize - 1) ||
-        (x === width / cellSize - 2 && y > 0 && y < height / cellSize - 1) ||
-        ((y === 1 || y === height / cellSize - 2) && x > 1 && x < width / cellSize - 2) ||
-        (x > 3 && x < width / cellSize - 4 && y === 1) ||
-        (x > 3 && x < width / cellSize - 4 && y === height / cellSize - 2) ||
-        (y === Math.floor(height / cellSize / 2) && (x === 1 || x === width / cellSize - 2))
-      ) {
+      if (x === 0 || x === width / cellSize - 1 || y === 0 || y === height / cellSize - 1) {
         grid[y][x] = "WALL";
       } else {
         grid[y][x] = "EMPTY";
       }
     }
   }
+
+  // Inner walls (replace with your level design)
+  const innerWalls = [
+    // Horizontal walls (y, x1, x2)
+    { y: 3, x1: 3, x2: 24 },
+    { y: 3, x1: 7, x2: 10 },
+    { y: 3, x1: 13, x2: 16 },
+    { y: 3, x1: 19, x2: 22 },
+    { y: 7, x1: 3, x2: 5 },
+    { y: 7, x1: 8, x2: 10 },
+    { y: 7, x1: 13, x2: 15 },
+    { y: 7, x1: 18, x2: 22 },
+    { y: 11, x1: 3, x2: 24 },
+    { y: 11, x1: 7, x2: 10 },
+    { y: 11, x1: 13, x2: 16 },
+    { y: 11, x1: 19, x2: 22 },
+    { y: 15, x1: 3, x2: 5 },
+    { y: 15, x1: 8, x2: 10 },
+    { y: 15, x1: 13, x2: 15 },
+    { y: 15, x1: 18, x2: 22 },
+    // Vertical walls (y1, y2, x)
+    { y1: 3, y2: 11, x: 3 },
+    { y1: 3, y2: 11, x: 7 },
+    { y1: 3, y2: 11, x: 10 },
+    { y1: 3, y2: 11, x: 13 },
+    { y1: 3, y2: 11, x: 16 },
+    { y1: 3, y2: 11, x: 19 },
+    { y1: 3, y2: 11, x: 22 },
+    { y1: 15, y2: 23, x: 3 },
+    { y1: 15, y2: 23, x: 7 },
+    { y1: 15, y2: 23, x: 10 },
+    { y1: 15, y2: 23, x: 13 },
+    { y1: 15, y2: 23, x: 16 },
+    { y1: 15, y2: 23, x: 19 },
+    { y1: 15, y2: 23, x: 22 },
+  ];
+
+  // Mark inner walls as WALL in the grid
+  innerWalls.forEach((wall) => {
+    for (let y = wall.y1; y <= wall.y2; y++) {
+      for (let x = wall.x1; x <= wall.x2; x++) {
+        grid[y][x] = "WALL";
+      }
+    }
+  });
 }
 
 function drawGrid() {

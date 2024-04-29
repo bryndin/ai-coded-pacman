@@ -67,3 +67,22 @@ Pacman moves up on arow key press, but not down or right.
 Walls need fixing too, as Pacman position is inside the wall.
 
 ![Visuals after Step 5](/screenshots/step5.png)
+
+## Step 6
+*Problem:* Maze doesn't make sense and Pacman is positioned in the wall. Instead we want to have the classic level of 28x36 grid. Original tiles were 8x8 pixel, it's too small for modern screens, we can do 16x16 or 32x32.
+
+#### Prompt
+Modify `createGrid` function to generate the classical pacman level with the grid of 28x36.
+
+#### Answer (shortened)
+Here's the modified createGrid function to generate a classic Pacman level with a grid of 28x36:
+
+<- code ->
+
+This code defines an innerWalls array containing objects that specify coordinates for horizontal and vertical walls. The loop iterates through these objects and marks the corresponding cells in the grid with "WALL".
+
+Note:
+ - This is a basic example.
+
+#### Actions
+- Replace `createGrid()` with the newly generated code.
