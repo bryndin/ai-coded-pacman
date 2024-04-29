@@ -23,7 +23,7 @@ function draw() {
   }
 
   pacman.show();
-  ghosts.forEach((ghost) => ghost.show());
+ ghosts.forEach((ghost) => ghost.show());
   // Add ghost movement logic here (optional)
 }
 
@@ -103,7 +103,7 @@ class Pacman {
     canMove(x, y) {
       const gridX = Math.floor(x / cellSize);
       const gridY = Math.floor(y / cellSize);
-      return grid[gridy] && grid[gridy][gridX] !== "WALL";
+      return grid[gridY] && grid[gridY][gridX] !== "WALL";
     }
     
     getAngle() {
