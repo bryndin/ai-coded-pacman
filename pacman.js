@@ -1,9 +1,11 @@
-const cellSize = 40;
+const cellSize = 16;
 let grid = [];
 let pacman, ghosts;
 
 function setup() {
-  createCanvas(400, 400);
+  const gridWidth = 28 * cellSize;
+  const gridHeight = 36 * cellSize;
+  createCanvas(gridWidth, gridHeight);
   grid = createGrid();
   pacman = new Pacman(cellSize, cellSize);
   ghosts = [

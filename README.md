@@ -161,3 +161,56 @@ This approach keeps the grid creation logic encapsulated within the createGrid f
 
 #### Action
 - Rendering is still broken, because global `grid` is defined as a `const`. swithch it to `let` similar to `pacman` and `ghosts`. Now it does render.
+
+Only outer walls are rendered correctly. Canvas and grid size didn't change and is still a square.
+
+![Visuals after Step 7](/screenshots/step7.png)
+
+## Step 8
+*Problem:* Grid is still 10x10, not 28x36. Canvas size is not increased either.
+
+#### Prompt
+Change canvas size to accommodate the 28x36 grid with the cell size of 16 pixels.
+
+#### Answer (shortened)
+To accommodate a 28x36 grid with a cell size of 16 pixels, you'll need to adjust the canvas size in the setup function. Here's the modified code:
+<- code ->
+
+#### Notes
+- cell size is hardcoded: `const gridWidth = 28 * 16;`
+- It doesn't mention that `const cellSize = 40;` needs updating too, and thus all rendering is of size 40, not 16.
+
+#### Prompt
+Cells are still of size 40 pixels, not 16.  Help to update.
+
+#### Answer (shortened)
+You're right, the cells are still rendering at 40 pixels even though the canvas size is adjusted. The cell size is determined by how you draw elements within the grid. Here's how to fix it:
+
+Update drawing functions: The size of the Pacman, ghosts, and potentially other elements in your code is likely defined based on the cell size. You need to update these drawing functions to use the actual cell size (16 pixels) instead of assuming it's the same as the canvas size.
+Here are some examples:
+
+Pacman:
+<- code ->
+
+#### Notes
+- This is wrong. Gemini seem to forget about global `const cellSize = 40;` and instead suggests to hack Pacman and Ghost size ` this.size = cellSize - 5; // Update size based on actual cellSize (16)`
+
+#### Prompt
+Should I update the global cellSize instead?
+
+#### Answer
+No, it's generally better practice to avoid updating the global cellSize variable in this scenario. Here's why:
+
+Maintainability: Using the actual cellSize (16) directly within the drawing functions makes the code clearer and easier to understand. It removes the need to mentally track the value of a global variable and its potential modifications throughout the code.
+
+Flexibility: If you ever decide to change the cell size in the future, you only need to modify the value used within the drawing functions instead of updating a single global variable and potentially affecting other parts of the code unintentionally.
+
+Encapsulation: Keeping the cell size definition within the context of the drawing functions promotes better encapsulation. Each function becomes more self-contained, relying on the provided cellSize value to draw elements correctly.
+
+While there's nothing technically wrong with updating the global cellSize, the approaches mentioned above offer several advantages for code maintainability, flexibility, and clarity.
+
+#### Notes
+- This is plain wrong. Based on the original code generated. Gemini suggests to keep the original `40` that it came up with. Instead hack Pacman and Ghost. This doesn't solve the problem with wall sizes.
+- I'm going to fix it myself as it's pretty obvious change.
+
+![Visuals after Step 8](/screenshots/step8.png)
