@@ -214,3 +214,67 @@ While there's nothing technically wrong with updating the global cellSize, the a
 - I'm going to fix it myself as it's pretty obvious change.
 
 ![Visuals after Step 8](/screenshots/step8.png)
+
+## Step 9
+*Problem:* Only the outer walls are generated, not the inner ones.
+
+#### Prompt
+createGrid only generates the outer walls, but not the inner ones. Find and fix the problem there.
+
+#### Answer (shortened)
+The problem lies in the conditional statement within the loop that creates the outer walls in the createGrid function. Here's the breakdown:
+
+Outer wall condition: The current condition checks if x === 0 || x === width / cellSize - 1 || y === 0 || y === height / cellSize - 1 to mark cells as "WALL" for the outer boundaries.
+
+Inner walls not considered: This condition only checks the edges of the grid (based on cell size and canvas size). It doesn't account for any additional walls you might want to define within the grid itself.
+
+Here's how to fix it:
+
+Option 1: Modify the loop condition (less flexible):
+<- code ->
+
+This approach changes the condition to true to mark all cells as "WALL" initially. Then, you'll need to add another loop or logic specifically designed to define the inner walls and set their corresponding positions in the grid to "EMPTY".
+
+Option 2: Use a separate loop for inner walls (more flexible):
+<- code ->
+
+This approach keeps the outer wall creation logic. Then, it introduces a separate loop that iterates through the innerWalls array (defined as before) to set the corresponding cells in the grid to "WALL".
+
+Option 2 is generally preferred as it allows for more flexibility in defining the inner walls without affecting the outer wall creation logic.
+
+#### Notes
+- Option 1 is meaningless, broken logic and doesn't take the inner walls in account at all.
+- Option 2 is exactly what the current broken logic does.
+
+#### Prompt
+Why innerWalls array mixes names, for example some elements use {y, x1, x2} names while the other use {y1,y2, x}?  Does it work correctly with the nested for loops operating on innerWalls.forEach?
+
+#### Answer (shortened)
+You're right, there's an inconsistency in the naming conventions used within the innerWalls array for defining walls. This inconsistency can lead to confusion and potential errors.
+
+#### Notes
+- While Gemini does claim inconsistency can be a problem, the newly generated code is exactly the same as it was before.
+
+#### Prompt
+Should innerWalls be split into 2 arrays, for horizontal and vertical walls,  and the forEach loops be modified accordingly?
+
+#### Answer
+Splitting the innerWalls array into separate arrays for horizontal and vertical walls is a good approach and can improve code organization and readability. Here's how to implement it:
+
+1. Separate arrays:
+<-code->
+2. Modified forEach loops:
+<-code->
+
+The loops now iterate through the respective arrays and use consistent naming for the loop variables (y for horizontal walls and x for vertical walls) based on the wall type being processed.
+
+Advantages:
+
+Improved Readability: Separating walls by type makes the code easier to understand and maintain.
+Flexibility: Adding or removing walls of a specific type becomes simpler as you only need to modify the corresponding array.
+Maintainability: If the logic for processing horizontal and vertical walls differs, you can handle them within separate loops.
+This approach provides a well-organized way to define and manage the inner walls in your Pacman level.
+
+#### Notes 
+- generated code uses `grid` not the `localGrid` we changed previously. This could be due to Gemini not knowing which option of the previous 2 we picked.
+- The walls look nothing like the classic pacman level.

@@ -56,7 +56,7 @@ function createGrid() {
   }
 
   // Inner walls (replace with your level design)
-  const innerWalls = [
+  const horizontalWalls = [
     // Horizontal walls (y, x1, x2)
     { y: 3, x1: 3, x2: 24 },
     { y: 3, x1: 7, x2: 10 },
@@ -74,6 +74,8 @@ function createGrid() {
     { y: 15, x1: 8, x2: 10 },
     { y: 15, x1: 13, x2: 15 },
     { y: 15, x1: 18, x2: 22 },
+  ];
+  const verticalWalls = [
     // Vertical walls (y1, y2, x)
     { y1: 3, y2: 11, x: 3 },
     { y1: 3, y2: 11, x: 7 },
@@ -91,12 +93,17 @@ function createGrid() {
     { y1: 15, y2: 23, x: 22 },
   ];
 
-  // Mark inner walls as WALL in the grid
-  innerWalls.forEach((wall) => {
+  horizontalWalls.forEach((wall) => {
+    const y = wall.y; // Consistent naming for horizontal walls
+    for (let x = wall.x1; x <= wall.x2; x++) {
+      localGrid[y][x] = "WALL";
+    }
+  });
+  
+  verticalWalls.forEach((wall) => {
     for (let y = wall.y1; y <= wall.y2; y++) {
-      for (let x = wall.x1; x <= wall.x2; x++) {
-        localGrid[y][x] = "WALL";
-      }
+      const x = wall.x; // Consistent naming for vertical walls
+      localGrid[y][x] = "WALL";
     }
   });
 
