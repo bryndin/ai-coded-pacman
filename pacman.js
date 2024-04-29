@@ -100,4 +100,25 @@ class Pacman {
       // Rest of canMove function logic (assuming it checks the grid for walls)
     }
   }
+
+  class Ghost {
+    constructor(x, y, color) {
+      this.x = x;
+      this.y = y;
+      this.size = cellSize - 5;
+      this.color = color;
+      // Add random movement properties (optional)
+    }
+  
+    show() {
+      fill(this.color);
+      ellipse(this.x + cellSize / 2, this.y + cellSize / 2, this.size, this.size);
+      triangle(this.x + cellSize / 3, this.y + cellSize / 3, this.x + cellSize / 2, this.y, this.x + cellSize - cellSize / 3, this.y + cellSize / 3);
+      fill(0);
+      ellipse(this.x + cellSize / 3, this.y + cellSize / 3, this.size / 5, this.size / 5);
+      ellipse(this.x + cellSize - cellSize / 3, this.y + cellSize / 3, this.size / 5, this.size / 5);
+    }
+  
+    // Add a move function with random movement logic (optional)
+  }
   
