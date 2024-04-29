@@ -15,10 +15,16 @@ function setup() {
 function draw() {
   background(0);
   drawGrid();
+
+  // Update Pacman position based on direction and collision check
+  if (pacman.canMove(pacman.x + pacman.directionX * cellSize, pacman.y + pacman.directionY * cellSize)) {
+    pacman.x += pacman.directionX * cellSize;
+    pacman.y += pacman.directionY * cellSize;
+  }
+
   pacman.show();
-  pacman.move();
   ghosts.forEach((ghost) => ghost.show());
-  ghosts.forEach((ghost) => ghost.move());
+  // Add ghost movement logic here (optional)
 }
 
 function keyPressed() {
@@ -97,8 +103,20 @@ class Pacman {
     canMove(x, y) {
       const gridX = Math.floor(x / cellSize);
       const gridY = Math.floor(y / cellSize);
-      // Rest of canMove function logic (assuming it checks the grid for walls)
+      return grid[gridy] && grid[gridy][gridX] !== "WALL";
     }
+    
+    getAngle() {
+      if (this.directionX > 0) {
+        return 0;
+      } else if (this.directionX < 0) {
+        return PI;
+      } else if (this.directionY > 0) {
+        return PI / 2;
+      } else {
+        return PI / -2;
+      }
+    }    
   }
 
   class Ghost {
