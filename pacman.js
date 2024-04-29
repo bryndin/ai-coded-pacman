@@ -1,10 +1,10 @@
 const cellSize = 40;
-const grid = [];
+let grid = [];
 let pacman, ghosts;
 
 function setup() {
   createCanvas(400, 400);
-  createGrid();
+  grid = createGrid();
   pacman = new Pacman(cellSize, cellSize);
   ghosts = [
     new Ghost(cellSize * 5, cellSize * 5, "red"),
@@ -40,15 +40,15 @@ function keyPressed() {
 }
 
 function createGrid() {
-  grid = [];
+  const localGrid = []; // Define a local grid variable
   // Outer walls
   for (let y = 0; y < height / cellSize; y++) {
-    grid[y] = [];
+    localGrid[y] = [];
     for (let x = 0; x < width / cellSize; x++) {
       if (x === 0 || x === width / cellSize - 1 || y === 0 || y === height / cellSize - 1) {
-        grid[y][x] = "WALL";
+        localGrid[y][x] = "WALL";
       } else {
-        grid[y][x] = "EMPTY";
+        localGrid[y][x] = "EMPTY";
       }
     }
   }
@@ -93,10 +93,12 @@ function createGrid() {
   innerWalls.forEach((wall) => {
     for (let y = wall.y1; y <= wall.y2; y++) {
       for (let x = wall.x1; x <= wall.x2; x++) {
-        grid[y][x] = "WALL";
+        localGrid[y][x] = "WALL";
       }
     }
   });
+
+  return localGrid; // Return the created grid
 }
 
 function drawGrid() {

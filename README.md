@@ -86,3 +86,78 @@ Note:
 
 #### Actions
 - Replace `createGrid()` with the newly generated code.
+
+Rendering broke again.
+
+## Step 7
+*Problem:* Maze rendering broke.  It's not clear why Gemini insists on generating outer walls. Inner walls mix horizontal and vertical walls with different schemas.
+
+#### Prompt
+There is a problem in `createGrid` can you identify and fix it?
+
+#### Answer (shortened)
+The issue lies in the way the innerWalls array defines horizontal walls. Here's the breakdown:
+
+Incorrect x-coordinate range for horizontal walls: The objects in the innerWalls array for horizontal walls define x1 and x2 to represent the starting and ending positions on the x-axis. However, these values should represent the column indexes in the grid, which range from 0 to width/cellSize - 1 (exclusive).
+Currently, the code defines x2 as the ending position for drawing the wall. Since the loop iterates from x1 to x2 (inclusive), it will try to mark one extra cell beyond the intended end position  as "WALL" which might cause issues with rendering or collision detection.
+
+Here's how to fix it:
+
+<- code ->
+
+By adjusting x2 in the horizontal wall definitions to be one less than the intended ending position, the loop will iterate up to the correct cell (inclusive), ensuring the wall is drawn within the grid boundaries.
+
+#### Actions
+- This is not the problem breaking rendering, but the fact `createGrid()` redefines the global `grid` variable. Asking again
+
+#### Prompt
+Why `createGrid` redefines `grid` that is already a global variable?
+
+#### Answer (shortened)
+You're right, redefining grid inside the createGrid function might be unnecessary and can be confusing. Here's why it happens and how to improve it:
+
+JavaScript variable scope: JavaScript has two main variable scopes: global and local. Variables declared outside any function (like grid here) are globally accessible. Variables declared within a function are local to that function.
+
+Reassignment vs. redeclaration: In the createGrid function, you're not technically redeclaring grid. You're assigning a new empty array to the existing grid variable. This effectively wipes out any previous content in grid.
+
+There are two ways to improve this:
+
+Option 1: Utilize existing grid variable directly:
+
+<- code ->
+
+This approach removes the line grid = []; and directly uses the grid variable within the function. Since grid is already defined globally, it's accessible within the function.
+
+Option 2: Use a local variable within createGrid:
+
+<- code ->
+
+This approach defines a local variable localGrid within the function to build the grid. After the loop finishes creating the grid structure, it assigns the entire localGrid to the global grid variable.
+
+Both approaches achieve the same functionality but with slightly different strategies for handling the grid data. Choose the one that you find clearer or more suitable for your code organization.
+
+#### Actions
+- Let's go with Option 2, but instead of assigning `grid = localGrid;` inside of it, lets ask `createGrid()` to return it.
+
+#### Prompt
+Modify Option 2 to return `localGrid` instead of assigning it to `grid` variable. Modify the call to `createGrid` to use that returned value.
+
+#### Answer (shortened)
+Here's the modified code utilizing Option 2 with createGrid returning the generated grid:
+
+1. Modified createGrid function:
+
+<- code ->
+
+Instead of assigning the local grid to the global grid variable, the function now returns the localGrid using the return statement.
+
+2. Modified call to createGrid:
+   
+<- code ->
+
+In the setup function, the call to createGrid is used, and the returned value (the generated grid) is assigned to the global grid variable. This eliminates the need for direct assignment within the function.
+
+This approach keeps the grid creation logic encapsulated within the createGrid function and separates it from modifying the global grid variable directly.
+
+#### Action
+- Rendering is still broken, because global `grid` is defined as a `const`. swithch it to `let` similar to `pacman` and `ghosts`. Now it does render.
