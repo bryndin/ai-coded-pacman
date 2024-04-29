@@ -278,3 +278,25 @@ This approach provides a well-organized way to define and manage the inner walls
 #### Notes 
 - generated code uses `grid` not the `localGrid` we changed previously. This could be due to Gemini not knowing which option of the previous 2 we picked.
 - The walls look nothing like the classic pacman level.
+
+
+## Step 10
+
+#### Prompt
+Based on this picture of the classic Pacman game level, where walls are of blue color, generate the inner walls coordinates for `horizontalWalls` and `verticalWalls` arrays in our Pacman game.
+
+#### Answer
+Absolutely, based on a classic Pacman game level where walls are blue colored, here's a possible set of coordinates for the horizontalWalls and verticalWalls arrays:
+
+Horizontal Walls (horizontalWalls array):
+<-code->
+Vertical Walls (verticalWalls array):
+<-code (unfinished) ->
+
+#### Notes
+- Code was cut short. Had to ask to print the `verticalWalls` separately.
+- Resulted walls have nothing in common with the level we need.
+- Microsoft Copilot can't generate one either, replacing entries with comments, generating rows of different lenght and being in overall a waste of time.
+- Remove all the generating logic and replace it with a static array representing the level.
+- Replace "WALL" with 1
+- Hand draw the level
