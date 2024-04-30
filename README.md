@@ -404,3 +404,6 @@ The current `move()` function operated with x and y being the pixels of the top 
 - Lengthy reply is not that useful. It suggests doing 4 checks and OR-ing the checks, but that's what we already asked. The rest of code is useless restatements.
 - A few more tries to generate `canMove` that checks all 4 corners results in bad code offsetting `gridX` and `gridY` instead of `x` and `y`
 - Instead reuse the idea of top 4 corners, but have to implement it myself.
+
+## Step 13
+*Problem:* Pacman must not stop if keyboard command can't change that direction immidiately, but instead apply it at the next possibility.

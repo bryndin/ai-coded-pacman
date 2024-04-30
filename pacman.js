@@ -28,13 +28,13 @@ function draw() {
 
 function keyPressed() {
   if (keyCode === UP_ARROW || key === 'W') {
-    pacman.setDirection(0, -1);
+    pacman.setDesiredDirection(0, -1);
   } else if (keyCode === DOWN_ARROW || key === 'S') {
-    pacman.setDirection(0, 1);
+    pacman.setDesiredDirection(0, 1);
   } else if (keyCode === LEFT_ARROW || key === 'A') {
-    pacman.setDirection(-1, 0);
+    pacman.setDesiredDirection(-1, 0);
   } else if (keyCode === RIGHT_ARROW || key === 'D') {
-    pacman.setDirection(1, 0);
+    pacman.setDesiredDirection(1, 0);
   }
 }
 
@@ -99,6 +99,8 @@ class Pacman {
     this.size = cellSize;
     this.directionX = 0;
     this.directionY = 0;
+    this.desiredDirX = 0;
+    this.desiredDirY = 0;
     this.speed = 100;
     this.lastMoveTime = 0;
   }
@@ -115,25 +117,36 @@ class Pacman {
     const currentTime = performance.now(); // Get current time in milliseconds
     const deltaTime = (currentTime - this.lastMoveTime) / 1000; // Time difference in seconds
 
-    // Calculate distance to move based on speed and deltaTime
-    const distanceX = this.speed * deltaTime * this.directionX;
-    const distanceY = this.speed * deltaTime * this.directionY;
-
-    const newX = this.x + distanceX;
-    const newY = this.y + distanceY;
+    const [newX, newY] = this.getNewPosition(this.desiredDirX, this.desiredDirY, deltaTime);
 
     if (this.canMove(newX, newY)) {
       this.x = newX;
       this.y = newY;
+      this.directionX = this.desiredDirX;
+      this.directionY = this.desiredDirY;
+    } else {
+      const [currentX, currentY] = this.getNewPosition(this.directionX, this.directionY, deltaTime);
+      if (this.canMove(currentX, currentY)) {
+        this.x = currentX;
+        this.y = currentY;
+      }
     }
 
     // Update last move time for next calculation
     this.lastMoveTime = currentTime;
   }
 
-  setDirection(x, y) {
-    this.directionX = x;
-    this.directionY = y;
+  getNewPosition(directionX, directionY, deltaTime) {
+    // Calculate distance to move based on speed and deltaTime
+    const distanceX = this.speed * deltaTime * directionX;
+    const distanceY = this.speed * deltaTime * directionY;
+
+    return [this.x + distanceX, this.y + distanceY];
+  }
+
+  setDesiredDirection(x, y) {
+    this.desiredDirX = x;
+    this.desiredDirY = y;
   }
 
   canMove(x, y) {
