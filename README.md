@@ -437,3 +437,72 @@ Ghosts aren't moving, add logic to chase Pacman.
 
 #### Notes
 - Gemini provides the "simple chase logic" to define the direction. Code is reasonable, but needs heavy adaption from the `Pacman.move()`. At the end the chase, though a simple one, works.
+
+## Step 15
+*Problem:* Simple chase logic is too simple. Can Gemini help us to build a smarter one from the classic implementation of Pacman?
+
+#### Prompt
+Can you provide a more complex chase logic that is used in real implementations of Pacman?
+
+#### Answer
+Absolutely! While the simple chase logic in the previous response provides a starting point, real Pacman implementations often utilize a combination of techniques for more interesting and challenging ghost behavior. Here's a breakdown of some common approaches:
+
+1. Target Grid Approach:
+
+Divide the maze into a grid of smaller cells.
+For each ghost, define a target grid cell based on Pacman's current location or a predetermined pattern (e.g., scatter points).
+The ghost uses a pathfinding algorithm (like A*) to find the shortest path to its target cell, avoiding walls.
+2. Chasing Modes:
+
+Implement different chasing modes for ghosts, like:
+Chase Mode: Ghosts actively chase Pacman using the target grid approach.
+Scatter Mode: Ghosts move away from specific scatter points in the maze (can be timed or triggered by Pacman's actions).
+Frightened Mode: Ghosts become vulnerable and move randomly when Pacman eats a power pellet.
+3. Field of View (FOV) Optimization:
+
+Ghosts don't have complete knowledge of the entire maze.
+Implement a limited field of view for each ghost, restricting their awareness of Pacman's location to nearby grid cells.
+This can be achieved using techniques like raycasting or pre-calculated visibility maps.
+4. Teaming and Cooperation:
+
+In advanced versions, ghosts might collaborate.
+For example, a chasing ghost might communicate Pacman's location to a strategically positioned ghost to cut him off.
+Here's an example incorporating some of these ideas:
+<-code->
+Remember:
+
+Replace the placeholder functions (getClosestPacmanCell, getScatterCell, findPath, getDirectionTowards) with your specific implementations based on your chosen pathfinding algorithm and FOV approach.
+Adjust the chase threshold, ghost modes, and other parameters to fine-tune the ghost behavior for your game.
+
+#### Prompt
+Generate `getDirectionTowards` function for the code above
+
+#### Notes
+- Generates the "simple chase" approach similar to what we used before.
+
+#### Prompt
+Generate `findPath` function for the `ghostMove` function above.
+
+#### Answer (shortened)
+The findPath function in the context of Pacman ghost AI typically involves a pathfinding algorithm to find the shortest path from the ghost's current position to a target cell within the maze. Here's an example using a basic Breadth-First Search (BFS) approach:
+<- code ->
+
+#### Notes
+- Need a helper function that will look at the grid to filter out the wall cells.
+
+#### Prompt
+Generate code for the `getValidNeighbors(x,y)` function that will look at the grid to avoid cells with walls.
+
+#### Notes
+- Great, we got something reasonably looking!
+- Path finding functions use grid coordinates, while pacman anf ghost use canvas ones. Need a function to convert between them
+
+#### Prompt
+Create a function to convert from the canvas coordinates in pixels to cell coordinates in the grid.
+
+#### Notes
+- Since `Ghost.move()` method is a hack of several suggestions from Gemini, I had to patch it manually with proper conversions from the canvas coords into the grid coords using `canvasToGridCell()` Gemini just generated. Some hacking required to pass "cell" object instead Ghost or Pacman instances.
+- Ghosts are shown and move, but the movement is cleary broken.
+- At least nothing leads to code freezing.
+
+
