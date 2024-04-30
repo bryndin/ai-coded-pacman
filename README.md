@@ -310,3 +310,97 @@ Vertical Walls (verticalWalls array):
 
 #### Notes:
 - Gemini is unable to find the typo in "RIGHT_arrow". Let's fix it ourselves.
+
+## Step 12
+*Problem:* 
+- Pacman doesn't align to the grid. It's shifted half a cell.
+- Pacman's speed is too fast.
+
+#### Prompt
+Pacman moves too fast, how to make it move slower and smooth?
+
+#### Answer
+There are a couple of approaches you can take to make Pacman move slower and smoother in your Pacman game:
+
+1. Timer-based Movement:
+<- code ->
+2. Animation Loop:
+<- code ->
+
+#### Prompt
+Current logic in Pacman.move() makes Pacman move my a cell size. Make a better, more smooth per-pixel movement.
+
+#### Answer
+You're right, moving Pacman by a full cell size in each update can feel clunky. To achieve smoother per-pixel movement, we can leverage concepts like animation and frame rates. Here's an approach using requestAnimationFrame:
+
+1. Update Pacman's Movement Speed:
+
+Define a variable, for example, pacman.speed, to represent Pacman's movement speed in pixels per frame. A common starting point could be something like 2 pixels per frame.
+2. Calculate Movement Distance:
+
+Instead of directly moving Pacman by a full cell size, calculate the distance to move based on the speed and the time elapsed since the last update.
+Here's an improved Pacman.move() function:
+<- code ->
+
+#### Notes
+- `Pacman.move()` method is not being used.. It duplicates the logic in `draw()` function.
+ 
+#### Prompt
+I don't see the move() function being used anywhere. Is it correct?
+
+#### Notes
+- Gemini started refactoring code to use `pacman.direction` `"RIGHT"` etc. instead of the previous logic of `setDirection(x, y)` operating on `pacman.directionX` and `pacman.directionY`
+
+#### Prompt
+I don't see the move() function being used anywhere. Is it correct?
+
+#### Prompt
+There is already a method `setDirection(x,y)` under Pacman class. Should the pacman's `directionX` and `directionY` attributes be used instead of newly introduced `direction` attribute?
+
+#### Answer (shortened)
+You're absolutely right. It's better to leverage the existing setDirection(x, y) method and directionX and directionY attributes for Pacman's movement logic if they're already present in your codebase. Here's how to adapt the approach:
+
+#### Notes
+- `Pacman.move()` is still not used.
+
+#### Prompt
+Show me how to integrate `Pacman.move()` into the animation loop using `requestAnimationFrame`. Dose grid and ghost drawing need updating?
+
+#### Notes
+- It explains how to use `requestAnimationFrame` with the new `animate()` function that will call `Pacman.move()`.
+- Not clear why do we need that `animate()` logic, if there is already the `draw()` function.
+
+#### Prompt
+How does the new `animate()` function relate to the existing `draw()` function that is responsible for drawing? Do we need to use both?
+
+#### Notes
+- While what Gemini describes with splitting `animate()` and `draw()` makes sense, the `draw()` is the p5s lib callback.
+
+#### Prompt
+Isn't our current `draw()` function part of p5js game library and that library calls it instead of us calling it directly?
+
+#### Answer (shortened)
+You're absolutely correct. I apologize for the confusion in the previous explanation.
+
+In the context of p5.js, the draw() function is indeed a core function provided by the library.  Here's a more accurate explanation:
+
+#### Notes
+- The movement and drawing logic gets more and more entangled.
+
+#### Prompt
+Show me the overall `draw()` and the pacman's `move()` function.
+
+#### Notes
+- At this point Gemini starts going in loops and doesn't have a good history of our code. It started providing the general code that is a variatio of what it suggested initially.
+- It's time to switch prompts to more precise and detailed ones. See if that can make some preogress.
+
+#### Prompt
+How does the `Pacman.move()` method is used with `Pacman.canMove(x,y)` method?
+
+#### Prompt
+The current `move()` function operated with x and y being the pixels of the top left corner of the pacman. This function uses `canMove(x,y)` function that checks if pacman can move into a new location not occupied by the wall declared in the `grid` array.  But it `canMove(x,y) only checks for the top left coordinates of pacman. Update `canMove` function to check all 4 corners.
+
+#### Notes
+- Lengthy reply is not that useful. It suggests doing 4 checks and OR-ing the checks, but that's what we already asked. The rest of code is useless restatements.
+- A few more tries to generate `canMove` that checks all 4 corners results in bad code offsetting `gridX` and `gridY` instead of `x` and `y`
+- Instead reuse the idea of top 4 corners, but have to implement it myself.
