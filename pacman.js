@@ -36,7 +36,7 @@ function keyPressed() {
     pacman.setDirection(0, 1);
   } else if (keyCode === LEFT_ARROW) {
     pacman.setDirection(-1, 0);
-  } else if (keyCode === RIGHT_arrow) {
+  } else if (keyCode === RIGHT_ARROW) {
     pacman.setDirection(1, 0);
   }
 }

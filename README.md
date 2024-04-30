@@ -300,3 +300,13 @@ Vertical Walls (verticalWalls array):
 - Remove all the generating logic and replace it with a static array representing the level.
 - Replace "WALL" with 1
 - Hand draw the level
+
+## Step 11
+*Problem:* Pacman doesn't go right.
+
+#### Prompt
+1. Pacman can move left, up and down, but doesn't move right. Fix it.
+2. Is there a problem in `keyPressed()` function?
+
+#### Notes:
+- Gemini is unable to find the typo in "RIGHT_arrow". Let's fix it ourselves.
