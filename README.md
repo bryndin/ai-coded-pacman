@@ -505,4 +505,136 @@ Create a function to convert from the canvas coordinates in pixels to cell coord
 - Ghosts are shown and move, but the movement is cleary broken.
 - At least nothing leads to code freezing.
 
+## Step 16
+*Problem:* Pacman is unable to enter some of the tunnels. This problem existed even before the addition of ghost logic. It's time to look at it, as it may affect the AI behind ghosts.
 
+#### Prompt
+Pacman can't turn into some of the paths. Look at the Pacman movement code and see if something is wrong there.
+
+#### Answer (shortened)
+Absolutely! Let's analyze the Pacman movement code to identify potential issues that might prevent him from turning into some paths:
+
+Common Issues:
+
+Collision Check Order:
+
+Make sure the collision check happens after the desired direction change is applied to Pacman's position.
+If the collision check is done before updating the position, it might prevent Pacman from entering a valid path even if the new position wouldn't lead to a collision.
+Incomplete Collision Checking:
+
+Ensure your canMove function considers all four corners of Pacman when checking for collisions with walls.
+A simple check for the center of Pacman might miss collisions when entering narrow passages or making sharp turns.
+Cell Snapping:
+
+If you're using a cell-based approach for movement, there might be issues where Pacman's position gets snapped to the center of a cell after a movement update.
+This can cause him to get stuck in corners or miss narrow paths if the snapping logic doesn't account for his desired direction.
+Floating-Point Precision Errors:
+
+Depending on how you calculate Pacman's movement based on speed and time, you might encounter floating-point precision errors.
+These errors can lead to slight discrepancies between the intended movement and the actual position, potentially causing Pacman to miss some paths.
+Code Review:
+
+Here's a breakdown of some things to look for in your Pacman movement code:
+
+#### Notes
+- This is due to the `speed` variable set to 100. It causes Pacman to jam over the coordinates needed to enter the turn.
+
+#### Promt
+The problem happens due to the high speed value that causes pacman position to jump over the x,y coordinates corresponding to the wall opening cell. Suggest a code change to fix the problem.
+
+#### Answer
+Absolutely! You're right, a high speed value can cause Pacman to overshoot wall openings. Here's a code change to address this issue:
+
+1. Movement Based on Cell Size:
+
+Instead of directly calculating movement distances based on speed and time, we can tie the movement to the size of a cell in the grid. This ensures Pacman's movement aligns perfectly with the grid and avoids overshooting openings.
+
+Here's an example code change:
+<- code ->
+
+2. Alternative: Snapping with Threshold
+
+If directly calculating movement distances is preferred, you can implement a snapping mechanism with a threshold:
+<- code ->
+
+#### Notes
+- Option 1 is a no go. It will make Pacman jump from cell to cell and will get in the way of animation, control etc. Won't work without some tricky animation based solutions on top.
+- Option 2 with snapping to the grid should work. Let's try it.
+
+#### Prompt
+Factor out the snapping logic into a reusable function.
+
+#### Notes
+- Refactoring Gemini did is interesting: `function snapToCell(position, cellSize, threshold = 0.1 * cellSize) {` . `cellSize` is not used in the body of the function, only for the default value of `threshold`
+
+#### Prompt
+Do we need to pass `cellSize` to `snapToCell` function?
+
+#### Answer (shortened)
+You're right, there are ways to avoid passing cellSize to the snapToCell function every time. Here are two approaches:
+
+1. Global Cell Size Variable:
+2. Function Argument with Default Value:
+
+#### Notes
+- Gemini can't set it's mind on data structures. We have classes, array like objects representing x,y coords and the separate vars for x and y. Similar problem with canvas vs grid coords.
+- It's easier to change `snapToCell()` to operate on one coordinate than return both. Have to change it manually, as it is getting messy with Gemini.
+- there is a bug in `snapToCell` it only rounds within 1 pixel no matter how big is the threshold.
+
+#### Prompt
+Look at `snapToCell` function, it only snaps within 1 pixel no matter how big is the threshold. Fix it.
+
+#### Prompt
+This is still incorrect. the difference between a coordinate and it's rounded value is still within 1 pixel.
+
+#### Prompt 
+The problem is still there. We want to round 27 to 25, with the threshold of 0.5 and the cellSize 16
+
+#### Prompt
+We have to snap within half of the cell, which is 8 pixels. For example x=6 is snapped to x=0. x=22 is snapped to 24. Checking `Math.abs(position.x - Math.round(position.x))` is incorrect, as this difference is always within 1 pixel.
+
+#### Notes
+- Here I give up because Gemini is clearly unable to understand and fix the problem.
+- Multiple other tests had shown Gemini really struggles with this kind of problems.
+
+#### Prompt
+Suggest optimization to this function.  It detects collisions of 4 corners of pacman with walls and creates false positives. Function:
+<- code of canMove ->
+
+#### Notes
+- While suggestion to reduce 4 corner checks is valid. Optimization is buggy. Gemini wrongly implies there is a direction info in these 4 coordinates, while there is none and thus conditional checks are wrong.
+
+#### Prompt
+If I've implemented snapping to the grid, do I need to check all 4 corners of Pacman for collisions? If I do, modify this `canMove()` collision checker.
+<- code of canMove ->
+
+#### Answer
+Yes, even with snapping to the grid, it's generally recommended to check all 4 corners of Pacman for collisions. Here's why:
+
+1. Floating-point Precision Errors:
+2. Sub-cell Collisions:
+Modified canMove function:
+<- code of canMove ->
+
+#### Notes
+- Gemini insists on the same buggy modification to `canMove()`.
+- The problem withsnapping all coordinates is, when changing direction we aren't longer collide with the wall as the coordinates are snapped back into the current empry cell.
+
+#### Prompt
+Without adding snapping to the grid into `move()` method of Pacman, Pacman can't turn into some of the corridors. With added snapping, the coordinates that otherwise be inside the wall on a direction change are snapped back into the open cell creating a false positive directional change. Provide suggestions on how to fix the problem.
+
+#### Answer
+Here are a few approaches to fix this problem:
+
+1. Pre-Turn Check:
+<- code ->
+2. Post-Turn Snap with Tolerance:
+<- code ->
+3. Directional Snapping:
+<- code ->
+
+#### Notes
+- (1) doesn't solve the problem as without snapping and with 4 point check, to turn we'd have to have a perfect alignment of pacman with the corridor next to it. 1 point check bings us back to previous bugs.
+- (2) doesn't work either, as it always snaps
+- (3) a no go either
+- It's gettting hard to make Gemini design a working approach with incrimental small movements of Pacman together with the snapping to grid. Let's try something different.

@@ -1,4 +1,5 @@
 const cellSize = 16;
+const snapThreshold = 0.1;
 let grid = [];
 let pacman, ghosts;
 let animationFrameId;
@@ -119,8 +120,8 @@ class Pacman {
     const currentTime = performance.now(); // Get current time in milliseconds
     const deltaTime = (currentTime - this.lastMoveTime) / 1000; // Time difference in seconds
 
-    const newX = this.x + this.speed * deltaTime * this.desiredDirX;
-    const newY = this.y + this.speed * deltaTime * this.desiredDirY;
+    const newX = snapToCell(this.x + this.speed * deltaTime * this.desiredDirX);
+    const newY = snapToCell(this.y + this.speed * deltaTime * this.desiredDirY);
 
     if (canMove(newX, newY, this.size)) {
       this.x = newX;
@@ -128,8 +129,9 @@ class Pacman {
       this.directionX = this.desiredDirX;
       this.directionY = this.desiredDirY;
     } else {
-      const currentX = this.x + this.speed * deltaTime * this.directionX;
-      const currentY = this.y + this.speed * deltaTime * this.directionY;
+      const currentX = snapToCell(this.x + this.speed * deltaTime * this.directionX);
+      const currentY = snapToCell(this.y + this.speed * deltaTime * this.directionY);
+
       if (canMove(currentX, currentY, this.size)) {
         this.x = currentX;
         this.y = currentY;
@@ -209,8 +211,8 @@ class Ghost {
     const path = findPath(ghostCell.col, ghostCell.row, targetCell.col, targetCell.row);
     if (path) { // Check if path exists (avoid getting stuck)
       const nextCell = path[0];
-      const newX = this.x + this.speed * deltaTime * this.directionX;
-      const newY = this.y + this.speed * deltaTime * this.directionY;
+      const newX = snapToCell(this.x + this.speed * deltaTime * this.directionX);
+      const newY = snapToCell(this.y + this.speed * deltaTime * this.directionY);
 
       // Update position based on next cell in path and check for collision
       if (canMove(newX, newY, this.size)) {
@@ -259,6 +261,13 @@ function canvasToGridCell(canvasX, canvasY) {
     row: rowIndex >= 0 ? rowIndex : null,
     col: colIndex >= 0 ? colIndex : null,
   };
+}
+
+function snapToCell(z) {
+  // const snappedZ = Math.abs(z - Math.round(z)) < snapThreshold * cellSize ? Math.round(z) : z;
+  const ratio = z/cellSize;
+  const snappedZ = Math.abs(ratio - Math.round(ratio)) < snapThreshold ? Math.round(ratio)*cellSize : Math.round(z);
+  return snappedZ
 }
 
 function findPath(startX, startY, targetX, targetY) {
