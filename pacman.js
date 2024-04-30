@@ -22,8 +22,10 @@ function draw() {
   pacman.move()
   pacman.show();
 
-  ghosts.forEach((ghost) => ghost.show());
-  // Add ghost movement logic here (optional)
+  for (const ghost of ghosts) {
+    ghost.move(pacman.x, pacman.y);
+    ghost.show();
+  }
 }
 
 function keyPressed() {
@@ -55,7 +57,7 @@ function createGrid() {
     [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
     [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0],
     [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
@@ -102,7 +104,7 @@ class Pacman {
     this.desiredDirX = 0;
     this.desiredDirY = 0;
     this.speed = 100;
-    this.lastMoveTime = 0;
+    this.lastMoveTime = performance.now();
   }
 
   show() {
@@ -117,16 +119,18 @@ class Pacman {
     const currentTime = performance.now(); // Get current time in milliseconds
     const deltaTime = (currentTime - this.lastMoveTime) / 1000; // Time difference in seconds
 
-    const [newX, newY] = this.getNewPosition(this.desiredDirX, this.desiredDirY, deltaTime);
+    const newX = this.x + this.speed * deltaTime * this.desiredDirX;
+    const newY = this.y + this.speed * deltaTime * this.desiredDirY;
 
-    if (this.canMove(newX, newY)) {
+    if (canMove(newX, newY, this.size)) {
       this.x = newX;
       this.y = newY;
       this.directionX = this.desiredDirX;
       this.directionY = this.desiredDirY;
     } else {
-      const [currentX, currentY] = this.getNewPosition(this.directionX, this.directionY, deltaTime);
-      if (this.canMove(currentX, currentY)) {
+      const currentX = this.x + this.speed * deltaTime * this.directionX;
+      const currentY = this.y + this.speed * deltaTime * this.directionY;
+      if (canMove(currentX, currentY, this.size)) {
         this.x = currentX;
         this.y = currentY;
       }
@@ -136,29 +140,9 @@ class Pacman {
     this.lastMoveTime = currentTime;
   }
 
-  getNewPosition(directionX, directionY, deltaTime) {
-    // Calculate distance to move based on speed and deltaTime
-    const distanceX = this.speed * deltaTime * directionX;
-    const distanceY = this.speed * deltaTime * directionY;
-
-    return [this.x + distanceX, this.y + distanceY];
-  }
-
   setDesiredDirection(x, y) {
     this.desiredDirX = x;
     this.desiredDirY = y;
-  }
-
-  canMove(x, y) {
-    const gridX1 = Math.floor(x / cellSize);
-    const gridX2 = Math.floor((x + this.size - 1) / cellSize);
-    const gridY1 = Math.floor(y / cellSize);
-    const gridY2 = Math.floor((y + this.size - 1) / cellSize);
-    return grid[gridY1] && grid[gridY2] &&
-      grid[gridY2][gridX2] !== 1 &&
-      grid[gridY1][gridX2] !== 1 &&
-      grid[gridY2][gridX1] !== 1 &&
-      grid[gridY1][gridX1] !== 1;
   }
 
   getAngle() {
@@ -178,9 +162,12 @@ class Ghost {
   constructor(x, y, color) {
     this.x = x;
     this.y = y;
-    this.size = cellSize - 5;
+    this.size = cellSize;
+    this.directionX = 0;
+    this.directionY = 0;
     this.color = color;
-    // Add random movement properties (optional)
+    this.speed = 100;
+    this.lastMoveTime = performance.now();
   }
 
   show() {
@@ -192,5 +179,44 @@ class Ghost {
     ellipse(this.x + cellSize - cellSize / 3, this.y + cellSize / 3, this.size / 5, this.size / 5);
   }
 
-  // Add a move function with random movement logic (optional)
+  move(pacmanX, pacmanY) {
+    const currentTime = performance.now(); // Get current time in milliseconds
+    const deltaTime = (currentTime - this.lastMoveTime) / 1000; // Time difference in seconds
+
+    // Calculate distance to Pacman (replace with your distance calculation logic)
+    const distanceX = pacmanX - this.x;
+    const distanceY = pacmanY - this.y;
+
+    // Choose direction based on distance (simple chase logic)
+    if (Math.abs(distanceX) > Math.abs(distanceY)) {
+      this.directionX = Math.sign(distanceX);
+    } else {
+      this.directionY = Math.sign(distanceY);
+    }
+
+    // Update ghost position based on direction and speed
+    const newX = this.x + this.speed * deltaTime * this.directionX;
+    const newY = this.y + this.speed * deltaTime * this.directionY;
+
+    // Check for wall collision (replace with your canMove function)
+    if (canMove(newX, newY, this.size)) {
+      this.x = newX;
+      this.y = newY;
+    }
+
+    // Update last move time for next calculation
+    this.lastMoveTime = currentTime;
+  }
+}
+
+function canMove(x, y, size) {
+  const gridX1 = Math.floor(x / cellSize);
+  const gridX2 = Math.floor((x + size - 1) / cellSize);
+  const gridY1 = Math.floor(y / cellSize);
+  const gridY2 = Math.floor((y + size - 1) / cellSize);
+  return grid[gridY1] && grid[gridY2] &&
+    grid[gridY2][gridX2] !== 1 &&
+    grid[gridY1][gridX2] !== 1 &&
+    grid[gridY2][gridX1] !== 1 &&
+    grid[gridY1][gridX1] !== 1;
 }

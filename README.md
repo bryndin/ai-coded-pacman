@@ -407,3 +407,33 @@ The current `move()` function operated with x and y being the pixels of the top 
 
 ## Step 13
 *Problem:* Pacman must not stop if keyboard command can't change that direction immidiately, but instead apply it at the next possibility.
+
+#### Prompt
+Already moving pacman stops if a new keyboard command points him into the wall. How does the `move()` `draw()` and `keyPressed()` functions need to change to ignore the change of direction if it's not possible at this moment?
+
+#### Notes
+- Gemini suggest to add "desired direction" that updates "direction" when pacman can move in the "desired" direction, but it's a faulty logic. 
+
+#### Prompt
+In the code above, while moving left the change in "desiredDirection" to go up will wrongly change the"pacmanDirection".
+
+#### Notes
+- Better, but with the repeating logic
+
+#### Prompt
+Good, but there is a repeating logic that can be factored out into a function. Is it worth doing that?
+
+#### Prompt
+Another problem is the code is missing the second check for `canMove` function. If else is executed no more collision check happens.
+
+#### Notes
+- Gemini keeps generating buggy code and have to be pointed out to fix it.
+
+## Step 14
+*Problem:* Ghosts aren't moving. Add the chasing logic. Also Pacman can't enter some of the tunnels.
+
+#### Prompt
+Ghosts aren't moving, add logic to chase Pacman.
+
+#### Notes
+- Gemini provides the "simple chase logic" to define the direction. Code is reasonable, but needs heavy adaption from the `Pacman.move()`. At the end the chase, though a simple one, works.
