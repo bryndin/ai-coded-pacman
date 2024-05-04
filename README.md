@@ -638,3 +638,15 @@ Here are a few approaches to fix this problem:
 - (2) doesn't work either, as it always snaps
 - (3) a no go either
 - It's gettting hard to make Gemini design a working approach with incrimental small movements of Pacman together with the snapping to grid. Let's try something different.
+
+## Step 16
+*Problem:* The maze is drawn over white background, that is visually distracting. Needs to be changed to black.
+
+#### Prompt
+How to change the background of an empty html page from white to black
+
+#### Answer
+There are two main ways to change the background of an empty HTML page from white to black:
+1. Using CSS:
+This is the most common and recommended approach. Here's how to do it.
+<- code ->
