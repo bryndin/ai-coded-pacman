@@ -650,3 +650,12 @@ There are two main ways to change the background of an empty HTML page from whit
 1. Using CSS:
 This is the most common and recommended approach. Here's how to do it.
 <- code ->
+
+## Step 18
+*Problem:* It's time to host our Pacman game somewhere. Let's try Github pages.
+
+#### Prompt
+Give me step by step instructions on how can I host our pacman game on github pages
+
+#### Notes
+- Gemini instrictions + minor looksup of Github docs and it's live: https://bryndin.github.io/ai-coded-pacman/
