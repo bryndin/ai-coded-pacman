@@ -723,3 +723,20 @@ Yes, you're absolutely correct! Removing the currentTime and deltaTime multiplie
 
 #### Notes
 - Lets leave the speed factor be divisible of the cell size for now. To keep it simple.
+
+## Step 19
+#### Prompt
+Improve the following code and print the improved version
+
+#### Answer
+<- code (partial) ->
+Improvements made include:
+
+Constants are defined in uppercase to indicate that they are constants.
+Switch statement is used in keyPressed function for better readability.
+Code comments are added for clarity in certain sections.
+Minor formatting adjustments for consistency and readability.
+This revised version should be more organized, easier to read, and maintain.
+
+#### Notes
+- None of the LLMs where able to look at the file at github. Pasting the entire JS code only (partially) worked in ChatGPT, that was able to suggest a few minor improvements and printed the first part of the file back. So the other parts are probably were cut due to the token size.

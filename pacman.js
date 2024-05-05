@@ -1,18 +1,17 @@
-const cellSize = 16;
-const snapThreshold = 0.1;
+const CELL_SIZE = 16;
+const SNAP_THRESHOLD = 0.1;
 let grid = [];
 let pacman, ghosts;
-let animationFrameId;
 
 function setup() {
-  const gridWidth = 28 * cellSize;
-  const gridHeight = 36 * cellSize;
+  const gridWidth = 28 * CELL_SIZE;
+  const gridHeight = 36 * CELL_SIZE;
   createCanvas(gridWidth, gridHeight);
   grid = createGrid();
-  pacman = new Pacman(13 * cellSize, 26 * cellSize);
+  pacman = new Pacman(13 * CELL_SIZE, 26 * CELL_SIZE);
   ghosts = [
-    new Ghost(cellSize * 13, cellSize * 17, "red"),
-    new Ghost(cellSize * 14, cellSize * 17, "blue"),
+    new Ghost(13 * CELL_SIZE, 17 * CELL_SIZE, "red"),
+    new Ghost(14 * CELL_SIZE, 17 * CELL_SIZE, "blue")
   ];
 }
 
@@ -20,7 +19,7 @@ function draw() {
   background(0);
   drawGrid();
 
-  pacman.move()
+  pacman.move();
   pacman.show();
 
   for (const ghost of ghosts) {
@@ -30,14 +29,23 @@ function draw() {
 }
 
 function keyPressed() {
-  if (keyCode === UP_ARROW || key === 'W') {
-    pacman.setDesiredDirection(0, -1);
-  } else if (keyCode === DOWN_ARROW || key === 'S') {
-    pacman.setDesiredDirection(0, 1);
-  } else if (keyCode === LEFT_ARROW || key === 'A') {
-    pacman.setDesiredDirection(-1, 0);
-  } else if (keyCode === RIGHT_ARROW || key === 'D') {
-    pacman.setDesiredDirection(1, 0);
+  switch (keyCode) {
+    case UP_ARROW:
+    case 87: // W key
+      pacman.setDesiredDirection(0, -1);
+      break;
+    case DOWN_ARROW:
+    case 83: // S key
+      pacman.setDesiredDirection(0, 1);
+      break;
+    case LEFT_ARROW:
+    case 65: // A key
+      pacman.setDesiredDirection(-1, 0);
+      break;
+    case RIGHT_ARROW:
+    case 68: // D key
+      pacman.setDesiredDirection(1, 0);
+      break;
   }
 }
 
@@ -81,15 +89,16 @@ function createGrid() {
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   ];
 
-  return localGrid; // Return the created grid
+  // Initialize the grid
+  return localGrid;
 }
 
 function drawGrid() {
-  for (let y = 0; y < height / cellSize; y++) {
-    for (let x = 0; x < width / cellSize; x++) {
+  for (let y = 0; y < height / CELL_SIZE; y++) {
+    for (let x = 0; x < width / CELL_SIZE; x++) {
       if (grid[y][x] === 1) {
         fill(220);
-        rect(x * cellSize, y * cellSize, cellSize, cellSize);
+        rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
       }
     }
   }
@@ -99,7 +108,7 @@ class Pacman {
   constructor(x, y) {
     this.x = x;
     this.y = y;
-    this.size = cellSize;
+    this.size = CELL_SIZE;
     this.directionX = 0;
     this.directionY = 0;
     this.desiredDirX = 0;
@@ -109,10 +118,10 @@ class Pacman {
 
   show() {
     fill(255, 255, 0);
-    ellipse(this.x + cellSize / 2, this.y + cellSize / 2, this.size, this.size);
-    let angle = this.getAngle();
+    ellipse(this.x + CELL_SIZE / 2, this.y + CELL_SIZE / 2, this.size, this.size);
+    const angle = this.getAngle();
     fill(0);
-    arc(this.x + cellSize / 2, this.y + cellSize / 2, this.size / 2, this.size / 2, angle - PI / 7, angle + PI / 7);
+    arc(this.x + CELL_SIZE / 2, this.y + CELL_SIZE / 2, this.size / 2, this.size / 2, angle - PI / 7, angle + PI / 7);
   }
 
   move() {
@@ -148,7 +157,7 @@ class Pacman {
     } else if (this.directionY > 0) {
       return PI / 2;
     } else {
-      return PI / -2;
+      return -PI / 2;
     }
   }
 }
@@ -157,23 +166,23 @@ class Ghost {
   constructor(x, y, color) {
     this.x = x;
     this.y = y;
-    this.size = cellSize;
+    this.size = CELL_SIZE;
     this.directionX = 0;
     this.directionY = 0;
     this.color = color;
     this.mode = "CHASE";
-    this.chaseThreshold = 8; // Chasing within these cells 
-    this.type; // TODO: define different types
+    this.chaseThreshold = 8; // Chasing within these cells
     this.speed = 2;
   }
 
+
   show() {
     fill(this.color);
-    ellipse(this.x + cellSize / 2, this.y + cellSize / 2, this.size, this.size);
-    triangle(this.x + cellSize / 3, this.y + cellSize / 3, this.x + cellSize / 2, this.y, this.x + cellSize - cellSize / 3, this.y + cellSize / 3);
+    ellipse(this.x + CELL_SIZE / 2, this.y + CELL_SIZE / 2, this.size, this.size);
+    triangle(this.x + CELL_SIZE / 3, this.y + CELL_SIZE / 3, this.x + CELL_SIZE / 2, this.y, this.x + CELL_SIZE - CELL_SIZE / 3, this.y + CELL_SIZE / 3);
     fill(0);
-    ellipse(this.x + cellSize / 3, this.y + cellSize / 3, this.size / 5, this.size / 5);
-    ellipse(this.x + cellSize - cellSize / 3, this.y + cellSize / 3, this.size / 5, this.size / 5);
+    ellipse(this.x + CELL_SIZE / 3, this.y + CELL_SIZE / 3, this.size / 5, this.size / 5);
+    ellipse(this.x + CELL_SIZE - CELL_SIZE / 3, this.y + CELL_SIZE / 3, this.size / 5, this.size / 5);
   }
 
   move(pacmanX, pacmanY) {
@@ -186,7 +195,7 @@ class Ghost {
 
     // Choose target cell based on ghost mode and distance to Pacman
     let targetCell;
-    if (this.mode === "CHASE" && Math.abs(distanceX) + Math.abs(distanceY) <= this.chaseThreshold * cellSize) {
+    if (this.mode === "CHASE" && Math.abs(distanceX) + Math.abs(distanceY) <= this.chaseThreshold * CELL_SIZE) {
       targetCell = getClosestPacmanCell(ghostCell, pacmanCell, 10); // Use A* to find closest Pacman cell within FOV
     } else if (this.mode === "SCATTER") {
       // TODO: implement later
@@ -215,10 +224,10 @@ class Ghost {
 }
 
 function canMove(x, y, size) {
-  const gridX1 = Math.floor(x / cellSize);
-  const gridX2 = Math.floor((x + size - 1) / cellSize);
-  const gridY1 = Math.floor(y / cellSize);
-  const gridY2 = Math.floor((y + size - 1) / cellSize);
+  const gridX1 = Math.floor(x / CELL_SIZE);
+  const gridX2 = Math.floor((x + size - 1) / CELL_SIZE);
+  const gridY1 = Math.floor(y / CELL_SIZE);
+  const gridY2 = Math.floor((y + size - 1) / CELL_SIZE);
   return grid[gridY1] && grid[gridY2] &&
     grid[gridY2][gridX2] !== 1 &&
     grid[gridY1][gridX2] !== 1 &&
@@ -239,8 +248,8 @@ function getDirectionTowards(x1, y1, x2, y2) {
 
 function canvasToGridCell(canvasX, canvasY) {
   // Calculate row and column indices based on canvas coordinates and cell size
-  const rowIndex = Math.floor(canvasY / cellSize);
-  const colIndex = Math.floor(canvasX / cellSize);
+  const rowIndex = Math.floor(canvasY / CELL_SIZE);
+  const colIndex = Math.floor(canvasX / CELL_SIZE);
 
   // Ensure row and column indices are within valid grid bounds (assuming 0-based indexing)
   return {
@@ -250,9 +259,9 @@ function canvasToGridCell(canvasX, canvasY) {
 }
 
 function snapToCell(z) {
-  // const snappedZ = Math.abs(z - Math.round(z)) < snapThreshold * cellSize ? Math.round(z) : z;
-  const ratio = z/cellSize;
-  const snappedZ = Math.abs(ratio - Math.round(ratio)) < snapThreshold ? Math.round(ratio)*cellSize : Math.round(z);
+  // const snappedZ = Math.abs(z - Math.round(z)) < SNAP_THRESHOLD * CELL_SIZE ? Math.round(z) : z;
+  const ratio = z/CELL_SIZE;
+  const snappedZ = Math.abs(ratio - Math.round(ratio)) < SNAP_THRESHOLD ? Math.round(ratio)*CELL_SIZE : Math.round(z);
   return snappedZ
 }
 
