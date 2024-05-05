@@ -104,8 +104,7 @@ class Pacman {
     this.directionY = 0;
     this.desiredDirX = 0;
     this.desiredDirY = 0;
-    this.speed = 100;
-    this.lastMoveTime = performance.now();
+    this.speed = 2;
   }
 
   show() {
@@ -117,11 +116,8 @@ class Pacman {
   }
 
   move() {
-    const currentTime = performance.now(); // Get current time in milliseconds
-    const deltaTime = (currentTime - this.lastMoveTime) / 1000; // Time difference in seconds
-
-    const newX = snapToCell(this.x + this.speed * deltaTime * this.desiredDirX);
-    const newY = snapToCell(this.y + this.speed * deltaTime * this.desiredDirY);
+    const newX = this.x + this.speed * this.desiredDirX;
+    const newY = this.y + this.speed * this.desiredDirY;
 
     if (canMove(newX, newY, this.size)) {
       this.x = newX;
@@ -129,17 +125,14 @@ class Pacman {
       this.directionX = this.desiredDirX;
       this.directionY = this.desiredDirY;
     } else {
-      const currentX = snapToCell(this.x + this.speed * deltaTime * this.directionX);
-      const currentY = snapToCell(this.y + this.speed * deltaTime * this.directionY);
+      const currentX = this.x + this.speed * this.directionX;
+      const currentY = this.y + this.speed * this.directionY;
 
       if (canMove(currentX, currentY, this.size)) {
         this.x = currentX;
         this.y = currentY;
       }
     }
-
-    // Update last move time for next calculation
-    this.lastMoveTime = currentTime;
   }
 
   setDesiredDirection(x, y) {
@@ -171,8 +164,7 @@ class Ghost {
     this.mode = "CHASE";
     this.chaseThreshold = 8; // Chasing within these cells 
     this.type; // TODO: define different types
-    this.speed = 100;
-    this.lastMoveTime = performance.now();
+    this.speed = 2;
   }
 
   show() {
@@ -185,9 +177,6 @@ class Ghost {
   }
 
   move(pacmanX, pacmanY) {
-    const currentTime = performance.now(); // Get current time in milliseconds
-    const deltaTime = (currentTime - this.lastMoveTime) / 1000; // Time difference in seconds
-
     // Calculate distance to Pacman (replace with your distance calculation logic)
     const distanceX = pacmanX - this.x;
     const distanceY = pacmanY - this.y;
@@ -211,8 +200,8 @@ class Ghost {
     const path = findPath(ghostCell.col, ghostCell.row, targetCell.col, targetCell.row);
     if (path) { // Check if path exists (avoid getting stuck)
       const nextCell = path[0];
-      const newX = snapToCell(this.x + this.speed * deltaTime * this.directionX);
-      const newY = snapToCell(this.y + this.speed * deltaTime * this.directionY);
+      const newX = snapToCell(this.x + this.speed * this.directionX);
+      const newY = snapToCell(this.y + this.speed * this.directionY);
 
       // Update position based on next cell in path and check for collision
       if (canMove(newX, newY, this.size)) {
@@ -221,9 +210,6 @@ class Ghost {
         [this.directionX, this.directionY] = getDirectionTowards(this.x, this.y, nextCell.x, nextCell.y);
       }
     }
-
-    // Update last move time for next calculation
-    this.lastMoveTime = currentTime;
   }
 
 }

@@ -659,3 +659,67 @@ Give me step by step instructions on how can I host our pacman game on github pa
 
 #### Notes
 - Gemini instrictions + minor looksup of Github docs and it's live: https://bryndin.github.io/ai-coded-pacman/
+
+## Step 19
+*Problem:* Collisions and snapping is still broken.
+
+#### Prompt
+Pacman move logic has a collision problem. Suggest code modifications to resolve them.
+In the 1move()` function below `desiredDirX` and `desiredDirY` are the new desired direction for Pacman, while `directionX` and `directionY` are the current movement direction,  each can take values of -1, 0, or 1. `canMove` function checks 4 corners of Pacman against the grid to know if there is a wall or open space.
+<- code ->
+
+#### Notes
+- Gemini suggests pre-turn checks and making `canMove` check all 4 corners, that we already told it we do.
+
+#### Prompt
+My code already implements Option 1 and Option 2, and the collision issue is still there. Modify code to implement Option 3.
+
+#### Notes
+- Option 3 does a while loop moving Pacman "slower" not to overstep the tern. "slower" mins taking 0.1 of a step. This can still skip some pixels and lead to a missed turn.
+
+#### Prompt
+The snapTolerance can still be over 1 pixel in length and thus can overstep the exact location of a corridor. Why not make snapTolerance to be exactly 1 pixel?
+
+#### Answer
+You're right, setting snapTolerance to exactly 1 pixel can seem like a good solution to avoid overstepping the corridor boundaries. However, there are potential drawbacks to consider:
+
+Grid Imperfections: Even with a perfect grid representation in your code, there might be slight rounding errors during calculations (especially when dealing with floating-point numbers) that could cause Pacman to miss the exact corridor center by 1 pixel. This can still lead to collisions or jittery movement.
+
+Floating-Point Precision: Computers often represent numbers using floating-point arithmetic, which can introduce slight inaccuracies. Setting snapTolerance to 1 pixel might not guarantee perfect snapping due to these limitations.
+
+Snapping Issues: With a 1-pixel tolerance, Pacman might get stuck in narrow corridors where the combined width of Pacman and the corridor walls is less than or equal to the sum of his size and the tolerance (e.g., Pacman size = 10 pixels, corridor width = 11 pixels, tolerance = 1 pixel). He wouldn't be able to move in either direction because snapping to the center would always cause a collision.
+
+Alternatives to 1-Pixel Tolerance:
+
+Lower Tolerance with Buffer: You can keep the tolerance slightly lower than 1 pixel (e.g., 0.9) to avoid overstepping corridor boundaries in most cases. Additionally, you can introduce a small buffer zone around corridor walls (e.g., 0.1 pixels) within which collisions are ignored. This allows for slight inaccuracies and smoother movement.
+
+Raycasting: Implement a raycasting system to check for clear paths in the desired direction before attempting movement. This can provide more precise collision detection and avoid the need for snapping altogether.
+
+Combined Approach: Consider a combination of pre-turn checks, a slightly lower tolerance for snapping, and a small buffer zone for smoother movement. This approach might offer a balance between accuracy and visual appeal.
+
+Considerations:
+
+Carefully test your chosen approach to ensure Pacman moves smoothly within corridors without getting stuck or exhibiting jittery behavior.
+Adjust values like tolerance and buffer size based on your specific grid size, Pacman size, and desired movement feel.
+Remember: There's no one-size-fits-all solution, and the best approach might depend on your game's specific requirements and desired gameplay experience.
+
+#### Notes
+- Putting ray tracing aside, we can try to eliminate floating points by working with integers only.
+
+#### Prompt
+At what rate does p5js lib calls the `draw()` function?
+
+#### Notes
+- Gemini tells us p5lib tries to draw at 60 fps. That can drop with complex animation or slow machines.
+
+#### Prompt
+Do we need the currentTime and deltaTime multipliers, given that p5lib tries to draw at 60 fps?
+
+#### Prompt
+If we remove that logic, we should be able to solve the collision problem if our grid cell size in pixels is divisible by the value of `this.speed` variable in the pacman coordinates calculation below. Is it correct? 
+
+#### Answer (shortened)
+Yes, you're absolutely correct! Removing the currentTime and deltaTime multipliers and ensuring the grid cell size is divisible by the speed value can potentially solve the collision problem in certain scenarios. 
+
+#### Notes
+- Lets leave the speed factor be divisible of the cell size for now. To keep it simple.
