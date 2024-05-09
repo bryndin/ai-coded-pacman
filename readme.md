@@ -14,23 +14,23 @@ We picked [Pacman](https://en.wikipedia.org/wiki/Pac-Man) game for our implement
 We plan to try different LLMs as we go. Freely available [Google Gemini](https://gemini.google.com/), [Microsoft Copilot](https://copilot.microsoft.com/) (ChatGPT4-Turbo?) and [ChatGPT 3.5](https://chatgpt.com/), as well as self-hosting Open Source models via [Oolama](https://ollama.com/).
 
 ## Latest deploy
-:video_game: https://bryndin.github.io/ai-coded-pacman
+🎮 https://bryndin.github.io/ai-coded-pacman
 
 ## Dev Journal
-[Step-by-step dev log: journal.md](journal.md)
+📒[Step-by-step dev log](journal.md)
 
 There we track development progress. List the problem for each step to work on, prompts used, LLM answers, and our notes. It's THE essence of the project.
 
 ## Notes & Findings
 These are general summary notes. For the detailed development notes see the [Dev Journal](journal.md).
 
-#### **LLM choice for a bootstrap** (ordered best to worst)
+### **LLM choice for a bootstrap** (ordered best to worst)
   - *Gemini*: good job generating a prototype with all major entities.
   - *llama3:8b-instruct-q6_K*: usable prototype, less logically structured compared to Gemini.
   - *MS Copilot* simple generic p5lib.js bootstrap. Not good.
   - *deepseek-coder:6.7b* p5lib.js bootstrap, Pacman logic is a throwaway.
 
-#### "Averaged" generated code that varies upon regeneration.
+### "Averaged" generated code that varies upon regeneration
 There must be a volume of Pacman implementations, with many making it into the training sets. The LLM generated code feels "averaged". Regenerating it produces a similar, yet slightly different version. Global variables are replaced by function arguments, or class attributes and vice versa. Controls are based on arrows and/or WASD, etc.
 
 These variations complicate putting different code blobs together and require human attention to make them compatible. We still need a developer familiar with the programming language.
