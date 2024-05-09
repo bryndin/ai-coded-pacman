@@ -1,3 +1,5 @@
+![AI Coded Pacman](logo.png "AI Coded Pacman")
+
 # AI Coded Pacman
 
 This is an experiment to see how capable LLMs are working with code. Can coding be replaced by prompts. Is there a difference between LLMs. What are the most efficient ways to utilize LLMs in development.
