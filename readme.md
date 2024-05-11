@@ -34,3 +34,8 @@ These are general summary notes. For the detailed development notes see the [Dev
 There must be a volume of Pacman implementations, with many making it into the training sets. The LLM generated code feels "averaged". Regenerating it produces a similar, yet slightly different version. Global variables are replaced by function arguments, or class attributes and vice versa. Controls are based on arrows and/or WASD, etc.
 
 These variations complicate putting different code blobs together and require human attention to make them compatible. We still need a developer familiar with the programming language.
+
+### Limits on Context Window in LLMs
+With a larger codebase (>5k tokens) supplying code to LLMs via prompt becomes a challenge. Public LLMs don't publish their context window sizes. Even with large contexts, limits are smaller on the prompts and even stricter on the output. This leads to truncated generated code, or functions being replaced with "insert needed logic here" comments.
+
+Possible solution is to refactor code into decoupled, smaller chunks to be used in prompts.
