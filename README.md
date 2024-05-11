@@ -639,7 +639,7 @@ Here are a few approaches to fix this problem:
 - (3) a no go either
 - It's gettting hard to make Gemini design a working approach with incrimental small movements of Pacman together with the snapping to grid. Let's try something different.
 
-## Step 16
+## Step 17
 *Problem:* The maze is drawn over white background, that is visually distracting. Needs to be changed to black.
 
 #### Prompt
