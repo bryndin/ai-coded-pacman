@@ -740,3 +740,9 @@ This revised version should be more organized, easier to read, and maintain.
 
 #### Notes
 - None of the LLMs where able to look at the file at github. Pasting the entire JS code only (partially) worked in ChatGPT, that was able to suggest a few minor improvements and printed the first part of the file back. So the other parts are probably were cut due to the token size.
+- Current code is 6,249 tokens (See https://platform.openai.com/tokenizer)
+- Context size. The exact context size for each of the Gemini, ChatGPT and MS Copilot is hard to find. Rumors vary significantly, ranging from 4k tokens to 32k. With the output being as small as 2k.
+  - ChatGPT 3.5 (input+output: 16k, output: 4k). We don't know if this is the model deployed, nor if there is a 4k pre message limit.
+- Given that returned code if often cut or the functions are replaced with stabs, we could be hitting that 4k token limit.
+- Llama3-70b-8192 on Groq seem to have output limit around 2k tokens.
+- Conclusion, LLMs have problems working with the code of 6k tokens. We may want to refactor the code to be more decoupled, then work on independent parts separately.
