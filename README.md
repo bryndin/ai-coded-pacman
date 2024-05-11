@@ -724,7 +724,7 @@ Yes, you're absolutely correct! Removing the currentTime and deltaTime multiplie
 #### Notes
 - Lets leave the speed factor be divisible of the cell size for now. To keep it simple.
 
-## Step 19
+## Step 20
 #### Prompt
 Improve the following code and print the improved version
 
