@@ -9,10 +9,10 @@ function setup() {
   const gridHeight = 36 * CELL_SIZE;
   createCanvas(gridWidth, gridHeight);
 
-  pacman = new Pacman(13 * CELL_SIZE, 26 * CELL_SIZE, CELL_SIZE, 2);
+  pacman = new Pacman(level.pacmanStart.x * CELL_SIZE, level.pacmanStart.y * CELL_SIZE, CELL_SIZE, 2);
   ghosts = [
-    new Ghost(13 * CELL_SIZE, 17 * CELL_SIZE, "red"),
-    new Ghost(14 * CELL_SIZE, 17 * CELL_SIZE, "blue")
+    new Ghost(level.ghostStarts[0].x * CELL_SIZE, level.ghostStarts[0].y * CELL_SIZE, "red"),
+    new Ghost(level.ghostStarts[1].x * CELL_SIZE, level.ghostStarts[1].y * CELL_SIZE, "blue")
   ];
 }
 
