@@ -8,7 +8,7 @@ function setup() {
   const gridHeight = 36 * CELL_SIZE;
   createCanvas(gridWidth, gridHeight);
   grid = createGrid();
-  pacman = new Pacman(13 * CELL_SIZE, 26 * CELL_SIZE);
+  pacman = new Pacman(13 * CELL_SIZE, 26 * CELL_SIZE, CELL_SIZE, 2);
   ghosts = [
     new Ghost(13 * CELL_SIZE, 17 * CELL_SIZE, "red"),
     new Ghost(14 * CELL_SIZE, 17 * CELL_SIZE, "blue")
@@ -105,16 +105,19 @@ function drawGrid() {
 }
 
 class Pacman {
-  constructor(x, y) {
+  static RIGHT = { x: 1, y: 0 };
+  static LEFT = { x: -1, y: 0 };
+  static UP = { x: 0, y: -1 };
+  static DOWN = { x: 0, y: 0 };
+
+  constructor(x, y, size, speed) {
     this.x = x;
     this.y = y;
-    this.size = CELL_SIZE;
-    this.directionX = 0;
-    this.directionY = 0;
-    this.desiredDirX = 0;
-    this.desiredDirY = 0;
-    this.speed = 2;
-  }
+    this.size = size;
+    this.speed = speed;
+    this.direction = { x: 0, y: 0 }
+    this.desiredDirection = { x: 0, y: 0 };
+  };
 
   show() {
     fill(255, 255, 0);
@@ -125,17 +128,17 @@ class Pacman {
   }
 
   move() {
-    const newX = this.x + this.speed * this.desiredDirX;
-    const newY = this.y + this.speed * this.desiredDirY;
+    const newX = this.x + this.speed * this.desiredDirection.x;
+    const newY = this.y + this.speed * this.desiredDirection.y;
 
     if (canMove(newX, newY, this.size)) {
       this.x = newX;
       this.y = newY;
-      this.directionX = this.desiredDirX;
-      this.directionY = this.desiredDirY;
+      this.direction.x = this.desiredDirection.x;
+      this.direction.y = this.desiredDirection.y;
     } else {
-      const currentX = this.x + this.speed * this.directionX;
-      const currentY = this.y + this.speed * this.directionY;
+      const currentX = this.x + this.speed * this.direction.x;
+      const currentY = this.y + this.speed * this.direction.y;
 
       if (canMove(currentX, currentY, this.size)) {
         this.x = currentX;
@@ -145,16 +148,16 @@ class Pacman {
   }
 
   setDesiredDirection(x, y) {
-    this.desiredDirX = x;
-    this.desiredDirY = y;
+    this.desiredDirection.x = x;
+    this.desiredDirection.y = y;
   }
 
   getAngle() {
-    if (this.directionX > 0) {
+    if (this.direction.x > 0) {
       return 0;
-    } else if (this.directionX < 0) {
+    } else if (this.direction.x < 0) {
       return PI;
-    } else if (this.directionY > 0) {
+    } else if (this.direction.y > 0) {
       return PI / 2;
     } else {
       return -PI / 2;
@@ -167,8 +170,7 @@ class Ghost {
     this.x = x;
     this.y = y;
     this.size = CELL_SIZE;
-    this.directionX = 0;
-    this.directionY = 0;
+    this.direction = {x:0, y:0};
     this.color = color;
     this.mode = "CHASE";
     this.chaseThreshold = 8; // Chasing within these cells
@@ -209,14 +211,14 @@ class Ghost {
     const path = findPath(ghostCell.col, ghostCell.row, targetCell.col, targetCell.row);
     if (path) { // Check if path exists (avoid getting stuck)
       const nextCell = path[0];
-      const newX = snapToCell(this.x + this.speed * this.directionX);
-      const newY = snapToCell(this.y + this.speed * this.directionY);
+      const newX = snapToCell(this.x + this.speed * this.direction.x);
+      const newY = snapToCell(this.y + this.speed * this.direction.y);
 
       // Update position based on next cell in path and check for collision
       if (canMove(newX, newY, this.size)) {
         this.x = newX;
         this.y = newY;
-        [this.directionX, this.directionY] = getDirectionTowards(this.x, this.y, nextCell.x, nextCell.y);
+        [this.direction.x, this.direction.y] = getDirectionTowards(this.x, this.y, nextCell.x, nextCell.y);
       }
     }
   }
@@ -260,8 +262,8 @@ function canvasToGridCell(canvasX, canvasY) {
 
 function snapToCell(z) {
   // const snappedZ = Math.abs(z - Math.round(z)) < SNAP_THRESHOLD * CELL_SIZE ? Math.round(z) : z;
-  const ratio = z/CELL_SIZE;
-  const snappedZ = Math.abs(ratio - Math.round(ratio)) < SNAP_THRESHOLD ? Math.round(ratio)*CELL_SIZE : Math.round(z);
+  const ratio = z / CELL_SIZE;
+  const snappedZ = Math.abs(ratio - Math.round(ratio)) < SNAP_THRESHOLD ? Math.round(ratio) * CELL_SIZE : Math.round(z);
   return snappedZ
 }
 
