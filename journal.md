@@ -746,3 +746,14 @@ This revised version should be more organized, easier to read, and maintain.
 - Given that returned code if often cut or the functions are replaced with stabs, we could be hitting that 4k token limit.
 - Llama3-70b-8192 on Groq seem to have output limit around 2k tokens.
 - Conclusion, LLMs have problems working with the code of 6k tokens. We may want to refactor the code to be more decoupled, then work on independent parts separately.
+
+
+## Step 21
+
+*Problem* The grid is not associated with the starting positions of Pacman and ghosts. Better have a concept of a level.
+
+#### Prompt
+Generate a Javascript class representing a Pacman Level, that has a 2D layout defining the walls, starting position of Pacman, and starting positions of Ghosts per each unique ghost.
+
+#### Prompt
+Add validation logic to PacmanLevel layout coming as an argument to constructor.
