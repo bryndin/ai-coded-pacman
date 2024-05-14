@@ -1,13 +1,14 @@
 const CELL_SIZE = 16;
 const SNAP_THRESHOLD = 0.1;
-let grid = [];
-let pacman, ghosts;
+let pacman, ghosts, level;
 
 function setup() {
+  level = new Level(createGrid(), { x: 13, y: 26 }, [{ x: 13, y: 17 }, { x: 14, y: 17 }]);
+
   const gridWidth = 28 * CELL_SIZE;
   const gridHeight = 36 * CELL_SIZE;
   createCanvas(gridWidth, gridHeight);
-  grid = createGrid();
+
   pacman = new Pacman(13 * CELL_SIZE, 26 * CELL_SIZE, CELL_SIZE, 2);
   ghosts = [
     new Ghost(13 * CELL_SIZE, 17 * CELL_SIZE, "red"),
@@ -51,52 +52,78 @@ function keyPressed() {
 
 function createGrid() {
   const localGrid = [
-"                            ",
-"                            ",
-"                            ",
-"############################",
-"#            ##            #",
-"# #### ##### ## ##### #### #",
-"# #### ##### ## ##### #### #",
-"# #### ##### ## ##### #### #",
-"#                          #",
-"# #### ## ######## ## #### #",
-"# #### ## ######## ## #### #",
-"#      ##    ##    ##      #",
-"###### ##### ## ##### ######",
-"     # ##### ## ##### #     ",
-"     # ##          ## #     ",
-"     # ## ###  ### ## #     ",
-"###### ## #      # ## ######",
-"          #      #          ",
-"###### ## #      # ## ######",
-"     # ## ######## ## #     ",
-"     # ##          ## #     ",
-"     # ## ######## ## #     ",
-"###### ## ######## ## ######",
-"#            ##            #",
-"# #### ##### ## ##### #### #",
-"# #### ##### ## ##### #### #",
-"#   ##                ##   #",
-"### ## ## ######## ## ## ###",
-"### ## ## ######## ## ## ###",
-"#      ##    ##    ##      #",
-"# ########## ## ########## #",
-"# ########## ## ########## #",
-"#                          #",
-"############################",
-"                            ",
-"                            ",
+    "                            ",
+    "                            ",
+    "                            ",
+    "############################",
+    "#            ##            #",
+    "# #### ##### ## ##### #### #",
+    "# #### ##### ## ##### #### #",
+    "# #### ##### ## ##### #### #",
+    "#                          #",
+    "# #### ## ######## ## #### #",
+    "# #### ## ######## ## #### #",
+    "#      ##    ##    ##      #",
+    "###### ##### ## ##### ######",
+    "     # ##### ## ##### #     ",
+    "     # ##          ## #     ",
+    "     # ## ###  ### ## #     ",
+    "###### ## #      # ## ######",
+    "          #      #          ",
+    "###### ## #      # ## ######",
+    "     # ## ######## ## #     ",
+    "     # ##          ## #     ",
+    "     # ## ######## ## #     ",
+    "###### ## ######## ## ######",
+    "#            ##            #",
+    "# #### ##### ## ##### #### #",
+    "# #### ##### ## ##### #### #",
+    "#   ##                ##   #",
+    "### ## ## ######## ## ## ###",
+    "### ## ## ######## ## ## ###",
+    "#      ##    ##    ##      #",
+    "# ########## ## ########## #",
+    "# ########## ## ########## #",
+    "#                          #",
+    "############################",
+    "                            ",
+    "                            ",
   ];
 
+  
   // Initialize the grid
   return localGrid;
 }
 
+
+class Level {
+  constructor(layout, pacmanStart, ghostStarts) {
+    // this.id = id;
+    this.layout = this.validate(layout);
+    this.pacmanStart = pacmanStart;
+    this.ghostStarts = ghostStarts;
+  }
+
+  validate(layout) {
+    if (!layout || !layout.length || !layout[0].length) {
+      throw new Error("Invalid level layout: Empty or missing data");
+    }
+
+    const rowLength = layout[0].length;
+    for (let i = 1; i < layout.length; i++) {
+      if (layout[i].length !== rowLength) {
+        throw new Error("Invalid level layout: Inconsistent row lengths");
+      }
+    }
+    return layout;
+  }
+}
+
+
 function drawGrid() {
   for (let y = 0; y < height / CELL_SIZE; y++) {
     for (let x = 0; x < width / CELL_SIZE; x++) {
-      if (grid[y][x] === "#") {
+      if (level.layout[y][x] === "#") {
         fill(220);
         rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
       }
@@ -170,7 +197,7 @@ class Ghost {
     this.x = x;
     this.y = y;
     this.size = CELL_SIZE;
-    this.direction = {x:0, y:0};
+    this.direction = { x: 0, y: 0 };
     this.color = color;
     this.mode = "CHASE";
     this.chaseThreshold = 8; // Chasing within these cells
@@ -230,11 +257,11 @@ function canMove(x, y, size) {
   const gridX2 = Math.floor((x + size - 1) / CELL_SIZE);
   const gridY1 = Math.floor(y / CELL_SIZE);
   const gridY2 = Math.floor((y + size - 1) / CELL_SIZE);
-  return grid[gridY1] && grid[gridY2] &&
-    grid[gridY2][gridX2] !== "#" &&
-    grid[gridY1][gridX2] !== "#" &&
-    grid[gridY2][gridX1] !== "#" &&
-    grid[gridY1][gridX1] !== "#";
+  return level.layout[gridY1] && level.layout[gridY2] &&
+    level.layout[gridY2][gridX2] !== "#" &&
+    level.layout[gridY1][gridX2] !== "#" &&
+    level.layout[gridY2][gridX1] !== "#" &&
+    level.layout[gridY1][gridX1] !== "#";
 }
 
 function getDirectionTowards(x1, y1, x2, y2) {
@@ -310,27 +337,27 @@ function reconstructPath(cell) {
 }
 
 function getValidNeighbors(x, y) {
-  const width = grid[0].length; // Get maze width from the first row's length
-  const height = grid.length; // Get maze height from the number of rows
+  const width = level.layout[0].length; // Get maze width from the first row's length
+  const height = level.layout.length; // Get maze height from the number of rows
   const neighbors = [];
 
   // Check up neighbor (if within maze bounds and not a wall)
-  if (y > 0 && grid[y - 1][x] === 0) {
+  if (y > 0 && level.layout[y - 1][x] === 0) {
     neighbors.push({ x, y: y - 1 });
   }
 
   // Check down neighbor (if within maze bounds and not a wall)
-  if (y < height - 1 && grid[y + 1][x] === 0) {
+  if (y < height - 1 && level.layout[y + 1][x] === 0) {
     neighbors.push({ x, y: y + 1 });
   }
 
   // Check left neighbor (if within maze bounds and not a wall)
-  if (x > 0 && grid[y][x - 1] === 0) {
+  if (x > 0 && level.layout[y][x - 1] === 0) {
     neighbors.push({ x: x - 1, y });
   }
 
   // Check right neighbor (if within maze bounds and not a wall)
-  if (x < width - 1 && grid[y][x + 1] === 0) {
+  if (x < width - 1 && level.layout[y][x + 1] === 0) {
     neighbors.push({ x: x + 1, y });
   }
 
@@ -338,8 +365,8 @@ function getValidNeighbors(x, y) {
 }
 
 function getClosestPacmanCell(ghostCell, pacmanCell, viewDistance) {
-  const width = grid[0].length; // Get maze width from the first row's length
-  const height = grid.length; // Get maze height from the number of rows
+  const width = level.layout[0].length; // Get maze width from the first row's length
+  const height = level.layout.length; // Get maze height from the number of rows
   const visited = {}; // Keep track of visited cells to avoid redundant checks
 
   // Define a queue to store cells to explore for BFS
@@ -364,7 +391,7 @@ function getClosestPacmanCell(ghostCell, pacmanCell, viewDistance) {
       const neighborY = currentCell.y + getDeltaY(direction);
 
       // Check if neighbor is within maze bounds and not a wall
-      if (0 <= neighborX && neighborX < width && 0 <= neighborY && neighborY < height && grid[neighborY][neighborX] === 0) {
+      if (0 <= neighborX && neighborX < width && 0 <= neighborY && neighborY < height && level.layout[neighborY][neighborX] === 0) {
         const neighborKey = `${neighborX}-${neighborY}`;
 
         // Check if neighbor hasn't been visited and within view distance
