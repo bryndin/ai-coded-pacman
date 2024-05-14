@@ -757,3 +757,44 @@ Generate a Javascript class representing a Pacman Level, that has a 2D layout de
 
 #### Prompt
 Add validation logic to PacmanLevel layout coming as an argument to constructor.
+
+
+## Step 22
+
+*Problem* Design rendering logic. Do we want to separate rendering from content? Make it less reliant on global variables.
+
+#### Prompt
+For the game Pacman, I have entities: GameBoard, Level, Pacman, Ghost. Explain different ways to organize the rendering of these entities in Javascript. I use p5play.js lib.
+
+#### Answer (Gemini)
+
+> Here are different ways to organize the rendering of entities in your Pacman game using p5play.js:
+>
+> **1. Individual Render Functions:**
+> **2. Entity Class with render method:**
+> **3. Component-based System:**
+>
+> * Define separate components for rendering (e.g., Renderer component) and logic (e.g., Movement component).
+> * Each entity can have multiple components attached.
+> * Have a separate system responsible for iterating through entities and calling the `render` method of their attached Renderer component.
+>
+> This approach offers more flexibility and separation of concerns but might be overkill for a simple Pacman game.
+>
+> **Choosing the right approach:**
+>
+> * For a simple Pacman game, approach 1 or 2 is probably sufficient.
+> * If your game becomes more complex with many different types of entities and behaviors, approach 3 might be beneficial.
+
+#### Answer (Llama3)
+
+> **1. Single render function**
+> **2. Entity-specific render functions**
+> **3. Use a rendering layer system**
+> **4. Use a scene graph**
+> Choose the approach that best fits your game's requirements and complexity. You can always mix and match these approaches to create a hybrid solution that works best for your game.
+
+#### Notes
+- Rendering layers and scene graphs is an overkill for Pacman.
+- Complex rendering component is an overkill too.
+- As Gemini said, either do separate rendering functions or make them class methods.
+- For simplicity, lets keep entity classes separated from rendering logic and use standalone functions.

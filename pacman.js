@@ -3,7 +3,7 @@ const SNAP_THRESHOLD = 0.1;
 let pacman, ghosts, level;
 
 function setup() {
-  level = new Level(createGrid(), { x: 13 * CELL_SIZE, y: 26 * CELL_SIZE }, { "red": { x: 13* CELL_SIZE, y: 17* CELL_SIZE }, "blue": { x: 14* CELL_SIZE, y: 17* CELL_SIZE } });
+  level = new Level(createGrid(), { x: 13 * CELL_SIZE, y: 26 * CELL_SIZE }, { "red": { x: 13 * CELL_SIZE, y: 17 * CELL_SIZE }, "blue": { x: 14 * CELL_SIZE, y: 17 * CELL_SIZE } });
 
   const gridWidth = 28 * CELL_SIZE;
   const gridHeight = 36 * CELL_SIZE;
@@ -18,14 +18,14 @@ function setup() {
 
 function draw() {
   background(0);
-  drawGrid();
+  Renderer.drawLevel(level);
 
   pacman.move();
-  pacman.show();
+  Renderer.drawPacman({ x: pacman.x, y: pacman.y }, pacman.size, pacman.direction);
 
   for (const ghost of ghosts) {
     ghost.move(pacman.x, pacman.y);
-    ghost.show();
+    Renderer.drawGhost({ x: ghost.x, y: ghost.y }, ghost.size, ghost.color);
   }
 }
 
@@ -96,6 +96,8 @@ class Level {
   constructor(layout, pacmanStart, ghostStarts) {
     // this.id = id;
     this.layout = this.validate(layout);
+    this.height = this.layout.length;
+    this.width = this.layout[0].length;
     this.pacmanStart = pacmanStart;
     this.ghostStarts = ghostStarts;
   }
@@ -115,19 +117,6 @@ class Level {
   }
 }
 
-function drawGrid() {
-  const layout = level.layout;
-
-  for (let y = 0; y < height / CELL_SIZE; y++) {
-    for (let x = 0; x < width / CELL_SIZE; x++) {
-      if (layout[y][x] === "#") {
-        fill(220);
-        rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-      }
-    }
-  }
-}
-
 class Pacman {
   static RIGHT = { x: 1, y: 0 };
   static LEFT = { x: -1, y: 0 };
@@ -142,14 +131,6 @@ class Pacman {
     this.direction = { x: 0, y: 0 }
     this.desiredDirection = { x: 0, y: 0 };
   };
-
-  show() {
-    fill(255, 255, 0);
-    ellipse(this.x + CELL_SIZE / 2, this.y + CELL_SIZE / 2, this.size, this.size);
-    const angle = this.getAngle();
-    fill(0);
-    arc(this.x + CELL_SIZE / 2, this.y + CELL_SIZE / 2, this.size / 2, this.size / 2, angle - PI / 7, angle + PI / 7);
-  }
 
   move() {
     const newX = this.x + this.speed * this.desiredDirection.x;
@@ -175,18 +156,6 @@ class Pacman {
     this.desiredDirection.x = x;
     this.desiredDirection.y = y;
   }
-
-  getAngle() {
-    if (this.direction.x > 0) {
-      return 0;
-    } else if (this.direction.x < 0) {
-      return PI;
-    } else if (this.direction.y > 0) {
-      return PI / 2;
-    } else {
-      return -PI / 2;
-    }
-  }
 }
 
 class Ghost {
@@ -199,16 +168,6 @@ class Ghost {
     this.mode = "CHASE";
     this.chaseThreshold = 8; // Chasing within these cells
     this.speed = 2;
-  }
-
-
-  show() {
-    fill(this.color);
-    ellipse(this.x + CELL_SIZE / 2, this.y + CELL_SIZE / 2, this.size, this.size);
-    triangle(this.x + CELL_SIZE / 3, this.y + CELL_SIZE / 3, this.x + CELL_SIZE / 2, this.y, this.x + CELL_SIZE - CELL_SIZE / 3, this.y + CELL_SIZE / 3);
-    fill(0);
-    ellipse(this.x + CELL_SIZE / 3, this.y + CELL_SIZE / 3, this.size / 5, this.size / 5);
-    ellipse(this.x + CELL_SIZE - CELL_SIZE / 3, this.y + CELL_SIZE / 3, this.size / 5, this.size / 5);
   }
 
   move(pacmanX, pacmanY) {
@@ -429,4 +388,47 @@ function getDeltaY(direction) {
 function getDistance(x1, y1, x2, y2) {
   // You can replace this with Manhattan distance or Euclidean distance based on your preference
   return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+}
+
+class Renderer {
+  static drawLevel(level) {
+    // const layout = level.layout;
+    for (let y = 0; y < level.height; y++) {
+      for (let x = 0; x < level.width; x++) {
+        if (level.layout[y][x] === "#") {
+          fill(220);
+          rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+      }
+    }
+  }
+
+  static drawPacman(pos, size, dir) {
+    function getAngle(dir) {
+      if (dir.x > 0) {
+        return 0;
+      } else if (dir.x < 0) {
+        return PI;
+      } else if (dir.y > 0) {
+        return PI / 2;
+      } else {
+        return -PI / 2;
+      }
+    }
+
+    fill(255, 255, 0);
+    ellipse(pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2, size, size);
+    const angle = getAngle(dir);
+    fill(0);
+    arc(pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2, size / 2, size / 2, angle - PI / 7, angle + PI / 7);
+  }
+
+  static drawGhost(pos, size, color) {
+    fill(color);
+    ellipse(pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2, size, size);
+    triangle(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, pos.x + CELL_SIZE / 2, pos.y, pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3);
+    fill(0);
+    ellipse(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
+    ellipse(pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
+  }
 }
