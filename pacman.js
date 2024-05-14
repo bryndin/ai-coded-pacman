@@ -3,16 +3,16 @@ const SNAP_THRESHOLD = 0.1;
 let pacman, ghosts, level;
 
 function setup() {
-  level = new Level(createGrid(), { x: 13, y: 26 }, [{ x: 13, y: 17 }, { x: 14, y: 17 }]);
+  level = new Level(createGrid(), { x: 13 * CELL_SIZE, y: 26 * CELL_SIZE }, { "red": { x: 13* CELL_SIZE, y: 17* CELL_SIZE }, "blue": { x: 14* CELL_SIZE, y: 17* CELL_SIZE } });
 
   const gridWidth = 28 * CELL_SIZE;
   const gridHeight = 36 * CELL_SIZE;
   createCanvas(gridWidth, gridHeight);
 
-  pacman = new Pacman(level.pacmanStart.x * CELL_SIZE, level.pacmanStart.y * CELL_SIZE, CELL_SIZE, 2);
+  pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
   ghosts = [
-    new Ghost(level.ghostStarts[0].x * CELL_SIZE, level.ghostStarts[0].y * CELL_SIZE, "red"),
-    new Ghost(level.ghostStarts[1].x * CELL_SIZE, level.ghostStarts[1].y * CELL_SIZE, "blue")
+    new Ghost(level.ghostStarts["red"], "red"),
+    new Ghost(level.ghostStarts["blue"], "blue")
   ];
 }
 
@@ -51,7 +51,7 @@ function keyPressed() {
 }
 
 function createGrid() {
-  const localGrid = [
+  return [
     "                            ",
     "                            ",
     "                            ",
@@ -89,10 +89,6 @@ function createGrid() {
     "                            ",
     "                            ",
   ];
-
-  
-  // Initialize the grid
-  return localGrid;
 }
 
 
@@ -119,11 +115,12 @@ class Level {
   }
 }
 
-
 function drawGrid() {
+  const layout = level.layout;
+
   for (let y = 0; y < height / CELL_SIZE; y++) {
     for (let x = 0; x < width / CELL_SIZE; x++) {
-      if (level.layout[y][x] === "#") {
+      if (layout[y][x] === "#") {
         fill(220);
         rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
       }
@@ -137,9 +134,9 @@ class Pacman {
   static UP = { x: 0, y: -1 };
   static DOWN = { x: 0, y: 0 };
 
-  constructor(x, y, size, speed) {
-    this.x = x;
-    this.y = y;
+  constructor(startPosition, size, speed) {
+    this.x = startPosition.x;
+    this.y = startPosition.y;
     this.size = size;
     this.speed = speed;
     this.direction = { x: 0, y: 0 }
@@ -193,9 +190,9 @@ class Pacman {
 }
 
 class Ghost {
-  constructor(x, y, color) {
-    this.x = x;
-    this.y = y;
+  constructor(startPosition, color) {
+    this.x = startPosition.x;
+    this.y = startPosition.y;
     this.size = CELL_SIZE;
     this.direction = { x: 0, y: 0 };
     this.color = color;
@@ -253,15 +250,17 @@ class Ghost {
 }
 
 function canMove(x, y, size) {
+  const layout = level.layout;
+
   const gridX1 = Math.floor(x / CELL_SIZE);
   const gridX2 = Math.floor((x + size - 1) / CELL_SIZE);
   const gridY1 = Math.floor(y / CELL_SIZE);
   const gridY2 = Math.floor((y + size - 1) / CELL_SIZE);
-  return level.layout[gridY1] && level.layout[gridY2] &&
-    level.layout[gridY2][gridX2] !== "#" &&
-    level.layout[gridY1][gridX2] !== "#" &&
-    level.layout[gridY2][gridX1] !== "#" &&
-    level.layout[gridY1][gridX1] !== "#";
+  return layout[gridY1] && layout[gridY2] &&
+    layout[gridY2][gridX2] !== "#" &&
+    layout[gridY1][gridX2] !== "#" &&
+    layout[gridY2][gridX1] !== "#" &&
+    layout[gridY1][gridX1] !== "#";
 }
 
 function getDirectionTowards(x1, y1, x2, y2) {
@@ -337,27 +336,29 @@ function reconstructPath(cell) {
 }
 
 function getValidNeighbors(x, y) {
-  const width = level.layout[0].length; // Get maze width from the first row's length
-  const height = level.layout.length; // Get maze height from the number of rows
+  const layout = level.layout;
+
+  const width = layout[0].length; // Get maze width from the first row's length
+  const height = layout.length; // Get maze height from the number of rows
   const neighbors = [];
 
   // Check up neighbor (if within maze bounds and not a wall)
-  if (y > 0 && level.layout[y - 1][x] === 0) {
+  if (y > 0 && layout[y - 1][x] === 0) {
     neighbors.push({ x, y: y - 1 });
   }
 
   // Check down neighbor (if within maze bounds and not a wall)
-  if (y < height - 1 && level.layout[y + 1][x] === 0) {
+  if (y < height - 1 && layout[y + 1][x] === 0) {
     neighbors.push({ x, y: y + 1 });
   }
 
   // Check left neighbor (if within maze bounds and not a wall)
-  if (x > 0 && level.layout[y][x - 1] === 0) {
+  if (x > 0 && layout[y][x - 1] === 0) {
     neighbors.push({ x: x - 1, y });
   }
 
   // Check right neighbor (if within maze bounds and not a wall)
-  if (x < width - 1 && level.layout[y][x + 1] === 0) {
+  if (x < width - 1 && layout[y][x + 1] === 0) {
     neighbors.push({ x: x + 1, y });
   }
 
@@ -365,8 +366,9 @@ function getValidNeighbors(x, y) {
 }
 
 function getClosestPacmanCell(ghostCell, pacmanCell, viewDistance) {
-  const width = level.layout[0].length; // Get maze width from the first row's length
-  const height = level.layout.length; // Get maze height from the number of rows
+  const layout = level.layout;
+  const width = layout[0].length; // Get maze width from the first row's length
+  const height = layout.length; // Get maze height from the number of rows
   const visited = {}; // Keep track of visited cells to avoid redundant checks
 
   // Define a queue to store cells to explore for BFS
@@ -391,7 +393,7 @@ function getClosestPacmanCell(ghostCell, pacmanCell, viewDistance) {
       const neighborY = currentCell.y + getDeltaY(direction);
 
       // Check if neighbor is within maze bounds and not a wall
-      if (0 <= neighborX && neighborX < width && 0 <= neighborY && neighborY < height && level.layout[neighborY][neighborX] === 0) {
+      if (0 <= neighborX && neighborX < width && 0 <= neighborY && neighborY < height && layout[neighborY][neighborX] === 0) {
         const neighborKey = `${neighborX}-${neighborY}`;
 
         // Check if neighbor hasn't been visited and within view distance
