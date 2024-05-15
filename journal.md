@@ -1081,3 +1081,29 @@ For the game Pacman, I have entities: GameBoard, Level, Pacman, Ghost. Explain d
 
 > [!NOTE]
 > Gemini generates a slightly better code, factoring out the collision logic into a separate variable. When Llama3 injected the large `if` check inline.
+
+## Step 27
+
+**Problem:** When Ghost touches Pacman nothing happens. Implement the life loss functionality.
+
+***Prompt:*** You are a game developer implementing a Pacman game. What happens when Ghost touches Pacman? Explain everything that is happening with the game state, animation, etc.
+
+***Answer (MS Copilot):***
+>When a Ghost touches Pacman in the game, several things happen:
+>
+>1. **Game State Update**: The game state changes to reflect that Pacman has been caught by a ghost. This could involve setting a variable like `pacmanCaught` to `true`.
+>
+>2. **Lives Update**: Pacman's lives count decreases by one. If Pacman has no lives left, the game state changes to `GameOver`.
+>
+>3. **Animation**: An animation plays to show Pacman being caught by the ghost. This could be Pacman flashing, changing color, or some other visual effect.
+>
+>4. **Sound Effects**: A sound effect plays to indicate that Pacman has been caught. This helps to alert the player to what has happened.
+>
+>5. **Score Update**: The player's score may be updated. Depending on the game rules, the score could decrease as a penalty for being caught, or it could stay the same.
+>
+>6. **Reset Positions**: After the catch animation and sound have played out, Pacman and the ghosts are usually reset to their starting positions, and play resumes.
+>
+>7. **Game Speed**: In some versions of the game, the speed of the ghosts relative to Pacman might increase each time Pacman is caught, making the game progressively harder.
+
+> [!NOTE]
+> While both Gemini and LLama3 have similar answers, the Llama3 `Score Reset: The score is reset to zero, and the game starts fresh.` part is incorrect. Microsoft Copilot and ChatGPT3.5 answers are also similar. They are more concise and listed by execution order, instead of grouping into State/Animation/Sound as the first two.

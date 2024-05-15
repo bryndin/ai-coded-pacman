@@ -153,7 +153,11 @@ class Game {
     // Check ghost collisions (handle lives or frightened mode)
     this.ghosts.forEach(ghost => {
       if (this.checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
-        console.log("You lost life!");
+        this.lives--;
+        if (this.lives === 0) {
+          console.log("Game Over!");
+        }
+        this.setLevel(this.currentLevelIndex);
       }
     });
   }
