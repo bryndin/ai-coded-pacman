@@ -1,6 +1,6 @@
 const CELL_SIZE = 16;
 const SNAP_THRESHOLD = 0.1;
-let pacman, ghosts, level;
+let game, level;
 
 function setup() {
   level = new Level(createGrid(), { x: 13 * CELL_SIZE, y: 26 * CELL_SIZE }, { "red": { x: 13 * CELL_SIZE, y: 17 * CELL_SIZE }, "blue": { x: 14 * CELL_SIZE, y: 17 * CELL_SIZE } });
@@ -9,22 +9,17 @@ function setup() {
   const gridHeight = 36 * CELL_SIZE;
   createCanvas(gridWidth, gridHeight);
 
-  pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
-  ghosts = [
-    new Ghost(level.ghostStarts["red"], "red"),
-    new Ghost(level.ghostStarts["blue"], "blue")
-  ];
+  const levels = [level];
+  game = new Game(levels);
 }
 
 function draw() {
+  game.update();
+
   background(0);
   Renderer.drawLevel(level);
-
-  pacman.move();
-  Renderer.drawPacman(pacman.position, pacman.size, pacman.direction);
-
-  for (const ghost of ghosts) {
-    ghost.move(pacman.position);
+  Renderer.drawPacman(game.pacman.position, game.pacman.size, game.pacman.direction);
+  for (const ghost of game.ghosts) {
     Renderer.drawGhost(ghost.position, ghost.size, ghost.color);
   }
 }
@@ -33,19 +28,19 @@ function keyPressed() {
   switch (keyCode) {
     case UP_ARROW:
     case 87: // W key
-      pacman.setDesiredDirection(Pacman.UP);
+      game.pacman.setDesiredDirection(Pacman.UP);
       break;
     case DOWN_ARROW:
     case 83: // S key
-      pacman.setDesiredDirection(Pacman.DOWN);
+      game.pacman.setDesiredDirection(Pacman.DOWN);
       break;
     case LEFT_ARROW:
     case 65: // A key
-      pacman.setDesiredDirection(Pacman.LEFT);
+      game.pacman.setDesiredDirection(Pacman.LEFT);
       break;
     case RIGHT_ARROW:
     case 68: // D key
-      pacman.setDesiredDirection(Pacman.RIGHT);
+      game.pacman.setDesiredDirection(Pacman.RIGHT);
       break;
   }
 }
@@ -114,6 +109,74 @@ class Level {
       }
     }
     return layout;
+  }
+}
+
+class Game {
+  constructor(levels) {
+    this.levels = levels;
+    this.score = 0;
+    this.lives = 3;
+
+    this.currentLevelIndex = 0;
+    this.pacman = null;
+    this.ghosts = [];
+
+    this.setLevel(0);
+  }
+
+  getCurrentLevel() {
+    return this.levels[this.currentLevelIndex];
+  }
+
+  update() {
+    this.pacman.move();
+    this.ghosts.forEach(ghost => ghost.move(this.pacman.position));
+    // this.checkCollisions();
+    // Check win/lose conditions (implement your logic here)
+    if (this.isLevelComplete()) {
+      this.setLevel(this.currentLevelIndex + 1);
+    }
+  }
+
+  checkCollisions() {
+    // Check pellet collisions (update score and remove pellet)
+    // for (let i = 0; i < this.pellets.length; i++) {
+    //   if (this.pacman.collide(this.pellets[i])) {
+    //     this.score++;
+    //     this.pellets.splice(i, 1);
+    //     break;
+    //   }
+    // }
+
+    // Check ghost collisions (handle lives or frightened mode)
+    this.ghosts.forEach(ghost => {
+      if (ghost.collideWithPacman()) {
+        // Implement ghost collision logic here (lives loss or frightened mode)
+        console.log("You lost life!");
+      }
+    });
+  }
+
+  isLevelComplete() {
+    // Implement your logic to check if all pellets are eaten
+    return false;
+  }
+
+  setLevel(n) {
+    this.currentLevelIndex = n;
+    if (this.currentLevelIndex < this.levels.length) {
+      const level = this.getCurrentLevel();
+      this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
+
+      this.ghosts = [];
+      for (const color in level.ghostStarts) {
+        this.ghosts.push(new Ghost(level.ghostStarts[color], color));
+      }
+    } else {
+      // Handle game completion (win screen, etc.)
+      console.log("You won the game!");
+    }
   }
 }
 
@@ -206,6 +269,10 @@ class Ghost {
     }
   }
 
+  collideWithPacman() {
+    // TODO: check for collision with Pacman
+    return false;
+  }
 }
 
 function canMove(position, size) {

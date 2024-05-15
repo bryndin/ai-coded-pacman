@@ -888,9 +888,7 @@ If we remove that logic, we should be able to solve the collision problem if our
 
 ***Answer (shortened):***
 
-```markdown
-Yes, you're absolutely correct! Removing the currentTime and deltaTime multipliers and ensuring the grid cell size is divisible by the speed value can potentially solve the collision problem in certain scenarios. 
-```
+>Yes, you're absolutely correct! Removing the currentTime and deltaTime multipliers and ensuring the grid cell size is divisible by the speed value can potentially solve the collision problem in certain scenarios.
 
 > [!NOTE]
 >
@@ -904,6 +902,7 @@ Improve the following code and print the improved version
 ***Answer:***
 
 ><- code (partial) ->
+>
 >Improvements made include:
 >
 >Constants are defined in uppercase to indicate that they are constants.
@@ -1011,3 +1010,52 @@ For the game Pacman, I have entities: GameBoard, Level, Pacman, Ghost. Explain d
 
 > [!NOTE]
 > Refactoring with LLMs is not worth the time. Have to do it by hand.
+
+## Step 25
+
+**Problem:** We need a `Game` class to control the entire game.
+
+***Prompt:*** Describe the `Game` class.
+
+***Answer: (Gemini)***
+
+>The `Game` class acts as the central control unit for your Pacman game. Here's a breakdown of its functionalities:
+>
+>**Initialization:**
+>
+>* Sets up the game world: Creates instances of `Maze`, `Pacman`, `Ghost` (potentially multiple), `Pellet`, and other necessary objects.
+>* Initializes game variables like score, lives, and level.
+>* Loads game assets like images and sounds.
+>
+>**Game Loop:**
+>
+>*  The core function that continuously updates the game state.
+>* Manages the flow of the game by calling methods on other classes like:
+>    *  `Pacman.move()` to update Pacman's position based on user input.
+>    *  `Ghost.update()` to handle ghost movement and AI logic.
+>    *  `Maze.checkCollisions()` to detect collisions between Pacman, ghosts, pellets, and walls.
+>* Updates the game state based on these interactions:
+>    *  Increase score for eaten pellets.
+>    *  Decrease lives on collision with a ghost in chase mode.
+>    *  Switch ghost behavior to frightened mode when a power pellet is eaten.
+>    *  Check for win/lose conditions (all pellets eaten, no lives left).
+>
+>**Other functionalities:**
+>
+>* Handles rendering the game: Might directly call drawing functions on the game objects or interact with a separate graphics class.
+>* Manages game states: Pausing, ending the game, and potentially handling transitions between levels.
+>* May handle user input: Capturing key presses to control Pacman's movement.
+
+***Prompt:*** Provide Javascript code for the Game class.
+
+***Prompt:*** Remove all the rendering logic from `Game` class, it will be placed into a separate set of functions that you don't have to show. Show the updated class.
+
+***Prompt:***
+
+1. Describe why you need `canvas` attribute, remove it if not needed.
+2. move game loop logic into the `draw()` function of p5play.js library.
+
+***Prompt:*** `Game` class must receive an array of levels, and have logic to switch to next level.
+
+> [!NOTE]
+> `Game` class is not finished. We preserved Pacman movement, but the rest of logic is a stub.
