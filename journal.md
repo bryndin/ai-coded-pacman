@@ -903,16 +903,14 @@ Improve the following code and print the improved version
 
 ***Answer:***
 
-```markdown
-<- code (partial) ->
-Improvements made include:
-
-Constants are defined in uppercase to indicate that they are constants.
-Switch statement is used in keyPressed function for better readability.
-Code comments are added for clarity in certain sections.
-Minor formatting adjustments for consistency and readability.
-This revised version should be more organized, easier to read, and maintain.
-```
+><- code (partial) ->
+>Improvements made include:
+>
+>Constants are defined in uppercase to indicate that they are constants.
+>Switch statement is used in keyPressed function for better readability.
+>Code comments are added for clarity in certain sections.
+>Minor formatting adjustments for consistency and readability.
+>This revised version should be more organized, easier to read, and maintain.
 
 > [!NOTE]
 >
@@ -943,36 +941,35 @@ For the game Pacman, I have entities: GameBoard, Level, Pacman, Ghost. Explain d
 
 ***Answer (Gemini):***
 
-```markdown
-Here are different ways to organize the rendering of entities in your Pacman game using p5play.js:
-
-**1. Individual Render Functions:**
-
-**2. Entity Class with render method:**
-
-**3. Component-based System:**
-* Define separate components for rendering (e.g., Renderer component) and logic (e.g., Movement component).
-* Each entity can have multiple components attached.
-* Have a separate system responsible for iterating through entities and calling the `render` method of their attached Renderer component.
-
-This approach offers more flexibility and separation of concerns but might be overkill for a simple Pacman game.
-
-**Choosing the right approach:**
-
-* For a simple Pacman game, approach 1 or 2 is probably sufficient.
-* If your game becomes more complex with many different types of entities and behaviors, approach 3 might be beneficial.
-```
+>Here are different ways to organize the rendering of entities in your Pacman game using p5play.js:
+>
+>**1. Individual Render Functions:**
+>
+>**2. Entity Class with render method:**
+>
+>**3. Component-based System:**
+>* Define separate components for rendering (e.g., Renderer component) and logic (e.g., Movement component).
+>* Each entity can have multiple components attached.
+>* Have a separate system responsible for iterating through entities and calling the `render` method of their attached Renderer component.
+>
+>This approach offers more flexibility and separation of concerns but might be overkill for a simple Pacman game.
+>
+>**Choosing the right approach:**
+>
+>* For a simple Pacman game, approach 1 or 2 is probably sufficient.
+>* If your game becomes more complex with many different types of entities and behaviors, approach 3 might be beneficial.
 
 ***Answer (Llama3):***
 
-```markdown
-**1. Single render function**
-**2. Entity-specific render functions**
-**3. Use a rendering layer system**
-**4. Use a scene graph**
-
-Choose the approach that best fits your game's requirements and complexity. You can always mix and match these approaches to create a hybrid solution that works best for your game.
-```
+>**1. Single render function**
+>
+>**2. Entity-specific render functions**
+>
+>**3. Use a rendering layer system**
+>
+>**4. Use a scene graph**
+>
+>Choose the approach that best fits your game's requirements and complexity. You can always mix and match these approaches to create a hybrid solution that works best for your game.
 
 > [!NOTE]
 >
@@ -980,3 +977,30 @@ Choose the approach that best fits your game's requirements and complexity. You 
 > - Complex rendering component is an overkill too.
 > - As Gemini said, either do separate rendering functions or make them class methods.
 > - For simplicity, lets keep entity classes separated from rendering logic and use standalone functions.
+
+## Step 23
+
+**Problem:** Let's see what important entities are we missing.
+
+***Prompt:*** What are the main Javascript classes needed for Pacman game?
+
+***Answer (llama3):***
+>Here are the main JavaScript classes needed to implement a Pac-Man game:
+>
+>1. **Game**: The main game class, responsible for initializing and managing the game state, including the game loop, scoring, and level management.
+>2. **PacMan**: Represents the Pac-Man character, handling its movement, collision detection, and interactions with the maze and ghosts.
+>3. **Ghost**: A base class for the four ghosts (Blinky, Pinky, Inky, and Clyde), managing their AI, movement, and interactions with Pac-Man.
+>4. **Maze**: Represents the game board, handling the layout, wall collisions, and pellet placement.
+>5. **Pellet**: Represents individual pellets, including their placement, scoring, and consumption by Pac-Man.
+>6. **PowerPellet**: A subclass of Pellet, representing the power pellets that allow Pac-Man to eat ghosts.
+>7. **Fruit**: Represents the bonus fruits that appear in the maze, providing extra points when eaten by Pac-Man.
+>8. **Score**: Manages the scoring system, tracking Pac-Man's points, lives, and level progress.
+>9. **Level**: Represents a single level, handling the maze layout, pellet placement, and ghost behavior.
+>
+>Optional classes:
+>
+>1. **SoundManager**: Handles sound effects and music for the game.
+>2. **InputManager**: Manages user input, such as keyboard or touch events, to control Pac-Man's movement.
+>3. **Graphics**: Responsible for rendering the game graphics, including the maze, characters, and UI elements.
+>
+>These classes can be organized into a more detailed hierarchy, and some classes might be merged or split depending on the specific implementation. However, this list provides a solid foundation for building a Pac-Man game in JavaScript.
