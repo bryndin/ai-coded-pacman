@@ -1,30 +1,26 @@
 const CELL_SIZE = 16;
 const SNAP_THRESHOLD = 0.1;
-let grid = [];
-let pacman, ghosts;
+let game, level;
 
 function setup() {
+  level = new Level(createGrid(), { x: 13 * CELL_SIZE, y: 26 * CELL_SIZE }, { "red": { x: 13 * CELL_SIZE, y: 17 * CELL_SIZE }, "blue": { x: 14 * CELL_SIZE, y: 17 * CELL_SIZE } });
+
   const gridWidth = 28 * CELL_SIZE;
   const gridHeight = 36 * CELL_SIZE;
   createCanvas(gridWidth, gridHeight);
-  grid = createGrid();
-  pacman = new Pacman(13 * CELL_SIZE, 26 * CELL_SIZE);
-  ghosts = [
-    new Ghost(13 * CELL_SIZE, 17 * CELL_SIZE, "red"),
-    new Ghost(14 * CELL_SIZE, 17 * CELL_SIZE, "blue")
-  ];
+
+  const levels = [level];
+  game = new Game(levels);
 }
 
 function draw() {
+  game.update();
+
   background(0);
-  drawGrid();
-
-  pacman.move();
-  pacman.show();
-
-  for (const ghost of ghosts) {
-    ghost.move(pacman.x, pacman.y);
-    ghost.show();
+  Renderer.drawLevel(level);
+  Renderer.drawPacman(game.pacman.position, game.pacman.size, game.pacman.direction);
+  for (const ghost of game.ghosts) {
+    Renderer.drawGhost(ghost.position, ghost.size, ghost.color);
   }
 }
 
@@ -32,166 +28,223 @@ function keyPressed() {
   switch (keyCode) {
     case UP_ARROW:
     case 87: // W key
-      pacman.setDesiredDirection(0, -1);
+      game.pacman.setDesiredDirection(Pacman.UP);
       break;
     case DOWN_ARROW:
     case 83: // S key
-      pacman.setDesiredDirection(0, 1);
+      game.pacman.setDesiredDirection(Pacman.DOWN);
       break;
     case LEFT_ARROW:
     case 65: // A key
-      pacman.setDesiredDirection(-1, 0);
+      game.pacman.setDesiredDirection(Pacman.LEFT);
       break;
     case RIGHT_ARROW:
     case 68: // D key
-      pacman.setDesiredDirection(1, 0);
+      game.pacman.setDesiredDirection(Pacman.RIGHT);
       break;
   }
 }
 
 function createGrid() {
-  const localGrid = [
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1],
-    [1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1],
-    [1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1],
-    [1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1],
-    [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  return [
+    "                            ",
+    "                            ",
+    "                            ",
+    "############################",
+    "#            ##            #",
+    "# #### ##### ## ##### #### #",
+    "# #### ##### ## ##### #### #",
+    "# #### ##### ## ##### #### #",
+    "#                          #",
+    "# #### ## ######## ## #### #",
+    "# #### ## ######## ## #### #",
+    "#      ##    ##    ##      #",
+    "###### ##### ## ##### ######",
+    "     # ##### ## ##### #     ",
+    "     # ##          ## #     ",
+    "     # ## ###  ### ## #     ",
+    "###### ## #      # ## ######",
+    "          #      #          ",
+    "###### ## #      # ## ######",
+    "     # ## ######## ## #     ",
+    "     # ##          ## #     ",
+    "     # ## ######## ## #     ",
+    "###### ## ######## ## ######",
+    "#            ##            #",
+    "# #### ##### ## ##### #### #",
+    "# #### ##### ## ##### #### #",
+    "#   ##                ##   #",
+    "### ## ## ######## ## ## ###",
+    "### ## ## ######## ## ## ###",
+    "#      ##    ##    ##      #",
+    "# ########## ## ########## #",
+    "# ########## ## ########## #",
+    "#                          #",
+    "############################",
+    "                            ",
+    "                            ",
   ];
-
-  // Initialize the grid
-  return localGrid;
 }
 
-function drawGrid() {
-  for (let y = 0; y < height / CELL_SIZE; y++) {
-    for (let x = 0; x < width / CELL_SIZE; x++) {
-      if (grid[y][x] === 1) {
-        fill(220);
-        rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+
+class Level {
+  constructor(layout, pacmanStart, ghostStarts) {
+    // this.id = id;
+    this.layout = this.validate(layout);
+    this.height = this.layout.length;
+    this.width = this.layout[0].length;
+    this.pacmanStart = pacmanStart;
+    this.ghostStarts = ghostStarts;
+  }
+
+  validate(layout) {
+    if (!layout || !layout.length || !layout[0].length) {
+      throw new Error("Invalid level layout: Empty or missing data");
+    }
+
+    const rowLength = layout[0].length;
+    for (let i = 1; i < layout.length; i++) {
+      if (layout[i].length !== rowLength) {
+        throw new Error("Invalid level layout: Inconsistent row lengths");
       }
+    }
+    return layout;
+  }
+}
+
+class Game {
+  constructor(levels) {
+    this.levels = levels;
+    this.score = 0;
+    this.lives = 3;
+
+    this.currentLevelIndex = 0;
+    this.pacman = null;
+    this.ghosts = [];
+
+    this.setLevel(0);
+  }
+
+  getCurrentLevel() {
+    return this.levels[this.currentLevelIndex];
+  }
+
+  update() {
+    this.pacman.move();
+    this.ghosts.forEach(ghost => ghost.move(this.pacman.position));
+    this.checkCollisions();
+    // Check win/lose conditions (implement your logic here)
+    if (this.isLevelComplete()) {
+      this.setLevel(this.currentLevelIndex + 1);
+    }
+  }
+
+  checkCollisions() {
+    // TODO: reuse this generated code, while working with pellets.
+    // Check pellet collisions (update score and remove pellet)
+    // for (let i = 0; i < this.pellets.length; i++) {
+    //   if (this.pacman.collide(this.pellets[i])) {
+    //     this.score++;
+    //     this.pellets.splice(i, 1);
+    //     break;
+    //   }
+    // }
+
+    // Check ghost collisions (handle lives or frightened mode)
+    this.ghosts.forEach(ghost => {
+      if (this.checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
+        console.log("You lost life!");
+      }
+    });
+  }
+
+  checkForOverlap(obj1Position, obj2Position, obj1Size, obj2Size) {
+    return (
+      (obj1Position.x < obj2Position.x + obj2Size && obj1Position.x + obj1Size > obj2Position.x) &&
+      (obj1Position.y < obj2Position.y + obj2Size && obj1Position.y + obj1Size > obj2Position.y)
+    );
+  }
+
+  isLevelComplete() {
+    // Implement your logic to check if all pellets are eaten
+    return false;
+  }
+
+  setLevel(n) {
+    this.currentLevelIndex = n;
+    if (this.currentLevelIndex < this.levels.length) {
+      const level = this.getCurrentLevel();
+      this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
+
+      this.ghosts = [];
+      for (const color in level.ghostStarts) {
+        this.ghosts.push(new Ghost(level.ghostStarts[color], color));
+      }
+    } else {
+      // Handle game completion (win screen, etc.)
+      console.log("You won the game!");
     }
   }
 }
 
 class Pacman {
-  constructor(x, y) {
-    this.x = x;
-    this.y = y;
-    this.size = CELL_SIZE;
-    this.directionX = 0;
-    this.directionY = 0;
-    this.desiredDirX = 0;
-    this.desiredDirY = 0;
-    this.speed = 2;
-  }
+  static RIGHT = { x: 1, y: 0 };
+  static LEFT = { x: -1, y: 0 };
+  static UP = { x: 0, y: -1 };
+  static DOWN = { x: 0, y: 1 };
 
-  show() {
-    fill(255, 255, 0);
-    ellipse(this.x + CELL_SIZE / 2, this.y + CELL_SIZE / 2, this.size, this.size);
-    const angle = this.getAngle();
-    fill(0);
-    arc(this.x + CELL_SIZE / 2, this.y + CELL_SIZE / 2, this.size / 2, this.size / 2, angle - PI / 7, angle + PI / 7);
-  }
+  constructor(startPosition, size, speed) {
+    this.position = startPosition;
+    this.size = size;
+    this.speed = speed;
+    this.direction = { x: 0, y: 0 }
+    this.desiredDirection = { x: 0, y: 0 };
+  };
 
   move() {
-    const newX = this.x + this.speed * this.desiredDirX;
-    const newY = this.y + this.speed * this.desiredDirY;
+    const newPosition = {
+      x: this.position.x + this.speed * this.desiredDirection.x,
+      y: this.position.y + this.speed * this.desiredDirection.y,
+    };
 
-    if (canMove(newX, newY, this.size)) {
-      this.x = newX;
-      this.y = newY;
-      this.directionX = this.desiredDirX;
-      this.directionY = this.desiredDirY;
+    if (canMove(newPosition, this.size)) {
+      this.position = newPosition;
+      this.direction = this.desiredDirection;
     } else {
-      const currentX = this.x + this.speed * this.directionX;
-      const currentY = this.y + this.speed * this.directionY;
+      const currentPosition = {
+        x: this.position.x + this.speed * this.direction.x,
+        y: this.position.y + this.speed * this.direction.y,
+      };
 
-      if (canMove(currentX, currentY, this.size)) {
-        this.x = currentX;
-        this.y = currentY;
+      if (canMove(currentPosition, this.size)) {
+        this.position = currentPosition;
       }
     }
   }
 
-  setDesiredDirection(x, y) {
-    this.desiredDirX = x;
-    this.desiredDirY = y;
-  }
-
-  getAngle() {
-    if (this.directionX > 0) {
-      return 0;
-    } else if (this.directionX < 0) {
-      return PI;
-    } else if (this.directionY > 0) {
-      return PI / 2;
-    } else {
-      return -PI / 2;
-    }
+  setDesiredDirection(direction) {
+    this.desiredDirection = direction;
   }
 }
 
 class Ghost {
-  constructor(x, y, color) {
-    this.x = x;
-    this.y = y;
+  constructor(startPosition, color) {
+    this.position = startPosition;
     this.size = CELL_SIZE;
-    this.directionX = 0;
-    this.directionY = 0;
+    this.direction = { x: 0, y: 0 };
     this.color = color;
     this.mode = "CHASE";
     this.chaseThreshold = 8; // Chasing within these cells
     this.speed = 2;
   }
 
-
-  show() {
-    fill(this.color);
-    ellipse(this.x + CELL_SIZE / 2, this.y + CELL_SIZE / 2, this.size, this.size);
-    triangle(this.x + CELL_SIZE / 3, this.y + CELL_SIZE / 3, this.x + CELL_SIZE / 2, this.y, this.x + CELL_SIZE - CELL_SIZE / 3, this.y + CELL_SIZE / 3);
-    fill(0);
-    ellipse(this.x + CELL_SIZE / 3, this.y + CELL_SIZE / 3, this.size / 5, this.size / 5);
-    ellipse(this.x + CELL_SIZE - CELL_SIZE / 3, this.y + CELL_SIZE / 3, this.size / 5, this.size / 5);
-  }
-
-  move(pacmanX, pacmanY) {
+  move(targetPosition) {
     // Calculate distance to Pacman (replace with your distance calculation logic)
-    const distanceX = pacmanX - this.x;
-    const distanceY = pacmanY - this.y;
+    const distanceX = targetPosition.x - this.position.x;
+    const distanceY = targetPosition.y - this.position.y;
 
-    const ghostCell = canvasToGridCell(this.x, this.y);
-    const pacmanCell = canvasToGridCell(pacman.x, pacman.y);
+    const ghostCell = canvasToGridCell(this.position);
+    const pacmanCell = canvasToGridCell(targetPosition);
 
     // Choose target cell based on ghost mode and distance to Pacman
     let targetCell;
@@ -209,30 +262,33 @@ class Ghost {
     const path = findPath(ghostCell.col, ghostCell.row, targetCell.col, targetCell.row);
     if (path) { // Check if path exists (avoid getting stuck)
       const nextCell = path[0];
-      const newX = snapToCell(this.x + this.speed * this.directionX);
-      const newY = snapToCell(this.y + this.speed * this.directionY);
+
+      const newPosition = {
+        x: snapToCell(this.position.x + this.speed * this.direction.x),
+        y: snapToCell(this.position.y + this.speed * this.direction.y),
+      }
 
       // Update position based on next cell in path and check for collision
-      if (canMove(newX, newY, this.size)) {
-        this.x = newX;
-        this.y = newY;
-        [this.directionX, this.directionY] = getDirectionTowards(this.x, this.y, nextCell.x, nextCell.y);
+      if (canMove(newPosition, this.size)) {
+        this.position = newPosition;
+        [this.direction.x, this.direction.y] = getDirectionTowards(this.position.x, this.position.y, nextCell.x, nextCell.y);
       }
     }
   }
+};
 
-}
+function canMove(position, size) {
+  const layout = level.layout;
 
-function canMove(x, y, size) {
-  const gridX1 = Math.floor(x / CELL_SIZE);
-  const gridX2 = Math.floor((x + size - 1) / CELL_SIZE);
-  const gridY1 = Math.floor(y / CELL_SIZE);
-  const gridY2 = Math.floor((y + size - 1) / CELL_SIZE);
-  return grid[gridY1] && grid[gridY2] &&
-    grid[gridY2][gridX2] !== 1 &&
-    grid[gridY1][gridX2] !== 1 &&
-    grid[gridY2][gridX1] !== 1 &&
-    grid[gridY1][gridX1] !== 1;
+  const gridX1 = Math.floor(position.x / CELL_SIZE);
+  const gridX2 = Math.floor((position.x + size - 1) / CELL_SIZE);
+  const gridY1 = Math.floor(position.y / CELL_SIZE);
+  const gridY2 = Math.floor((position.y + size - 1) / CELL_SIZE);
+  return layout[gridY1] && layout[gridY2] &&
+    layout[gridY2][gridX2] !== "#" &&
+    layout[gridY1][gridX2] !== "#" &&
+    layout[gridY2][gridX1] !== "#" &&
+    layout[gridY1][gridX1] !== "#";
 }
 
 function getDirectionTowards(x1, y1, x2, y2) {
@@ -246,10 +302,10 @@ function getDirectionTowards(x1, y1, x2, y2) {
   }
 }
 
-function canvasToGridCell(canvasX, canvasY) {
+function canvasToGridCell(canvasPosition) {
   // Calculate row and column indices based on canvas coordinates and cell size
-  const rowIndex = Math.floor(canvasY / CELL_SIZE);
-  const colIndex = Math.floor(canvasX / CELL_SIZE);
+  const rowIndex = Math.floor(canvasPosition.y / CELL_SIZE);
+  const colIndex = Math.floor(canvasPosition.x / CELL_SIZE);
 
   // Ensure row and column indices are within valid grid bounds (assuming 0-based indexing)
   return {
@@ -260,8 +316,8 @@ function canvasToGridCell(canvasX, canvasY) {
 
 function snapToCell(z) {
   // const snappedZ = Math.abs(z - Math.round(z)) < SNAP_THRESHOLD * CELL_SIZE ? Math.round(z) : z;
-  const ratio = z/CELL_SIZE;
-  const snappedZ = Math.abs(ratio - Math.round(ratio)) < SNAP_THRESHOLD ? Math.round(ratio)*CELL_SIZE : Math.round(z);
+  const ratio = z / CELL_SIZE;
+  const snappedZ = Math.abs(ratio - Math.round(ratio)) < SNAP_THRESHOLD ? Math.round(ratio) * CELL_SIZE : Math.round(z);
   return snappedZ
 }
 
@@ -308,27 +364,29 @@ function reconstructPath(cell) {
 }
 
 function getValidNeighbors(x, y) {
-  const width = grid[0].length; // Get maze width from the first row's length
-  const height = grid.length; // Get maze height from the number of rows
+  const layout = level.layout;
+
+  const width = layout[0].length; // Get maze width from the first row's length
+  const height = layout.length; // Get maze height from the number of rows
   const neighbors = [];
 
   // Check up neighbor (if within maze bounds and not a wall)
-  if (y > 0 && grid[y - 1][x] === 0) {
+  if (y > 0 && layout[y - 1][x] === 0) {
     neighbors.push({ x, y: y - 1 });
   }
 
   // Check down neighbor (if within maze bounds and not a wall)
-  if (y < height - 1 && grid[y + 1][x] === 0) {
+  if (y < height - 1 && layout[y + 1][x] === 0) {
     neighbors.push({ x, y: y + 1 });
   }
 
   // Check left neighbor (if within maze bounds and not a wall)
-  if (x > 0 && grid[y][x - 1] === 0) {
+  if (x > 0 && layout[y][x - 1] === 0) {
     neighbors.push({ x: x - 1, y });
   }
 
   // Check right neighbor (if within maze bounds and not a wall)
-  if (x < width - 1 && grid[y][x + 1] === 0) {
+  if (x < width - 1 && layout[y][x + 1] === 0) {
     neighbors.push({ x: x + 1, y });
   }
 
@@ -336,8 +394,9 @@ function getValidNeighbors(x, y) {
 }
 
 function getClosestPacmanCell(ghostCell, pacmanCell, viewDistance) {
-  const width = grid[0].length; // Get maze width from the first row's length
-  const height = grid.length; // Get maze height from the number of rows
+  const layout = level.layout;
+  const width = layout[0].length; // Get maze width from the first row's length
+  const height = layout.length; // Get maze height from the number of rows
   const visited = {}; // Keep track of visited cells to avoid redundant checks
 
   // Define a queue to store cells to explore for BFS
@@ -362,7 +421,7 @@ function getClosestPacmanCell(ghostCell, pacmanCell, viewDistance) {
       const neighborY = currentCell.y + getDeltaY(direction);
 
       // Check if neighbor is within maze bounds and not a wall
-      if (0 <= neighborX && neighborX < width && 0 <= neighborY && neighborY < height && grid[neighborY][neighborX] === 0) {
+      if (0 <= neighborX && neighborX < width && 0 <= neighborY && neighborY < height && layout[neighborY][neighborX] === 0) {
         const neighborKey = `${neighborX}-${neighborY}`;
 
         // Check if neighbor hasn't been visited and within view distance
@@ -398,4 +457,47 @@ function getDeltaY(direction) {
 function getDistance(x1, y1, x2, y2) {
   // You can replace this with Manhattan distance or Euclidean distance based on your preference
   return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+}
+
+class Renderer {
+  static drawLevel(level) {
+    // const layout = level.layout;
+    for (let y = 0; y < level.height; y++) {
+      for (let x = 0; x < level.width; x++) {
+        if (level.layout[y][x] === "#") {
+          fill(220);
+          rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        }
+      }
+    }
+  }
+
+  static drawPacman(pos, size, dir) {
+    function getAngle(dir) {
+      if (dir.x > 0) {
+        return 0;
+      } else if (dir.x < 0) {
+        return PI;
+      } else if (dir.y > 0) {
+        return PI / 2;
+      } else {
+        return -PI / 2;
+      }
+    }
+
+    fill(255, 255, 0);
+    ellipse(pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2, size, size);
+    const angle = getAngle(dir);
+    fill(0);
+    arc(pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2, size / 2, size / 2, angle - PI / 7, angle + PI / 7);
+  }
+
+  static drawGhost(pos, size, color) {
+    fill(color);
+    ellipse(pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2, size, size);
+    triangle(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, pos.x + CELL_SIZE / 2, pos.y, pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3);
+    fill(0);
+    ellipse(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
+    ellipse(pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
+  }
 }
