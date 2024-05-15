@@ -1004,3 +1004,10 @@ For the game Pacman, I have entities: GameBoard, Level, Pacman, Ghost. Explain d
 >3. **Graphics**: Responsible for rendering the game graphics, including the maze, characters, and UI elements.
 >
 >These classes can be organized into a more detailed hierarchy, and some classes might be merged or split depending on the specific implementation. However, this list provides a solid foundation for building a Pac-Man game in JavaScript.
+
+## Step 24
+
+**Problem:** Everything but Pacman and Ghosts operate on "position" structure. Refactor them to match.
+
+> [!NOTE]
+> Refactoring with LLMs is not worth the time. Have to do it by hand.

@@ -21,11 +21,11 @@ function draw() {
   Renderer.drawLevel(level);
 
   pacman.move();
-  Renderer.drawPacman({ x: pacman.x, y: pacman.y }, pacman.size, pacman.direction);
+  Renderer.drawPacman(pacman.position, pacman.size, pacman.direction);
 
   for (const ghost of ghosts) {
-    ghost.move(pacman.x, pacman.y);
-    Renderer.drawGhost({ x: ghost.x, y: ghost.y }, ghost.size, ghost.color);
+    ghost.move(pacman.position);
+    Renderer.drawGhost(ghost.position, ghost.size, ghost.color);
   }
 }
 
@@ -33,19 +33,19 @@ function keyPressed() {
   switch (keyCode) {
     case UP_ARROW:
     case 87: // W key
-      pacman.setDesiredDirection(0, -1);
+      pacman.setDesiredDirection(Pacman.UP);
       break;
     case DOWN_ARROW:
     case 83: // S key
-      pacman.setDesiredDirection(0, 1);
+      pacman.setDesiredDirection(Pacman.DOWN);
       break;
     case LEFT_ARROW:
     case 65: // A key
-      pacman.setDesiredDirection(-1, 0);
+      pacman.setDesiredDirection(Pacman.LEFT);
       break;
     case RIGHT_ARROW:
     case 68: // D key
-      pacman.setDesiredDirection(1, 0);
+      pacman.setDesiredDirection(Pacman.RIGHT);
       break;
   }
 }
@@ -121,11 +121,10 @@ class Pacman {
   static RIGHT = { x: 1, y: 0 };
   static LEFT = { x: -1, y: 0 };
   static UP = { x: 0, y: -1 };
-  static DOWN = { x: 0, y: 0 };
+  static DOWN = { x: 0, y: 1 };
 
   constructor(startPosition, size, speed) {
-    this.x = startPosition.x;
-    this.y = startPosition.y;
+    this.position = startPosition;
     this.size = size;
     this.speed = speed;
     this.direction = { x: 0, y: 0 }
@@ -133,35 +132,34 @@ class Pacman {
   };
 
   move() {
-    const newX = this.x + this.speed * this.desiredDirection.x;
-    const newY = this.y + this.speed * this.desiredDirection.y;
+    const newPosition = {
+      x: this.position.x + this.speed * this.desiredDirection.x,
+      y: this.position.y + this.speed * this.desiredDirection.y,
+    };
 
-    if (canMove(newX, newY, this.size)) {
-      this.x = newX;
-      this.y = newY;
-      this.direction.x = this.desiredDirection.x;
-      this.direction.y = this.desiredDirection.y;
+    if (canMove(newPosition, this.size)) {
+      this.position = newPosition;
+      this.direction = this.desiredDirection;
     } else {
-      const currentX = this.x + this.speed * this.direction.x;
-      const currentY = this.y + this.speed * this.direction.y;
+      const currentPosition = {
+        x: this.position.x + this.speed * this.direction.x,
+        y: this.position.y + this.speed * this.direction.y,
+      };
 
-      if (canMove(currentX, currentY, this.size)) {
-        this.x = currentX;
-        this.y = currentY;
+      if (canMove(currentPosition, this.size)) {
+        this.position = currentPosition;
       }
     }
   }
 
-  setDesiredDirection(x, y) {
-    this.desiredDirection.x = x;
-    this.desiredDirection.y = y;
+  setDesiredDirection(direction) {
+    this.desiredDirection = direction;
   }
 }
 
 class Ghost {
   constructor(startPosition, color) {
-    this.x = startPosition.x;
-    this.y = startPosition.y;
+    this.position = startPosition;
     this.size = CELL_SIZE;
     this.direction = { x: 0, y: 0 };
     this.color = color;
@@ -170,13 +168,13 @@ class Ghost {
     this.speed = 2;
   }
 
-  move(pacmanX, pacmanY) {
+  move(pacmanPosition) {
     // Calculate distance to Pacman (replace with your distance calculation logic)
-    const distanceX = pacmanX - this.x;
-    const distanceY = pacmanY - this.y;
+    const distanceX = pacmanPosition.x - this.position.x;
+    const distanceY = pacmanPosition.y - this.position.y;
 
-    const ghostCell = canvasToGridCell(this.x, this.y);
-    const pacmanCell = canvasToGridCell(pacman.x, pacman.y);
+    const ghostCell = canvasToGridCell(this.position);
+    const pacmanCell = canvasToGridCell(pacmanPosition);
 
     // Choose target cell based on ghost mode and distance to Pacman
     let targetCell;
@@ -194,27 +192,29 @@ class Ghost {
     const path = findPath(ghostCell.col, ghostCell.row, targetCell.col, targetCell.row);
     if (path) { // Check if path exists (avoid getting stuck)
       const nextCell = path[0];
-      const newX = snapToCell(this.x + this.speed * this.direction.x);
-      const newY = snapToCell(this.y + this.speed * this.direction.y);
+
+      const newPosition = {
+        x: snapToCell(this.position.x + this.speed * this.direction.x),
+        y: snapToCell(this.position.y + this.speed * this.direction.y),
+      }
 
       // Update position based on next cell in path and check for collision
-      if (canMove(newX, newY, this.size)) {
-        this.x = newX;
-        this.y = newY;
-        [this.direction.x, this.direction.y] = getDirectionTowards(this.x, this.y, nextCell.x, nextCell.y);
+      if (canMove(newPosition, this.size)) {
+        this.position = newPosition;
+        [this.direction.x, this.direction.y] = getDirectionTowards(this.position.x, this.position.y, nextCell.x, nextCell.y);
       }
     }
   }
 
 }
 
-function canMove(x, y, size) {
+function canMove(position, size) {
   const layout = level.layout;
 
-  const gridX1 = Math.floor(x / CELL_SIZE);
-  const gridX2 = Math.floor((x + size - 1) / CELL_SIZE);
-  const gridY1 = Math.floor(y / CELL_SIZE);
-  const gridY2 = Math.floor((y + size - 1) / CELL_SIZE);
+  const gridX1 = Math.floor(position.x / CELL_SIZE);
+  const gridX2 = Math.floor((position.x + size - 1) / CELL_SIZE);
+  const gridY1 = Math.floor(position.y / CELL_SIZE);
+  const gridY2 = Math.floor((position.y + size - 1) / CELL_SIZE);
   return layout[gridY1] && layout[gridY2] &&
     layout[gridY2][gridX2] !== "#" &&
     layout[gridY1][gridX2] !== "#" &&
@@ -233,10 +233,10 @@ function getDirectionTowards(x1, y1, x2, y2) {
   }
 }
 
-function canvasToGridCell(canvasX, canvasY) {
+function canvasToGridCell(canvasPosition) {
   // Calculate row and column indices based on canvas coordinates and cell size
-  const rowIndex = Math.floor(canvasY / CELL_SIZE);
-  const colIndex = Math.floor(canvasX / CELL_SIZE);
+  const rowIndex = Math.floor(canvasPosition.y / CELL_SIZE);
+  const colIndex = Math.floor(canvasPosition.x / CELL_SIZE);
 
   // Ensure row and column indices are within valid grid bounds (assuming 0-based indexing)
   return {
