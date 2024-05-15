@@ -49,7 +49,7 @@ Pacman is not moving. How is it supposed to be controlled and what is the proble
 
 ***Answer (shortened):***
 
-```text
+```markdown
 Missing getAngle function: The show method in the Pacman class references a getAngle function that's not defined. This function is likely used to determine the direction Pacman is facing to draw the mouth correctly.
 
 Incomplete canMove function: The canMove function only defines the logic to get the grid coordinates of the intended move but lacks the actual collision check with walls. It needs to check if the corresponding grid position in grid is "WALL" to prevent movement.
@@ -73,7 +73,7 @@ Rendering of pacman broke, what is wrong with canMove related logic in the `draw
 
 ***Answer (shortened):***
 
-```text
+```markdown
 The issue with the canMove related logic in the draw function is related to a variable typo. Here's the breakdown:
 
 Typo in variable name: Inside the draw function, you're using gridy to access the grid array, but this variable isn't defined anywhere. It should be gridY which is correctly defined within the canMove function of the Pacman class.
@@ -103,7 +103,7 @@ Modify `createGrid` function to generate the classical pacman level with the gri
 
 ***Answer (shortened):***
 
-```text
+```markdown
 Here's the modified createGrid function to generate a classic Pacman level with a grid of 28x36:
 
 <- code ->
@@ -129,7 +129,7 @@ There is a problem in `createGrid` can you identify and fix it?
 
 ***Answer (shortened):***
 
-```text
+```markdown
 The issue lies in the way the innerWalls array defines horizontal walls. Here's the breakdown:
 
 Incorrect x-coordinate range for horizontal walls: The objects in the innerWalls array for horizontal walls define x1 and x2 to represent the starting and ending positions on the x-axis. However, these values should represent the column indexes in the grid, which range from 0 to width/cellSize - 1 (exclusive).
@@ -151,7 +151,7 @@ Why `createGrid` redefines `grid` that is already a global variable?
 
 ***Answer (shortened):***
 
-```text
+```markdown
 You're right, redefining grid inside the createGrid function might be unnecessary and can be confusing. Here's why it happens and how to improve it:
 
 JavaScript variable scope: JavaScript has two main variable scopes: global and local. Variables declared outside any function (like grid here) are globally accessible. Variables declared within a function are local to that function.
@@ -184,7 +184,7 @@ Modify Option 2 to return `localGrid` instead of assigning it to `grid` variable
 
 ***Answer (shortened):***
 
-```text
+```markdown
 Here's the modified code utilizing Option 2 with createGrid returning the generated grid:
 
 1. Modified createGrid function:
@@ -219,7 +219,7 @@ Change canvas size to accommodate the 28x36 grid with the cell size of 16 pixels
 
 ***Answer (shortened):***
 
-```text
+```markdown
 To accommodate a 28x36 grid with a cell size of 16 pixels, you'll need to adjust the canvas size in the setup function. Here's the modified code:
 
 <- code ->
@@ -235,7 +235,7 @@ Cells are still of size 40 pixels, not 16.  Help to update.
 
 ***Answer (shortened):***
 
-```text
+```markdown
 You're right, the cells are still rendering at 40 pixels even though the canvas size is adjusted. The cell size is determined by how you draw elements within the grid. Here's how to fix it:
 
 Update drawing functions: The size of the Pacman, ghosts, and potentially other elements in your code is likely defined based on the cell size. You need to update these drawing functions to use the actual cell size (16 pixels) instead of assuming it's the same as the canvas size.
@@ -254,7 +254,7 @@ Should I update the global cellSize instead?
 
 ***Answer:***
 
-```text
+```markdown
 No, it's generally better practice to avoid updating the global cellSize variable in this scenario. Here's why:
 
 Maintainability: Using the actual cellSize (16) directly within the drawing functions makes the code clearer and easier to understand. It removes the need to mentally track the value of a global variable and its potential modifications throughout the code.
@@ -282,7 +282,7 @@ createGrid only generates the outer walls, but not the inner ones. Find and fix 
 
 ***Answer (shortened):***
 
-```text
+```markdown
 The problem lies in the conditional statement within the loop that creates the outer walls in the createGrid function. Here's the breakdown:
 
 Outer wall condition: The current condition checks if x === 0 || x === width / cellSize - 1 || y === 0 || y === height / cellSize - 1 to mark cells as "WALL" for the outer boundaries.
@@ -316,7 +316,7 @@ Why innerWalls array mixes names, for example some elements use {y, x1, x2} name
 
 ***Answer (shortened):***
 
-```text
+```markdown
 You're right, there's an inconsistency in the naming conventions used within the innerWalls array for defining walls. This inconsistency can lead to confusion and potential errors.
 ```
 
@@ -329,7 +329,7 @@ Should innerWalls be split into 2 arrays, for horizontal and vertical walls,  an
 
 ***Answer:***
 
-```text
+```markdown
 Splitting the innerWalls array into separate arrays for horizontal and vertical walls is a good approach and can improve code organization and readability. Here's how to implement it:
 
 1. Separate arrays:
@@ -359,7 +359,7 @@ Based on this picture of the classic Pacman game level, where walls are of blue 
 
 ***Answer:***
 
-```text
+```markdown
 Absolutely, based on a classic Pacman game level where walls are blue colored, here's a possible set of coordinates for the horizontalWalls and verticalWalls arrays:
 
 Horizontal Walls (horizontalWalls array):
@@ -405,7 +405,7 @@ Pacman moves too fast, how to make it move slower and smooth?
 
 ***Answer:***
 
-```text
+```markdown
 There are a couple of approaches you can take to make Pacman move slower and smoother in your Pacman game:
 
 1. Timer-based Movement:
@@ -419,7 +419,7 @@ Current logic in Pacman.move() makes Pacman move my a cell size. Make a better, 
 
 ***Answer:***
 
-```text
+```markdown
 You're right, moving Pacman by a full cell size in each update can feel clunky. To achieve smoother per-pixel movement, we can leverage concepts like animation and frame rates. Here's an approach using requestAnimationFrame:
 
 1. Update Pacman's Movement Speed:
@@ -453,7 +453,7 @@ There is already a method `setDirection(x,y)` under Pacman class. Should the pac
 
 ***Answer (shortened):***
 
-```text
+```markdown
 You're absolutely right. It's better to leverage the existing setDirection(x, y) method and directionX and directionY attributes for Pacman's movement logic if they're already present in your codebase. Here's how to adapt the approach:
 ```
 
@@ -481,7 +481,7 @@ Isn't our current `draw()` function part of p5js game library and that library c
 
 ***Answer (shortened):***
 
-```text
+```markdown
 You're absolutely correct. I apologize for the confusion in the previous explanation.
 
 In the context of p5.js, the draw() function is indeed a core function provided by the library.  Here's a more accurate explanation:
@@ -559,7 +559,7 @@ Can you provide a more complex chase logic that is used in real implementations 
 
 ***Answer:***
 
-```text
+```markdown
 Absolutely! While the simple chase logic in the previous response provides a starting point, real Pacman implementations often utilize a combination of techniques for more interesting and challenging ghost behavior. Here's a breakdown of some common approaches:
 
 1. Target Grid Approach:
@@ -607,7 +607,7 @@ Generate `findPath` function for the `ghostMove` function above.
 
 ***Answer (shortened):***
 
-```text
+```markdown
 The findPath function in the context of Pacman ghost AI typically involves a pathfinding algorithm to find the shortest path from the ghost's current position to a target cell within the maze. Here's an example using a basic Breadth-First Search (BFS) approach:
 <- code ->
 ```
@@ -642,7 +642,7 @@ Pacman can't turn into some of the paths. Look at the Pacman movement code and s
 
 ***Answer (shortened):***
 
-```text
+```markdown
 Absolutely! Let's analyze the Pacman movement code to identify potential issues that might prevent him from turning into some paths:
 
 Common Issues:
@@ -677,7 +677,7 @@ The problem happens due to the high speed value that causes pacman position to j
 
 ***Answer:***
 
-```text
+```markdown
 Absolutely! You're right, a high speed value can cause Pacman to overshoot wall openings. Here's a code change to address this issue:
 
 1. Movement Based on Cell Size:
@@ -710,7 +710,7 @@ Do we need to pass `cellSize` to `snapToCell` function?
 
 ***Answer (shortened):***
 
-```text
+```markdown
 You're right, there are ways to avoid passing cellSize to the snapToCell function every time. Here are two approaches:
 
 1. Global Cell Size Variable:
@@ -754,7 +754,7 @@ If I've implemented snapping to the grid, do I need to check all 4 corners of Pa
 
 ***Answer:***
 
-```text
+```markdown
 Yes, even with snapping to the grid, it's generally recommended to check all 4 corners of Pacman for collisions. Here's why:
 
 1. Floating-point Precision Errors:
@@ -774,7 +774,7 @@ Without adding snapping to the grid into `move()` method of Pacman, Pacman can't
 
 ***Answer:***
 
-```text
+```markdown
 Here are a few approaches to fix this problem:
 
 1. Pre-Turn Check:
@@ -801,7 +801,7 @@ How to change the background of an empty html page from white to black
 
 ***Answer:***
 
-```text
+```markdown
 There are two main ways to change the background of an empty HTML page from white to black:
 1. Using CSS:
 This is the most common and recommended approach. Here's how to do it.
@@ -845,7 +845,7 @@ The snapTolerance can still be over 1 pixel in length and thus can overstep the 
 
 ***Answer:***
 
-```text
+```markdown
 You're right, setting snapTolerance to exactly 1 pixel can seem like a good solution to avoid overstepping the corridor boundaries. However, there are potential drawbacks to consider:
 
 Grid Imperfections: Even with a perfect grid representation in your code, there might be slight rounding errors during calculations (especially when dealing with floating-point numbers) that could cause Pacman to miss the exact corridor center by 1 pixel. This can still lead to collisions or jittery movement.
@@ -888,7 +888,7 @@ If we remove that logic, we should be able to solve the collision problem if our
 
 ***Answer (shortened):***
 
-```text
+```markdown
 Yes, you're absolutely correct! Removing the currentTime and deltaTime multipliers and ensuring the grid cell size is divisible by the speed value can potentially solve the collision problem in certain scenarios. 
 ```
 
@@ -903,7 +903,7 @@ Improve the following code and print the improved version
 
 ***Answer:***
 
-```text
+```markdown
 <- code (partial) ->
 Improvements made include:
 
@@ -943,7 +943,7 @@ For the game Pacman, I have entities: GameBoard, Level, Pacman, Ghost. Explain d
 
 ***Answer (Gemini):***
 
-```text
+```markdown
 Here are different ways to organize the rendering of entities in your Pacman game using p5play.js:
 
 **1. Individual Render Functions:**
@@ -965,7 +965,7 @@ This approach offers more flexibility and separation of concerns but might be ov
 
 ***Answer (Llama3):***
 
-```text
+```markdown
 **1. Single render function**
 **2. Entity-specific render functions**
 **3. Use a rendering layer system**
