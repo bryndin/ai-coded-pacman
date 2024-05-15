@@ -826,7 +826,7 @@ Give me step by step instructions on how can I host our pacman game on github pa
 
 ***Prompt:***
 Pacman move logic has a collision problem. Suggest code modifications to resolve them.
-In the 1move()` function below `desiredDirX` and `desiredDirY` are the new desired direction for Pacman, while `directionX` and `directionY` are the current movement direction,  each can take values of -1, 0, or 1. `canMove` function checks 4 corners of Pacman against the grid to know if there is a wall or open space.
+In the `move()` function below `desiredDirX` and `desiredDirY` are the new desired direction for Pacman, while `directionX` and `directionY` are the current movement direction,  each can take values of -1, 0, or 1. `canMove` function checks 4 corners of Pacman against the grid to know if there is a wall or open space.
 <- code ->
 
 > [!NOTE]
@@ -917,7 +917,7 @@ This revised version should be more organized, easier to read, and maintain.
 > [!NOTE]
 >
 > - None of the LLMs where able to look at the file at github. Pasting the entire JS code only (partially) worked in ChatGPT, that was able to suggest a few minor improvements and printed the first part of the file back. So the other parts are probably were cut due to the token size.
-> - Current code is 6,249 tokens (See [Online Tokenizer](https://platform.openai.com/tokenizer)
+> - Current code is 6,249 tokens (See [Online Tokenizer](https://platform.openai.com/tokenizer)).
 > - Context size. The exact context size for each of the Gemini, ChatGPT and MS Copilot is hard to find. Rumors vary significantly, ranging from 4k tokens to 32k. With the output being as small as 2k.
 > - ChatGPT 3.5 (input+output: 16k, output: 4k). We don't know if this is the model deployed, nor if there is a 4k pre message limit.
 > - Given that returned code if often cut or the functions are replaced with stabs, we could be hitting that 4k token limit.
@@ -936,7 +936,7 @@ Add validation logic to PacmanLevel layout coming as an argument to constructor.
 
 ## Step 22
 
-*Problem* Design rendering logic. Do we want to separate rendering from content? Make it less reliant on global variables.
+**Problem:** Design rendering logic. Do we want to separate rendering from content? Make it less reliant on global variables.
 
 ***Prompt:***
 For the game Pacman, I have entities: GameBoard, Level, Pacman, Ghost. Explain different ways to organize the rendering of these entities in Javascript. I use p5play.js lib.
@@ -967,11 +967,8 @@ This approach offers more flexibility and separation of concerns but might be ov
 
 ```text
 **1. Single render function**
-
 **2. Entity-specific render functions**
-
 **3. Use a rendering layer system**
-
 **4. Use a scene graph**
 
 Choose the approach that best fits your game's requirements and complexity. You can always mix and match these approaches to create a hybrid solution that works best for your game.
