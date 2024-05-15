@@ -132,7 +132,7 @@ class Game {
   update() {
     this.pacman.move();
     this.ghosts.forEach(ghost => ghost.move(this.pacman.position));
-    // this.checkCollisions();
+    this.checkCollisions();
     // Check win/lose conditions (implement your logic here)
     if (this.isLevelComplete()) {
       this.setLevel(this.currentLevelIndex + 1);
@@ -140,6 +140,7 @@ class Game {
   }
 
   checkCollisions() {
+    // TODO: reuse this generated code, while working with pellets.
     // Check pellet collisions (update score and remove pellet)
     // for (let i = 0; i < this.pellets.length; i++) {
     //   if (this.pacman.collide(this.pellets[i])) {
@@ -151,11 +152,17 @@ class Game {
 
     // Check ghost collisions (handle lives or frightened mode)
     this.ghosts.forEach(ghost => {
-      if (ghost.collideWithPacman()) {
-        // Implement ghost collision logic here (lives loss or frightened mode)
+      if (this.checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
         console.log("You lost life!");
       }
     });
+  }
+
+  checkForOverlap(obj1Position, obj2Position, obj1Size, obj2Size) {
+    return (
+      (obj1Position.x < obj2Position.x + obj2Size && obj1Position.x + obj1Size > obj2Position.x) &&
+      (obj1Position.y < obj2Position.y + obj2Size && obj1Position.y + obj1Size > obj2Position.y)
+    );
   }
 
   isLevelComplete() {
@@ -231,13 +238,13 @@ class Ghost {
     this.speed = 2;
   }
 
-  move(pacmanPosition) {
+  move(targetPosition) {
     // Calculate distance to Pacman (replace with your distance calculation logic)
-    const distanceX = pacmanPosition.x - this.position.x;
-    const distanceY = pacmanPosition.y - this.position.y;
+    const distanceX = targetPosition.x - this.position.x;
+    const distanceY = targetPosition.y - this.position.y;
 
     const ghostCell = canvasToGridCell(this.position);
-    const pacmanCell = canvasToGridCell(pacmanPosition);
+    const pacmanCell = canvasToGridCell(targetPosition);
 
     // Choose target cell based on ghost mode and distance to Pacman
     let targetCell;
@@ -268,12 +275,7 @@ class Ghost {
       }
     }
   }
-
-  collideWithPacman() {
-    // TODO: check for collision with Pacman
-    return false;
-  }
-}
+};
 
 function canMove(position, size) {
   const layout = level.layout;

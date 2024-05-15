@@ -1059,3 +1059,25 @@ For the game Pacman, I have entities: GameBoard, Level, Pacman, Ghost. Explain d
 
 > [!NOTE]
 > `Game` class is not finished. We preserved Pacman movement, but the rest of logic is a stub.
+
+## Step 26
+
+**Problem:** Detect collisions between Ghost and Pacman.
+
+***Prompt:** You're developing a Pacman game. You have 2 classes: `Pacman` and `Ghost`. `Pacman` class has the attribute `position`, an object with the x,y coordinates of the upper left corner, e.g. `{x: 1, y: 2}`; and `size`. `Ghost` has similar attributes `position` and `pacmanPosition` for the ghost and the Pacman positions respectively; and attribute `size`. Write Javascript code to detect collision between ghost and Pacman.
+
+> [!NOTE]
+> Gemini provides a slightly better optimized code, comparing to Llama3-70b.
+
+***Prompt:** In the Pacman game, you have 3 entities: Pacman, Ghost, and GameBoard, represented by Javascript classes. Which one is responsible for checking for a collision between Pacman and Ghost, and why?
+
+> [!NOTE]
+> Both LLMs suggest the `GameBoard` class to handle collision checks. Why?
+>
+> - Gemini: Centralized Knowledge, Separation of Concerns, Efficiency, Game State Management.
+> - Llama3-70b: Single Responsibility Principle, Game Logic, Decoupling, Centralized Game State.
+
+***Prompt:** Update the collision logic to have the collision function in the `Game` class, instead of the `Ghost` class. Generate Javascript code.
+
+> [!NOTE]
+> Gemini generates a slightly better code, factoring out the collision logic into a separate variable. When Llama3 injected the large `if` check inline.
