@@ -1230,3 +1230,9 @@ For the game Pacman, I have entities: GameBoard, Level, Pacman, Ghost. Explain d
 
 > [!NOTE]
 > We use a mix of code from MS Copilot and Gemini. Gemini generated a dedicated static object listing all state constants, while Copilot didn't. But Copilot generates chunks of game logic for each state that we will reuse. Unrelated, Copilot uses too much space between code lines visually, that makes it harder to read compared to Gemini.
+
+## Step 29
+
+**Problem:** Number of lives and score aren't displayed.
+
+***Prompt:*** You're developing the game Pacman in Javascript. Generate code that uses p5play.js lib to display the current score and Pacman lives on the canvas.

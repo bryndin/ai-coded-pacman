@@ -1,13 +1,11 @@
 const CELL_SIZE = 16;
 const SNAP_THRESHOLD = 0.1;
-let game, level;
+let game, level, renderer;
 
 function setup() {
   level = new Level(createGrid(), { x: 13 * CELL_SIZE, y: 26 * CELL_SIZE }, { "red": { x: 13 * CELL_SIZE, y: 17 * CELL_SIZE }, "blue": { x: 14 * CELL_SIZE, y: 17 * CELL_SIZE } });
 
-  const gridWidth = 28 * CELL_SIZE;
-  const gridHeight = 36 * CELL_SIZE;
-  createCanvas(gridWidth, gridHeight);
+  renderer = new Renderer(28 * CELL_SIZE, 36 * CELL_SIZE);
 
   const levels = [level];
   game = new Game(levels);
@@ -15,13 +13,7 @@ function setup() {
 
 function draw() {
   game.main();
-
-  background(0);
-  Renderer.drawLevel(level);
-  Renderer.drawPacman(game.pacman.position, game.pacman.size, game.pacman.direction);
-  for (const ghost of game.ghosts) {
-    Renderer.drawGhost(ghost.position, ghost.size, ghost.color);
-  }
+  renderer.draw(game);
 }
 
 function keyPressed() {
@@ -518,6 +510,25 @@ function getDistance(x1, y1, x2, y2) {
 }
 
 class Renderer {
+  constructor(canvasWidth, canvasHeight) {
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
+
+    createCanvas(this.canvasWidth, this.canvasHeight);
+  }
+
+  draw(game) {
+    background(0);
+    this.drawScore(game.score);
+    this.drawLives(game.lives);
+    Renderer.drawLevel(game.getCurrentLevel());
+
+    Renderer.drawPacman(game.pacman.position, game.pacman.size, game.pacman.direction);
+    for (const ghost of game.ghosts) {
+      Renderer.drawGhost(ghost.position, ghost.size, ghost.color);
+    }
+  }
+
   static drawLevel(level) {
     // const layout = level.layout;
     for (let y = 0; y < level.height; y++) {
@@ -557,5 +568,17 @@ class Renderer {
     fill(0);
     ellipse(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
     ellipse(pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
+  }
+
+  drawScore(score) {
+    textSize(20);
+    fill(255);
+    text("Score: " + score, 10, 20);
+  }
+
+  drawLives(lives) {
+    textSize(20);
+    fill(255);
+    text("Lives: " + lives, this.canvasWidth - 80, 20);
   }
 }
