@@ -14,7 +14,7 @@ function setup() {
 }
 
 function draw() {
-  game.update();
+  game.main();
 
   background(0);
   Renderer.drawLevel(level);
@@ -89,7 +89,6 @@ function createGrid() {
 
 class Level {
   constructor(layout, pacmanStart, ghostStarts) {
-    // this.id = id;
     this.layout = this.validate(layout);
     this.height = this.layout.length;
     this.width = this.layout[0].length;
@@ -117,56 +116,104 @@ class Game {
     this.levels = levels;
     this.score = 0;
     this.lives = 3;
+    this.state = Game.states.START;
 
     this.currentLevelIndex = 0;
     this.pacman = null;
     this.ghosts = [];
-
-    this.setLevel(0);
   }
+
+  static states = {
+    START: "START",
+    RUNNING: "RUNNING",
+    PACMAN_DEAD: "PACMAN_DEAD",
+    LEVEL_COMPLETE: "LEVEL_COMPLETE",
+    PAUSED: "PAUSED",
+    GAME_OVER: "GAME_OVER",
+    POWERUP: "POWERUP",
+  };
 
   getCurrentLevel() {
     return this.levels[this.currentLevelIndex];
   }
 
-  update() {
-    this.pacman.move();
-    this.ghosts.forEach(ghost => ghost.move(this.pacman.position));
-    this.checkCollisions();
-    // Check win/lose conditions (implement your logic here)
-    if (this.isLevelComplete()) {
-      this.setLevel(this.currentLevelIndex + 1);
+  setState(newState) {
+    console.log(`Game State Changed from ${this.state} to ${newState}`);
+    this.state = newState;
+  }
+
+  main() {
+    switch (this.state) {
+      case Game.states.START:
+        this.setLevel(0);
+        this.setState(Game.states.RUNNING);
+        break;
+
+      case Game.states.RUNNING:
+        this.pacman.move();
+        this.ghosts.forEach(ghost => ghost.move(this.pacman.position));
+
+        if (this.checkPacmanGhostCollision()) {
+          this.setState(Game.states.PACMAN_DEAD);
+        }
+
+        if (this.isLevelComplete()) {
+          this.setLevel(this.currentLevelIndex + 1);
+        }
+
+        if (this.checkGameCompletion()) {
+          this.setState(Game.states.GAME_OVER);
+        }
+
+        break;
+
+      case Game.states.PACMAN_DEAD:
+        // Handle Pacman death animation and options (restart, game over)
+        this.lives--;
+        if (this.lives === 0) {
+          this.setState(Game.states.GAME_OVER);
+        } else {
+          // Reset positions
+          this.setLevel(this.currentLevelIndex);
+          this.setState(Game.states.RUNNING);
+        }
+        break;
+
+      case Game.states.LEVEL_COMPLETE:
+        // Handle level completion logic (restart, next level)
+        // TODO: add more logic here.
+        this.currentLevelIndex++;
+
+        if (this.currentLevelIndex < this.levels.length) {
+          this.setLevel(this.currentLevelIndex);
+        } else {
+          this.setState(Game.states.GAME_OVER);
+        }
+        break;
+
+      case Game.states.PAUSED:
+        // Pause game loop and user interaction
+        break;
+
+      case Game.states.GAME_OVER:
+        // Display final score and options (restart, exit)
+        console.log("Game Over!");
+        break;
     }
   }
 
-  checkCollisions() {
-    // TODO: reuse this generated code, while working with pellets.
-    // Check pellet collisions (update score and remove pellet)
-    // for (let i = 0; i < this.pellets.length; i++) {
-    //   if (this.pacman.collide(this.pellets[i])) {
-    //     this.score++;
-    //     this.pellets.splice(i, 1);
-    //     break;
-    //   }
-    // }
-
-    // Check ghost collisions (handle lives or frightened mode)
-    this.ghosts.forEach(ghost => {
-      if (this.checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
-        this.lives--;
-        if (this.lives === 0) {
-          console.log("Game Over!");
-        }
-        this.setLevel(this.currentLevelIndex);
-      }
-    });
+  checkGameCompletion() {
+    return false;
   }
 
-  checkForOverlap(obj1Position, obj2Position, obj1Size, obj2Size) {
-    return (
-      (obj1Position.x < obj2Position.x + obj2Size && obj1Position.x + obj1Size > obj2Position.x) &&
-      (obj1Position.y < obj2Position.y + obj2Size && obj1Position.y + obj1Size > obj2Position.y)
-    );
+  checkPacmanGhostCollision() {
+    for (const ghost of this.ghosts) {
+      if (checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
+        return ghost;
+      }
+    }
+
+    return null;
   }
 
   isLevelComplete() {
@@ -176,17 +223,17 @@ class Game {
 
   setLevel(n) {
     this.currentLevelIndex = n;
-    if (this.currentLevelIndex < this.levels.length) {
-      const level = this.getCurrentLevel();
-      this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
 
-      this.ghosts = [];
-      for (const color in level.ghostStarts) {
-        this.ghosts.push(new Ghost(level.ghostStarts[color], color));
-      }
-    } else {
-      // Handle game completion (win screen, etc.)
-      console.log("You won the game!");
+    if (this.currentLevelIndex >= this.levels.length) {
+      throw new Error(`Invalid level index: Level ${n} doesn't exist`);
+    }
+
+    const level = this.getCurrentLevel();
+    this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
+
+    this.ghosts = [];
+    for (const color in level.ghostStarts) {
+      this.ghosts.push(new Ghost(level.ghostStarts[color], color));
     }
   }
 }
@@ -280,6 +327,13 @@ class Ghost {
     }
   }
 };
+
+function checkForOverlap(obj1Position, obj2Position, obj1Size, obj2Size) {
+  return (
+    (obj1Position.x < obj2Position.x + obj2Size && obj1Position.x + obj1Size > obj2Position.x) &&
+    (obj1Position.y < obj2Position.y + obj2Size && obj1Position.y + obj1Size > obj2Position.y)
+  );
+}
 
 function canMove(position, size) {
   const layout = level.layout;

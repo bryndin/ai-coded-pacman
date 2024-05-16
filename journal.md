@@ -1107,3 +1107,126 @@ For the game Pacman, I have entities: GameBoard, Level, Pacman, Ghost. Explain d
 
 > [!NOTE]
 > While both Gemini and LLama3 have similar answers, the Llama3 `Score Reset: The score is reset to zero, and the game starts fresh.` part is incorrect. Microsoft Copilot and ChatGPT3.5 answers are also similar. They are more concise and listed by execution order, instead of grouping into State/Animation/Sound as the first two.
+
+## Step 28
+
+**Problem:** Game logic becomes complex, it's more transparent to operate based on a state machine.
+
+***Prompt:*** You are game developer creating a classic Pacman game in Javascript. You have classes GameBoard, Pacman, Ghost.  Class GameBoard controls the game and operates on game states. List all the states for the GameBoard that are needed for the game to work.
+
+***Answer (MS Copilot):***
+>Sure, here are some of the potential states that the `GameBoard` class might need to manage in a classic Pacman game:
+>
+>1. **`Start`**: This is the initial state of the game. The game waits for the player to start the game.
+>
+>2. **`Running`**: This state indicates that the game is currently in progress. Pacman and the ghosts are moving around the board.
+>
+>3. **`Paused`**: In this state, the game is temporarily halted, usually due to player action. Pacman and the ghosts are not moving.
+>
+>4. **`PacmanCaught`**: This state is triggered when a ghost catches Pacman. It might initiate an animation or sound effect and lead to a decrease in Pacman's lives.
+>
+>5. **`LevelComplete`**: This state is triggered when all the dots on the board have been eaten by Pacman. The game might display a message or animation, then proceed to the next level.
+>
+>6. **`GameOver`**: This state is triggered when Pacman has no lives left. The game might display a "Game Over" message and wait for the player to start a new game.
+>
+>7. **`PowerUp`**: This state is triggered when Pacman eats a power pellet. The ghosts change their behavior (usually they run away from Pacman), and the game might display a different animation or sound effect.
+>
+>Remember, these are general states and can vary based on the specific implementation of the game. The key is to manage these states appropriately to ensure the game runs smoothly. Each state might also have associated actions that are triggered when entering or exiting the state. For example, when entering the `GameOver` state, the game might play a specific sound effect, display a message to the player, and update the high score list. When exiting the `GameOver` state (i.e., starting a new game), the game would reset all game variables to their initial values.
+
+> [!NOTE]
+> MS Copilot gave the best option and described it in the simplest terms. Gemini came close. Llama3 had extra steps, e.g. `WAITING_FOR_INPUT`, `ANIMATING` that aren't a good fit.
+
+***Prompt:*** Create a finite state machine for the states you've provided.
+
+> [!NOTE]
+> MS Copilot has concise explanation. It even tried to draw the states in pseudo graphics, but hallucinated in state transitions. Gemini didn't draw, bet described it well, though the answer were harder to process.
+
+***Answer (MS Copilot):***
+>Sure, here's a simple representation of a finite state machine for the Pacman game:
+>
+>```plaintext
+>+-----------+     +---------+     +--------+     +-------------+
+>|           |     |         |     |        |     |             |
+>|   Start   +-----> Running +-----> Paused +-----> PacmanCaught |
+>|           |     |         |     |        |     |             |
+>+-----+-----+     +----+----+     +---+----+     +------+------+
+>      |                |              |                 |
+>      |                |              |                 |
+>      |                |              |                 |
+>      |                |              |                 |
+>      |                |              |                 |
+>      |                |              |                 |
+>      v                v              v                 v
+>+-----+-----+     +----+----+     +---+----+     +------+------+
+>|           |     |         |     |        |     |             |
+>| GameOver  <-----+ Level   +<----+ PowerUp+<----+ PacmanCaught |
+>|           |     | Complete|     |        |     |             |
+>+-----------+     +---------+     +--------+     +-------------+
+>```
+>
+>- **Start**: The initial state of the game. The game waits for the player to start the game.
+>- **Running**: The game is currently in progress. Pacman and the ghosts are moving around the board.
+>- **Paused**: The game is temporarily halted, usually due to player action. Pacman and the ghosts are not moving.
+>- **PacmanCaught**: Triggered when a ghost catches Pacman. It might initiate an animation or sound effect and lead to a decrease in Pacman's lives.
+>- **PowerUp**: Triggered when Pacman eats a power pellet. The ghosts change their behavior (usually they run away from Pacman), and the game might display a different animation or sound effect.
+>- **LevelComplete**: Triggered when all the dots on the board have been eaten by Pacman. The game might display a message or animation, then proceed to the next level.
+>- **GameOver**: Triggered when Pacman has no lives left. The game might display a "Game Over" message and wait for the player to start a new game.
+>
+>Each arrow represents a transition from one state to another. The direction of the arrow indicates the direction of the transition. For example, the game can go from the `Start` state to the `Running` state, but not the other way around. The game can transition from almost any state to the `GameOver` state, reflecting the fact that the game can end at any time if Pacman runs out of lives. Note that this is a simplified model and actual implementation might have more states and transitions.
+
+***Answer (Gemini):***
+>Here's a finite state machine representation for the Pacman game states:
+>
+>**States:**
+>
+>* Setup
+>* Running
+>* Pacman Dead
+>* Level Complete
+>* Paused
+>* Game Over
+>
+>**Transitions:**
+>
+>* Setup -> Running: This happens when the initial game board is created and ready for gameplay.
+>* Running -> Pacman Dead: This occurs when Pacman collides with a ghost.
+>* Running -> Level Complete: This triggers when Pacman eats all the dots on the current level.
+>* Running -> Paused: This happens when the user pauses the game.
+>* Paused -> Running: This occurs when the user resumes the game from a paused state.
+>* Running -> Power Pellet Active (Sub-state): This is a temporary transition within Running when Pacman eats a power pellet.
+>* Power Pellet Active -> Running: This transition happens when the power pellet effect wears off.
+>* Running -> Ghost Frightened (Sub-state): This is another temporary transition within Running when Pacman eats a power pellet, making ghosts vulnerable.
+>* Ghost Frightened -> Running: This occurs when the ghost vulnerability period ends.
+>* Level Complete -> Running (Optional): This could be used to restart the current level.
+>* Level Complete -> Next Level (Optional): This would transition to a new level if available.
+>* Pacman Dead -> Game Over (Optional): This happens if the player has no more lives left.
+>* Pacman Dead -> Running (Optional): This could be used to restart the current level with a life cost.
+>
+>**Events:**
+>
+>* Game Start: Triggers the transition from Setup to Running.
+>* User Input (Movement, Pause): Triggers transitions based on player actions.
+>* Collision (Pacman-Ghost): Triggers the transition from Running to Pacman Dead.
+>* Dot Eaten (Last Dot): Triggers the transition from Running to Level Complete.
+>* Power Pellet Eaten: Triggers the temporary transition to Power Pellet Active within Running.
+>* Power Pellet Effect Ends: Triggers the transition back to Running from Power Pellet Active.
+>* Ghost Eaten (By Pacman): Triggers the temporary transition to Ghost Frightened within Running.
+>* Ghost Vulnerability Ends: Triggers the transition back to Running from Ghost Frightened.
+>* Level Completion Logic: Determines if the game progresses to the next level or restarts the current one.
+>* Game Over Condition (Lives Depleted): Triggers the transition from Pacman Dead (or any state) to Game Over.
+>
+>**Notes:**
+>
+>* This is a simplified FSM, and additional states or transitions might be needed depending on the complexity of your game.
+>* The optional transitions allow for design choices on how the game handles restarts, level progression, and handling Pacman deaths.
+>* Sub-states like Power Pellet Active and Ghost Frightened can be implemented within the Running state for temporary behavior changes.
+
+***Prompt:*** Create a finite state machine for the states you've provided.
+
+> [!NOTE]
+> MS Copilot has concise explanation. It even tried to draw the states in pseudo graphics, but hallucinated in state transitions. Gemini didn't draw, bet described it well, though the answer were harder to process.
+
+***Prompt:*** Generate Javascript code for the GameBoard class that contains all these states. Add logic to check the state and execute game logic based on that state.
+
+> [!NOTE]
+> We use a mix of code from MS Copilot and Gemini. Gemini generated a dedicated static object listing all state constants, while Copilot didn't. But Copilot generates chunks of game logic for each state that we will reuse. Unrelated, Copilot uses too much space between code lines visually, that makes it harder to read compared to Gemini.
