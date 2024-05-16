@@ -13,6 +13,11 @@ function setup() {
 
 function draw() {
   game.main();
+
+  if (game.state == Game.states.GAME_OVER) {
+    return;
+  }
+
   renderer.draw(game);
 }
 
@@ -43,49 +48,50 @@ function createGrid() {
     "                            ",
     "                            ",
     "############################",
-    "#            ##            #",
-    "# #### ##### ## ##### #### #",
-    "# #### ##### ## ##### #### #",
-    "# #### ##### ## ##### #### #",
-    "#                          #",
-    "# #### ## ######## ## #### #",
-    "# #### ## ######## ## #### #",
-    "#      ##    ##    ##      #",
-    "###### ##### ## ##### ######",
-    "     # ##### ## ##### #     ",
-    "     # ##          ## #     ",
-    "     # ## ###  ### ## #     ",
-    "###### ## #      # ## ######",
-    "          #      #          ",
-    "###### ## #      # ## ######",
-    "     # ## ######## ## #     ",
-    "     # ##          ## #     ",
-    "     # ## ######## ## #     ",
-    "###### ## ######## ## ######",
-    "#            ##            #",
-    "# #### ##### ## ##### #### #",
-    "# #### ##### ## ##### #### #",
-    "#   ##                ##   #",
-    "### ## ## ######## ## ## ###",
-    "### ## ## ######## ## ## ###",
-    "#      ##    ##    ##      #",
-    "# ########## ## ########## #",
-    "# ########## ## ########## #",
-    "#                          #",
+    "# ...........##............#",
+    "#.####.#####.##.#####.####.#",
+    "#.####.#####.##.#####.####.#",
+    "#.####.#####.##.#####.####.#",
+    "#..........................#",
+    "#.####.##.########.##.####.#",
+    "#.####.##.########.##.####.#",
+    "#......##....##....##......#",
+    "######.##### ## #####.######",
+    "     #.##### ## #####.#     ",
+    "     #.##          ##.#     ",
+    "     #.## ###  ### ##.#     ",
+    "######.## #      # ##.######",
+    "      .   #      #   .      ",
+    "######.## #      # ##.######",
+    "     #.## ######## ##.#     ",
+    "     #.##          ##.#     ",
+    "     #.## ######## ##.#     ",
+    "######.## ######## ##.######",
+    "#............##............#",
+    "#.####.#####.##.#####.####.#",
+    "#.####.#####.##.#####.####.#",
+    "#...##................##...#",
+    "###.##.##.########.##.##.###",
+    "###.##.##.########.##.##.###",
+    "#......##....##....##......#",
+    "#.##########.##.##########.#",
+    "#.##########.##.##########.#",
+    "#..........................#",
     "############################",
     "                            ",
     "                            ",
   ];
 }
 
-
 class Level {
   constructor(layout, pacmanStart, ghostStarts) {
-    this.layout = this.validate(layout);
+    this.layout = Level.convert(this.validate(layout));
     this.height = this.layout.length;
     this.width = this.layout[0].length;
     this.pacmanStart = pacmanStart;
     this.ghostStarts = ghostStarts;
+
+    this.pelletCount = this.countPellets();
   }
 
   validate(layout) {
@@ -101,9 +107,40 @@ class Level {
     }
     return layout;
   }
+
+  static convert(layout) {
+    return layout.map(row => row.split(''));
+  }
+
+  // Count the number of pellets in the layout
+  countPellets() {
+    let count = 0;
+    for (let row of this.layout) {
+      for (let cell of row) {
+        if (cell === '.') {
+          count++;
+        }
+      }
+    }
+    return count;
+  }
+
+  // Remove a pellet at the given coordinates
+  removePellet(x, y) {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
+      throw new Error("Invalid coordinates. Pellet removal outside level bounds.");
+    }
+
+    if (this.layout[y][x] === ".") {
+      this.layout[y][x] = " ";
+      this.pelletCount--;
+    }
+  }
 }
 
 class Game {
+  static PELLET_SCORE = 1;
+
   constructor(levels) {
     this.levels = levels;
     this.score = 0;
@@ -145,16 +182,38 @@ class Game {
         this.pacman.move();
         this.ghosts.forEach(ghost => ghost.move(this.pacman.position));
 
+        // Check for Pacman collision with pellets in four neighboring cells
+        const level = this.getCurrentLevel();
+        const pacmanCellX = Math.floor(this.pacman.position.x / CELL_SIZE);
+        const pacmanCellY = Math.floor(this.pacman.position.y / CELL_SIZE);
+        for (let dx = 0; dx <= 1; dx++) {
+          for (let dy = 0; dy <= 1; dy++) {
+            const cellX = pacmanCellX + dx;
+            const cellY = pacmanCellY + dy;
+            if (this.checkPelletCollision(cellX, cellY)) {
+              this.score++;
+              level.removePellet(cellX, cellY);
+
+              if (level.pelletCount === 0) {
+                this.setState(Game.states.LEVEL_COMPLETE);
+              }
+            }
+          }
+        }
+
         if (this.checkPacmanGhostCollision()) {
           this.setState(Game.states.PACMAN_DEAD);
+          return;
         }
 
         if (this.isLevelComplete()) {
           this.setLevel(this.currentLevelIndex + 1);
+          // TODO: add more logic here
         }
 
         if (this.checkGameCompletion()) {
           this.setState(Game.states.GAME_OVER);
+          // TODO: reset all levels, as they could have removed pellets.
         }
 
         break;
@@ -208,6 +267,18 @@ class Game {
     return null;
   }
 
+  checkPelletCollision(cellX, cellY) {
+    const level = this.getCurrentLevel();
+
+    // Check if the cell coordinates are within the layout limits
+    if ((0 <= cellX && cellX < level.layout[0].length) && (0 <= cellY && cellY < level.layout.length) && level.layout[cellY][cellX] === ".") {
+      // Compute its collision box in canvas coordinates
+      const pellet = new Pellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
+      return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, pellet.size);
+    }
+    return false;
+  }
+
   isLevelComplete() {
     // Implement your logic to check if all pellets are eaten
     return false;
@@ -242,7 +313,7 @@ class Pacman {
     this.speed = speed;
     this.direction = { x: 0, y: 0 }
     this.desiredDirection = { x: 0, y: 0 };
-  };
+  }
 
   move() {
     const newPosition = {
@@ -509,6 +580,13 @@ function getDistance(x1, y1, x2, y2) {
   return Math.abs(x1 - x2) + Math.abs(y1 - y2);
 }
 
+class Pellet {
+  constructor(cellPosition) {
+    this.size = CELL_SIZE / 3;
+    this.position = { x: cellPosition.x + (CELL_SIZE - this.size) / 2, y: cellPosition.y + (CELL_SIZE - this.size) / 2 };
+  }
+}
+
 class Renderer {
   constructor(canvasWidth, canvasHeight) {
     this.canvasWidth = canvasWidth;
@@ -530,12 +608,15 @@ class Renderer {
   }
 
   static drawLevel(level) {
-    // const layout = level.layout;
     for (let y = 0; y < level.height; y++) {
       for (let x = 0; x < level.width; x++) {
-        if (level.layout[y][x] === "#") {
-          fill(220);
-          rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        switch (level.layout[y][x]) {
+          case "#":
+            Renderer.drawWall(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE);
+            break;
+          case ".":
+            Renderer.drawPellet(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE / 3);
+            break;
         }
       }
     }
@@ -568,6 +649,18 @@ class Renderer {
     fill(0);
     ellipse(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
     ellipse(pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
+  }
+
+  static drawWall(x, y, size) {
+    fill(220);
+    rect(x, y, size, size);
+  }
+
+  static drawPellet(x, y, size) {
+    // Set fill color to yellow
+    fill(255, 255, 0);
+    // Draw a circle at the provided coordinates
+    ellipse(x + CELL_SIZE / 2, y + CELL_SIZE / 2, size, size);
   }
 
   drawScore(score) {

@@ -1236,3 +1236,302 @@ For the game Pacman, I have entities: GameBoard, Level, Pacman, Ghost. Explain d
 **Problem:** Number of lives and score aren't displayed.
 
 ***Prompt:*** You're developing the game Pacman in Javascript. Generate code that uses p5play.js lib to display the current score and Pacman lives on the canvas.
+
+## Step 30
+
+**Problem:** Game have no pellets and thus no winning.
+
+***Prompt:*** You are game developer creating a classic Pacman game in Javascript. You have classes GameBoard, Pacman, Ghost. Explain how pellets have to be implemented there.
+
+***Answer (Gemini):***
+>There are a few ways to implement pellets in your classic Pacman game using Javascript and the classes you mentioned:
+>
+>**1. Multi-dimensional Array in GameBoard:**
+>
+>**2. Separate Pellet Class:**
+>
+>**3. Combining both approaches:**
+>
+>* Use a 2D array for the overall layout in `GameBoard`.
+>* Within the array elements representing empty spaces, store references to `Pellet` objects (if any).
+>* This allows flexibility in defining different types of pellets and simplifies adding/removing them during gameplay.
+>
+>**Pacman and Pellet Interaction:**
+>
+>* In the `Pacman` class, implement a collision detection method that checks if Pacman's position overlaps with a pellet's position (using either array index or object reference).
+>* Upon collision:
+>    * Remove the pellet from the board (array or object list).
+>    * Update the game score in `GameBoard`.
+>    * Play a sound effect (optional).
+>
+>**Remember:**
+>
+>* Whichever method you choose, ensure efficient collision detection to optimize game performance.
+>* Consider adding a property to the `Pellet` class to track if it's been eaten, allowing removal from the board only once.
+>
+>These are some ways to implement pellets in your Pacman game. Choose the approach that best suits your project structure and coding style.
+
+***Prompt:***
+You're developing the game Pacman in Javascript. You have a class `Level` provided below. `layout` argument is a 2D array describing the level, pellets are represented by "." character there. Modify class `Level` to parse the layout, count and store the number of pellets. Provide a function or a method to remove pellet from the provided coordinates.
+
+class Level {
+  constructor(layout) {
+    this.layout = layout;
+    this.height = this.layout.length;
+    this.width = this.layout[0].length;
+  }
+}
+
+***Prompt:*** Modify `removePellet` to throw an exception if x and y are outside of the layout size.
+
+***Prompt:*** Using Javascript lib p5play.js generate code to draw a pellet from the Pacman game.
+
+***Prompt:*** In the `draw()` function, replace the `if` check with the switch/case logic.
+
+> [!NOTE]
+> Gemini did a good job providing code. For the level layout to save time we updated it manually.
+
+***Prompt:*** You're developing the game Pacman in Javascript. You have a class `Game` representing main game logic. Function `main()` is the main game loop. The state `Game.states.RUNNING` means Pacman is moving. `level` is an instance of class `Level`. `layout` is a 2D array representing the level, where "." character is a pellet.
+To the code below add functionality of Pacman eating pellets and thus increasing the score in `score` attribute.
+
+class Level {
+  constructor(layout, pacmanStart, ghostStarts) {
+    this.layout = layout;
+    this.pellets = this.countPellets();
+  }
+}
+
+class Game {
+  constructor(level) {
+    this.level = level;
+    this.score = 0;
+    this.state = Game.states.RUNNING;
+    this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
+  }
+
+  main() {
+    switch (this.state) {
+      case Game.states.RUNNING:
+        this.pacman.move();
+
+        if (this.checkPacmanGhostCollision()) {
+          this.setState(Game.states.PACMAN_DEAD);
+        }
+
+        if (this.isLevelComplete()) {
+          this.setLevel(this.currentLevelIndex + 1);
+        }
+
+        if (this.checkGameCompletion()) {
+          this.setState(Game.states.GAME_OVER);
+        }
+
+        break;
+    }
+  }
+}
+
+***Prompt:*** Why does `checkPelletCollision` modify the state of the Game, being a "check" method?
+
+***Prompt:*** Use Option 2, where logic is in the `main()` function. There is a problem with `this.level.layout[this.pacman.y][this.pacman.x]` code. `layout` uses layout local coordinates, while `pacman` uses canvas coordinates. Fix it.
+
+***Answer: (shortened)***
+
+>```javascript
+>  const cellX = Math.floor(this.pacman.x / CELL_SIZE);
+>  const cellY = Math.floor(this.pacman.y / CELL_SIZE);
+>  if (this.level.layout[cellY][cellX] === ".") {
+>    this.level.layout[cellY][cellX] = " ";
+>    this.score += 10;
+>```
+
+***Prompt:*** There still could be a problem related to `Math.floor`. Most of the Pacman can be already located in the next cell, but the top left corner of Pacman (`this.pacman.x` and `this.pacman.y`) can be still in the previous cell.
+
+***Answer: (shortened)***
+>You're absolutely right. Using `Math.floor` alone might lead to situations where Pacman is mostly in the next cell but its top left corner is still considered in the previous cell, causing missed pellet detections. Here are two approaches to address this:
+>
+>**Approach 1: Check for overlapping with both current and next cell**
+>
+>**Approach 2: Use a threshold for cell occupancy**
+>
+>**Choosing the Approach:**
+>
+>* Approach 1 might be more complex but offers more precise detection, especially for faster Pacman speeds.
+>* Approach 2 is simpler but relies on a chosen threshold value, which might require some experimentation for optimal results.
+
+***Prompt:*** 
+Going with Approach 1, would it be better to check 4 cells instead of 2? The current one plus the one to the left, the one below and the one below to the left?
+
+***Answer(shortened):***
+>While checking four cells (current, next in movement direction, and diagonally below/left) might seem more comprehensive for pellet detection, it can introduce unnecessary complexity and potential issues. Here's why:
+
+***Prompt:***
+Approach 1 can make Pacman prematurely eat a pellet in the next cell.  Why not use the collision check instead? We can compute the sprite size for the pellet in the canvas coordinates.
+
+***Answer(shortened):***
+>You're right, Approach 1 with just checking the next cell based on movement direction can lead to premature pellet eating. Here's how we can leverage the collision detection logic to achieve more accurate pellet consumption using the pellet sprite size:
+>
+>**1. Define Pellet Information:**
+>
+>* Introduce a new property in the `Level` class to store the pellet sprite size:
+>
+>**2. Modify `main()` Function:**
+>
+>* Instead of checking the next cell based on direction, use the collision detection logic to check for overlap with the current cell's pellet:
+>
+>**Explanation:**
+>
+>1. We calculate the exact coordinates of the pellet's bounding box in canvas space based on its position in the level layout (`cellX`, `cellY`) and the defined `pelletSize`.
+>2. We call the `isColliding` function (assuming you have one for collision detection) to check if Pacman's sprite overlaps with the calculated pellet bounding box. 
+>3. If there's a collision and the tile is a ".", we remove the pellet from the layout and update the score.
+>
+>This approach leverages the existing collision detection logic for more accurate pellet eating detection based on the actual sprite sizes of Pacman and the pellet.
+>
+>**Note:**
+>
+>* Ensure your `isColliding` function can handle both rectangle-to-rectangle and circle-to-rectangle collisions, depending on how you represent Pacman and the pellet sprites.
+
+***Prompt:***
+This again has the problem when most of the Pacman sprite is in the next cell, touching the next pellet sprite that this logic won't detect.
+
+***Answer (shortened):***
+>You're absolutely right. The previous approach based solely on the pellet's bounding box might still miss pellets when Pacman is mostly in the next cell. Here's a refined solution that combines collision detection and a threshold for Pacman's position within a cell:
+>
+>**1. Define Threshold and Pellet Information:**
+>
+>* Introduce a `cellOccupancyThreshold` property in the `Game` class:
+>
+>**2. Modify `main()` Function:**
+>
+>* Combine collision detection with the threshold check:
+>
+>**Explanation:**
+>
+>1. We calculate the `isPastThreshold` flag to check if Pacman's X position is beyond the threshold point within the current cell.
+>2. The pellet is considered eaten if:
+>    * The tile is a "." (pellet) and
+>    * EITHER Pacman is past the threshold within the current cell (ensuring it's not just touching the edge) OR
+>    * There's a collision between Pacman and the pellet's bounding box.
+>
+>This approach combines the strengths of both previous solutions:
+>
+>* It leverages collision detection for more precise handling of sprite overlaps.
+>* It uses the `cellOccupancyThreshold` to ensure Pacman doesn't eat a pellet in the next cell too early.
+>
+>**Adjusting the Threshold:**
+>
+>The `cellOccupancyThreshold` value impacts how deep Pacman needs to be within a cell to be considered occupying it for pellet consumption. Adjust this value based on your desired behavior and pellet size. 
+>
+>* A higher threshold ensures Pacman is further into the current cell before eating a pellet, potentially reducing the feeling of "premature" eating.
+>* A lower threshold allows Pacman to eat pellets slightly earlier as it enters a cell.
+>
+>**Testing and Refinement:**
+>
+>Test your game with different threshold values to find the sweet spot that balances responsiveness and pellet eating accuracy for your specific game design. Remember, the ideal value might depend on factors like Pacman's speed and pellet size.
+
+***Prompt:***
+This introduces a magic number for a threshold that could lead to some hidden bugs. Why not check the 4 neighboring pellets and do a collision check with all 4?
+
+***Answer (shortened):***
+>You're right, using a magic number for the threshold might not be ideal and could lead to unexpected behavior in certain scenarios. Here's why checking all four neighboring pellets with collision detection can be a viable solution, with some considerations:
+>
+>**Benefits:**
+>
+>* **Reduced reliance on magic numbers:** By checking all four neighbors, we eliminate the need for a specific threshold value, potentially improving code maintainability and reducing the likelihood of hidden bugs related to the threshold.
+>* **More comprehensive detection:** Checking all four neighbors ensures Pacman can eat pellets even if it's positioned diagonally between cells, offering a more complete solution.
+>
+>**Drawbacks:**
+>
+>* **Increased complexity:**  Checking four pellets with collision detection requires more calculations compared to checking the current cell and potentially the next one in movement direction. This might not be a significant performance hit for a simple Pacman game, but it's a factor to consider, especially for larger or more complex games.
+>* **Potential for over-detection:** Depending on the implementation of the collision detection and pellet/Pacman size, there's a slight chance of Pacman eating pellets it shouldn't reach if it's perfectly positioned between cells.
+>
+>**Implementation:**
+>
+>Here's how you can implement checking all four neighboring pellets: ...
+>
+>**Explanation:**
+>
+>1. We define additional checks for the left, right, and top neighboring pellets based on their calculated bounding boxes.
+>2. The `isPelletEaten` flag is set to `true` if any of the collision checks with the neighboring pellets return `true`.
+>3. We only update the layout and score if there's a collision and the corresponding tile in the layout is a "." (pellet).
+>
+>**Choosing the Approach:**
+>
+>The decision between checking four neighbors with collision detection and a threshold-based approach depends on your game's priorities. 
+>
+>* If you prioritize simplicity and reducing magic numbers, checking four neighbors might be a good choice. Just be aware of the potential for slight over-detection in some scenarios.
+>* If performance is a concern and you want a more precise control over Pacman's pellet eating behavior, a refined threshold-based approach with well-tested threshold values might be preferable.
+>
+>Ultimately, test both approaches in your game and see what works best for your specific design goals and desired level of pellet consumption accuracy.
+
+***Prompt:***
+This code will make Pacman eat at most one pellet, while Pacman sprite might touch several. Modify the code that if Pacman collides with several pellet sprites, each of them is removed from the level layout and increase the score.
+
+***Prompt:***
+You get cell coordinates from the Pacman canvas coordinates, `cellX` and `cellY`. Check that cell and the cells to the right, down, and right down, if any of them have a pellet, compute the sprite box for that pellet and use it to check for collision with Pacman.
+
+> [!NOTE]
+> This is where Gemini starts generating crazy code. Lets start over.
+
+
+You're developing the game Pacman in Javascript. You have class `Level` with an attribute `layout` being a 2D array representing the level. "." character in the array cell is a pellet.
+Class `Pacman` has attribute `position` that holds x,y coordinates of the top left sprite corner in canvas space.
+Class `Game` contains a method `main()` responsible for the game logic.
+
+After `this.pacman.move();` code add logic that checks for Pacman collision with pellets in four neighboring cells: current, one to the right, one below, one below to the right. If there is a pellet in a cell, compute its collision box in convas coordinates and check against collision with Pacman using `checkForOverlap` function. If there is a collision, increase the game score and remove the pellet from the layout via `removePellet` function.
+
+```javascript
+class Level {
+  constructor(layout, pacmanStart, ghostStarts) {
+    this.layout = layout;
+    this.pellets = this.countPellets();
+  }
+
+  removePellet(x, y) {
+    // this function removes pellet from the layout
+  }
+}
+
+class Pacman {
+  constructor(size) {
+    this.position = {x: 1, y:10};
+    this.size = size;
+  }
+}
+
+class Game {
+  constructor(level) {
+    this.level = level;
+    this.score = 0;
+    this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
+  }
+
+  main() {
+    this.pacman.move();
+
+    // here add the needed logic
+  }
+}
+
+function checkForOverlap(obj1Position, obj2Position, obj1Size, obj2Size) {
+  return (
+    (obj1Position.x < obj2Position.x + obj2Size && obj1Position.x + obj1Size > obj2Position.x) &&
+    (obj1Position.y < obj2Position.y + obj2Size && obj1Position.y + obj1Size > obj2Position.y)
+  );
+}
+```
+
+> [!NOTE]
+> Both Gemini and Copilot did an ok-ish job with the code this time, though using different approaches for iteration. BUT both use canvas coordinates in cell calculations, when they can simply add +1 to the level coordinated.
+
+***Prompt:***
+You use canvas coordinates to calculate cell coordinates on each iteration. Why not to calculate it once, then next cell in the layout coordinates will be just +1.
+
+***Prompt:***
+Do you need to check your cell x and y are within the layout limits?
+
+> [!NOTE]
+> Copilot added the check, yet it didn't figure out `x >= 0` one is redundant. Gemini claimed their code is alright, providing 2 points why. While one is based on JS voodoo and can hold, the other about throwing an exception is incorrect. We want to check, not to raise an exception to player.
+
+***Prompt:***
+Write a function in Javascript to convert an array of the form `["#..", "#.#"]` into array `["#", ".", "."], ["#", ".", "#"]`
