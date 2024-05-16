@@ -84,6 +84,10 @@ function createGrid() {
 }
 
 class Level {
+  static WALL = "#";
+  static EMPTY = " ";
+  static PELLET = ".";
+  
   constructor(layout, pacmanStart, ghostStarts) {
     this.layout = Level.convert(this.validate(layout));
     this.height = this.layout.length;
@@ -131,7 +135,7 @@ class Level {
       throw new Error("Invalid coordinates. Pellet removal outside level bounds.");
     }
 
-    if (this.layout[y][x] === ".") {
+    if (this.layout[y][x] === Level.PELLET) {
       this.layout[y][x] = " ";
       this.pelletCount--;
     }
@@ -271,7 +275,7 @@ class Game {
     const level = this.getCurrentLevel();
 
     // Check if the cell coordinates are within the layout limits
-    if ((0 <= cellX && cellX < level.layout[0].length) && (0 <= cellY && cellY < level.layout.length) && level.layout[cellY][cellX] === ".") {
+    if ((0 <= cellX && cellX < level.layout[0].length) && (0 <= cellY && cellY < level.layout.length) && level.layout[cellY][cellX] === Level.PELLET) {
       // Compute its collision box in canvas coordinates
       const pellet = new Pellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
       return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, pellet.size);
@@ -406,10 +410,10 @@ function canMove(position, size) {
   const gridY1 = Math.floor(position.y / CELL_SIZE);
   const gridY2 = Math.floor((position.y + size - 1) / CELL_SIZE);
   return layout[gridY1] && layout[gridY2] &&
-    layout[gridY2][gridX2] !== "#" &&
-    layout[gridY1][gridX2] !== "#" &&
-    layout[gridY2][gridX1] !== "#" &&
-    layout[gridY1][gridX1] !== "#";
+    layout[gridY2][gridX2] !== Level.WALL &&
+    layout[gridY1][gridX2] !== Level.WALL &&
+    layout[gridY2][gridX1] !== Level.WALL &&
+    layout[gridY1][gridX1] !== Level.WALL;
 }
 
 function getDirectionTowards(x1, y1, x2, y2) {
@@ -611,10 +615,10 @@ class Renderer {
     for (let y = 0; y < level.height; y++) {
       for (let x = 0; x < level.width; x++) {
         switch (level.layout[y][x]) {
-          case "#":
+          case Level.WALL:
             Renderer.drawWall(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE);
             break;
-          case ".":
+          case Level.PELLET:
             Renderer.drawPellet(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE / 3);
             break;
         }

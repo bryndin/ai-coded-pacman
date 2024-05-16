@@ -1535,3 +1535,10 @@ Do you need to check your cell x and y are within the layout limits?
 
 ***Prompt:***
 Write a function in Javascript to convert an array of the form `["#..", "#.#"]` into array `["#", ".", "."], ["#", ".", "#"]`
+
+## Step 31
+
+**Problem:** Code uses hardcoded level elements, e.g. "#", ".". Use constants instead.
+
+> [!NOTE]
+> This is a simple refactoring, that is not worse dealing with complex LLM prompts.
