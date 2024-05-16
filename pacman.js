@@ -1,27 +1,19 @@
 const CELL_SIZE = 16;
 const SNAP_THRESHOLD = 0.1;
-let game, level;
+let game, level, renderer;
 
 function setup() {
   level = new Level(createGrid(), { x: 13 * CELL_SIZE, y: 26 * CELL_SIZE }, { "red": { x: 13 * CELL_SIZE, y: 17 * CELL_SIZE }, "blue": { x: 14 * CELL_SIZE, y: 17 * CELL_SIZE } });
 
-  const gridWidth = 28 * CELL_SIZE;
-  const gridHeight = 36 * CELL_SIZE;
-  createCanvas(gridWidth, gridHeight);
+  renderer = new Renderer(28 * CELL_SIZE, 36 * CELL_SIZE);
 
   const levels = [level];
   game = new Game(levels);
 }
 
 function draw() {
-  game.update();
-
-  background(0);
-  Renderer.drawLevel(level);
-  Renderer.drawPacman(game.pacman.position, game.pacman.size, game.pacman.direction);
-  for (const ghost of game.ghosts) {
-    Renderer.drawGhost(ghost.position, ghost.size, ghost.color);
-  }
+  game.main();
+  renderer.draw(game);
 }
 
 function keyPressed() {
@@ -89,7 +81,6 @@ function createGrid() {
 
 class Level {
   constructor(layout, pacmanStart, ghostStarts) {
-    // this.id = id;
     this.layout = this.validate(layout);
     this.height = this.layout.length;
     this.width = this.layout[0].length;
@@ -117,52 +108,104 @@ class Game {
     this.levels = levels;
     this.score = 0;
     this.lives = 3;
+    this.state = Game.states.START;
 
     this.currentLevelIndex = 0;
     this.pacman = null;
     this.ghosts = [];
-
-    this.setLevel(0);
   }
+
+  static states = {
+    START: "START",
+    RUNNING: "RUNNING",
+    PACMAN_DEAD: "PACMAN_DEAD",
+    LEVEL_COMPLETE: "LEVEL_COMPLETE",
+    PAUSED: "PAUSED",
+    GAME_OVER: "GAME_OVER",
+    POWERUP: "POWERUP",
+  };
 
   getCurrentLevel() {
     return this.levels[this.currentLevelIndex];
   }
 
-  update() {
-    this.pacman.move();
-    this.ghosts.forEach(ghost => ghost.move(this.pacman.position));
-    this.checkCollisions();
-    // Check win/lose conditions (implement your logic here)
-    if (this.isLevelComplete()) {
-      this.setLevel(this.currentLevelIndex + 1);
+  setState(newState) {
+    console.log(`Game State Changed from ${this.state} to ${newState}`);
+    this.state = newState;
+  }
+
+  main() {
+    switch (this.state) {
+      case Game.states.START:
+        this.setLevel(0);
+        this.setState(Game.states.RUNNING);
+        break;
+
+      case Game.states.RUNNING:
+        this.pacman.move();
+        this.ghosts.forEach(ghost => ghost.move(this.pacman.position));
+
+        if (this.checkPacmanGhostCollision()) {
+          this.setState(Game.states.PACMAN_DEAD);
+        }
+
+        if (this.isLevelComplete()) {
+          this.setLevel(this.currentLevelIndex + 1);
+        }
+
+        if (this.checkGameCompletion()) {
+          this.setState(Game.states.GAME_OVER);
+        }
+
+        break;
+
+      case Game.states.PACMAN_DEAD:
+        // Handle Pacman death animation and options (restart, game over)
+        this.lives--;
+        if (this.lives === 0) {
+          this.setState(Game.states.GAME_OVER);
+        } else {
+          // Reset positions
+          this.setLevel(this.currentLevelIndex);
+          this.setState(Game.states.RUNNING);
+        }
+        break;
+
+      case Game.states.LEVEL_COMPLETE:
+        // Handle level completion logic (restart, next level)
+        // TODO: add more logic here.
+        this.currentLevelIndex++;
+
+        if (this.currentLevelIndex < this.levels.length) {
+          this.setLevel(this.currentLevelIndex);
+        } else {
+          this.setState(Game.states.GAME_OVER);
+        }
+        break;
+
+      case Game.states.PAUSED:
+        // Pause game loop and user interaction
+        break;
+
+      case Game.states.GAME_OVER:
+        // Display final score and options (restart, exit)
+        console.log("Game Over!");
+        break;
     }
   }
 
-  checkCollisions() {
-    // TODO: reuse this generated code, while working with pellets.
-    // Check pellet collisions (update score and remove pellet)
-    // for (let i = 0; i < this.pellets.length; i++) {
-    //   if (this.pacman.collide(this.pellets[i])) {
-    //     this.score++;
-    //     this.pellets.splice(i, 1);
-    //     break;
-    //   }
-    // }
-
-    // Check ghost collisions (handle lives or frightened mode)
-    this.ghosts.forEach(ghost => {
-      if (this.checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
-        console.log("You lost life!");
-      }
-    });
+  checkGameCompletion() {
+    return false;
   }
 
-  checkForOverlap(obj1Position, obj2Position, obj1Size, obj2Size) {
-    return (
-      (obj1Position.x < obj2Position.x + obj2Size && obj1Position.x + obj1Size > obj2Position.x) &&
-      (obj1Position.y < obj2Position.y + obj2Size && obj1Position.y + obj1Size > obj2Position.y)
-    );
+  checkPacmanGhostCollision() {
+    for (const ghost of this.ghosts) {
+      if (checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
+        return ghost;
+      }
+    }
+
+    return null;
   }
 
   isLevelComplete() {
@@ -172,17 +215,17 @@ class Game {
 
   setLevel(n) {
     this.currentLevelIndex = n;
-    if (this.currentLevelIndex < this.levels.length) {
-      const level = this.getCurrentLevel();
-      this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
 
-      this.ghosts = [];
-      for (const color in level.ghostStarts) {
-        this.ghosts.push(new Ghost(level.ghostStarts[color], color));
-      }
-    } else {
-      // Handle game completion (win screen, etc.)
-      console.log("You won the game!");
+    if (this.currentLevelIndex >= this.levels.length) {
+      throw new Error(`Invalid level index: Level ${n} doesn't exist`);
+    }
+
+    const level = this.getCurrentLevel();
+    this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
+
+    this.ghosts = [];
+    for (const color in level.ghostStarts) {
+      this.ghosts.push(new Ghost(level.ghostStarts[color], color));
     }
   }
 }
@@ -276,6 +319,13 @@ class Ghost {
     }
   }
 };
+
+function checkForOverlap(obj1Position, obj2Position, obj1Size, obj2Size) {
+  return (
+    (obj1Position.x < obj2Position.x + obj2Size && obj1Position.x + obj1Size > obj2Position.x) &&
+    (obj1Position.y < obj2Position.y + obj2Size && obj1Position.y + obj1Size > obj2Position.y)
+  );
+}
 
 function canMove(position, size) {
   const layout = level.layout;
@@ -460,6 +510,25 @@ function getDistance(x1, y1, x2, y2) {
 }
 
 class Renderer {
+  constructor(canvasWidth, canvasHeight) {
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
+
+    createCanvas(this.canvasWidth, this.canvasHeight);
+  }
+
+  draw(game) {
+    background(0);
+    this.drawScore(game.score);
+    this.drawLives(game.lives);
+    Renderer.drawLevel(game.getCurrentLevel());
+
+    Renderer.drawPacman(game.pacman.position, game.pacman.size, game.pacman.direction);
+    for (const ghost of game.ghosts) {
+      Renderer.drawGhost(ghost.position, ghost.size, ghost.color);
+    }
+  }
+
   static drawLevel(level) {
     // const layout = level.layout;
     for (let y = 0; y < level.height; y++) {
@@ -499,5 +568,17 @@ class Renderer {
     fill(0);
     ellipse(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
     ellipse(pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
+  }
+
+  drawScore(score) {
+    textSize(20);
+    fill(255);
+    text("Score: " + score, 10, 20);
+  }
+
+  drawLives(lives) {
+    textSize(20);
+    fill(255);
+    text("Lives: " + lives, this.canvasWidth - 80, 20);
   }
 }
