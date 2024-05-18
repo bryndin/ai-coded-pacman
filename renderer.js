@@ -58,13 +58,44 @@ class Renderer {
     }
 
     static drawGhost(pos, size, color) {
+        push(); // Save current drawing style
+
+        translate(pos.x, pos.y); // Move to the center of the ghost
+
+        // Draw the body (semicircle)
+
         fill(color);
-        ellipse(pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2, size, size);
-        triangle(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, pos.x + CELL_SIZE / 2, pos.y, pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3);
-        fill(0);
-        ellipse(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
-        ellipse(pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
-    }
+        // arc(0, 0, size, size, 0, PI, CHORD);
+        circle(0,0, size);
+
+        // Draw the eyes
+        fill(255); // White eyes
+        const eyeOffset = size / 5;
+        const eyeSize = size / 6;
+        ellipse(-eyeOffset, -eyeOffset, eyeSize, eyeSize);
+        ellipse(eyeOffset, -eyeOffset, eyeSize, eyeSize);
+
+        // Draw the bottom "skirt"
+        beginShape();
+        for (let i = 0; i <= 8; i++) {
+          let angle = map(i, 0, 8, PI, TWO_PI);
+          let x = (size / 2) * cos(angle);
+          let y = (size / 2) * sin(angle) + (size / 4); // Adjust for skirt height
+          vertex(x, y);
+        }
+        endShape(CLOSE);
+
+        pop(); // Restore previous drawing style
+      }
+
+    // static drawGhost(pos, size, color) {
+    //     fill(color);
+    //     ellipse(pos.x, pos.y + CELL_SIZE / 2, size, size);
+    //     triangle(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, pos.x + CELL_SIZE / 2, pos.y, pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3);
+    //     fill(0);
+    //     ellipse(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
+    //     ellipse(pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
+    // }
 
     static drawWall(x, y, size) {
         fill(220);

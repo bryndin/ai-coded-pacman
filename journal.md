@@ -1694,3 +1694,71 @@ After adding `type="module"` in front of `src="pacman.js"` in `index.html` these
 
 ***Prompt:***
 Does Javascript have a concept of set, a data structure to quickly lookup at?
+
+## Step 36
+
+**Problem:** Ghosts navigation is broken.
+
+***Prompt:***
+You are developing a Pacman game in Javascript. You have class `Ghost` listed below and variable `layout` that is a 2D array of the level, where the wall is defined by the constant `WALL`. Ghost has a method `move(layout, targetPosition)` with arguments of current level layout and the position of Pacman to go to, `targetPosition` is an object with x,y coordinates, e.g. `{x: 1, y: 4}`.
+Ghost moves in canvas coordinates. Size of one level layout cell is stored in `CELL_SIZE` constant.
+
+Generate code that finds an optimal path in the level maze defined by `layout` array and moves the ghost towards the given `targePosition` using the `speed` attribute.
+
+const CELL_SIZE = 16;
+
+class Ghost {
+    constructor(startPositionInCellCoordinates) {
+        this.position = { x: startPosition.x * CELL_SIZE, y: startPosition.y * CELL_SIZE };;
+        this.size = CELL_SIZE;
+        this.speed = 2;
+    }
+
+    move(layout, targetPosition) {
+        // TODO generate movement logic based on the movement speed
+    }
+}
+
+***Prompt:***
+This is great, the only problem is  `this.position` is a coordinate of the top left corner, not the center of the ghost.  Modify logic accordingly.
+
+***Prompt:***
+For Pacman game is it better to operate with the sprite center or a top-left corner of the sprite for  pacman and ghost positions
+
+***Answer (Gemini 1.5 Pro):***
+>For a Pacman game, it's generally better to **operate with the center of the sprite** for both Pacman and ghost positions. Here's why:
+>
+>* **Collision Detection:** Collision detection becomes more intuitive and accurate when working with centers. You can easily check if the distance between the centers of two sprites is less than the sum of their radii to determine a collision.
+>* **Movement Logic:**  When moving characters, thinking about them moving from center to center of grid cells makes the logic more straightforward. You're aiming for specific points on the grid rather than dealing with corner alignments.
+>* **Rotation:** If you plan to implement any rotation for Pacman or the ghosts, rotating around the center is much simpler than rotating around a corner. 
+>
+>**While using the top-left corner might seem easier at first:**
+>
+>* It often leads to more complex calculations when determining cell positions, especially when considering the size of the sprite.
+>* Collision detection becomes less intuitive, requiring adjustments based on sprite dimensions.
+>
+>**In summary:**  Center-based coordinates provide a more intuitive and convenient system for sprite positioning, movement, and collision detection in a Pacman game, making your development process smoother. 
+
+> [!NOTE]
+>
+> Gemini 1.5 Pro is very impressive. It generated a very clean and well written code for the ghost AI that worked right away.
+> The suggestion to use center of the cell instead of the top-left corner also makes sense.
+
+***Prompt:***
+Generate code for drawing a Pacman ghost in JS using p5.js game lib. The function signature: `drawGhost(pos, size, color)` where `pos` are the coordinates of the sprite center in the form `{x: 1, y: 4}`, `size` is the sprite size and color is the ghost color.
+
+***Prompt:***
+In your `drawGhost` code only the eyes are drawn, why?
+
+***Answer (Gemini 1.5 Pro, shortened)***
+>You are absolutely correct! There was an error in the previous `drawGhost` function. The `arc()` function was only drawing the eyes because I accidentally set the start and end angles to `0` and `PI`, which creates a semicircle representing the eyes.
+
+***Prompt:***
+Isn't it the same code as before?
+
+***Answer (Gemini 1.5 Pro, shortened)***
+>You are absolutely right!  I apologize for the mistake. The code I provided in the previous response was indeed **exactly the same as the original incorrect code**.
+>
+>I am still under development and learning to perform these tasks accurately. It seems I made a copy-paste error and did not properly implement the correction I described.
+>
+>I am working on improving my ability to generate and verify code accurately. Thank you for pointing out the error! 
