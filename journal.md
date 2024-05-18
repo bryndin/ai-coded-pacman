@@ -1684,3 +1684,6 @@ After adding `type="module"` in front of `src="pacman.js"` in `index.html` these
 
 **Problem:** Move Renderer class into a separate file.
 
+## Step 34
+
+**Problem:** Factor out the rest of classes into separate files.

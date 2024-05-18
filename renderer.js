@@ -3,9 +3,9 @@ import Level from './level.js';
 const CELL_SIZE = 16;
 
 class Renderer {
-    constructor(canvasWidth, canvasHeight) {
-        this.canvasWidth = canvasWidth;
-        this.canvasHeight = canvasHeight;
+    constructor(cellWidth, cellHeight) {
+        this.canvasWidth = cellWidth * CELL_SIZE;
+        this.canvasHeight = cellHeight * CELL_SIZE;
 
         createCanvas(this.canvasWidth, this.canvasHeight);
     }
