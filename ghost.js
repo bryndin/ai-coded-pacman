@@ -1,7 +1,8 @@
-import Level from './level.js';
+import Level from "./level.js";
 import canMove from "./shared.js";
 
 const CELL_SIZE = 16;
+const SNAP_THRESHOLD = 0.1;
 
 class Ghost {
     constructor(startPosition, color) {
@@ -131,22 +132,22 @@ function getValidNeighbors(layout, x, y) {
     const neighbors = [];
 
     // Check up neighbor (if within maze bounds and not a wall)
-    if (y > 0 && layout[y - 1][x] === 0) {
+    if (y > 0 && Level.MOVABLE.has(layout[y - 1][x])) {
         neighbors.push({ x, y: y - 1 });
     }
 
     // Check down neighbor (if within maze bounds and not a wall)
-    if (y < height - 1 && layout[y + 1][x] === 0) {
+    if (y < height - 1 && Level.MOVABLE.has(layout[y + 1][x])) {
         neighbors.push({ x, y: y + 1 });
     }
 
     // Check left neighbor (if within maze bounds and not a wall)
-    if (x > 0 && layout[y][x - 1] === 0) {
+    if (x > 0 && Level.MOVABLE.has(layout[y][x - 1])) {
         neighbors.push({ x: x - 1, y });
     }
 
     // Check right neighbor (if within maze bounds and not a wall)
-    if (x < width - 1 && layout[y][x + 1] === 0) {
+    if (x < width - 1 && Level.MOVABLE.has(layout[y][x + 1])) {
         neighbors.push({ x: x + 1, y });
     }
 
@@ -180,7 +181,7 @@ function getClosestPacmanCell(layout, ghostCell, pacmanCell, viewDistance) {
             const neighborY = currentCell.y + getDeltaY(direction);
 
             // Check if neighbor is within maze bounds and not a wall
-            if (0 <= neighborX && neighborX < width && 0 <= neighborY && neighborY < height && layout[neighborY][neighborX] === 0) {
+            if (0 <= neighborX && neighborX < width && 0 <= neighborY && neighborY < height && Level.MOVABLE.has(layout[neighborY][neighborX])) {
                 const neighborKey = `${neighborX}-${neighborY}`;
 
                 // Check if neighbor hasn't been visited and within view distance

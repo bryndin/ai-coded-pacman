@@ -1687,3 +1687,10 @@ After adding `type="module"` in front of `src="pacman.js"` in `index.html` these
 ## Step 34
 
 **Problem:** Factor out the rest of classes into separate files.
+
+## Step 35
+
+**Problem:** Ghosts must be able to move not only to empty space, but any space that is not a wall.
+
+***Prompt:***
+Does Javascript have a concept of set, a data structure to quickly lookup at?

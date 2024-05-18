@@ -2,6 +2,7 @@ class Level {
     static WALL = "#";
     static EMPTY = " ";
     static PELLET = ".";
+    static MOVABLE = new Set([this.EMPTY, this.PELLET]);
     
     constructor(layout, pacmanStart, ghostStarts) {
       this.layout = Level.convert(this.validate(layout));

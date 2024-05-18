@@ -1,7 +1,6 @@
 import canMove from "./shared.js";
 
 const CELL_SIZE = 16;
-const SNAP_THRESHOLD = 0.1;
 
 class Pacman {
   static RIGHT = { x: 1, y: 0 };
