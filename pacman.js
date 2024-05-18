@@ -1,17 +1,32 @@
+import Level from './level.js';
+
+// Import level data from individual files
+import level1 from './levels/1.js';
+
 const CELL_SIZE = 16;
 const SNAP_THRESHOLD = 0.1;
 let game, level, renderer;
 
-function setup() {
-  level = new Level(createGrid(), { x: 13 * CELL_SIZE, y: 26 * CELL_SIZE }, { "red": { x: 13 * CELL_SIZE, y: 17 * CELL_SIZE }, "blue": { x: 14 * CELL_SIZE, y: 17 * CELL_SIZE } });
+// Add setup and draw to the global scope
+window.setup = setup;
+window.draw = draw;
+window.keyPressed = keyPressed;
+
+export function setup() {
+  const levels = [
+    new Level(level1.layout, level1.pacman, level1.ghosts),
+  ];
+
+  game = new Game(levels);
 
   renderer = new Renderer(28 * CELL_SIZE, 36 * CELL_SIZE);
 
-  const levels = [level];
-  game = new Game(levels);
+  // TODO: remove this tmp global variable
+  level = level1;
 }
 
-function draw() {
+
+export function draw() {
   game.main();
 
   if (game.state == Game.states.GAME_OVER) {
@@ -21,7 +36,7 @@ function draw() {
   renderer.draw(game);
 }
 
-function keyPressed() {
+export function keyPressed() {
   switch (keyCode) {
     case UP_ARROW:
     case 87: // W key
@@ -39,106 +54,6 @@ function keyPressed() {
     case 68: // D key
       game.pacman.setDesiredDirection(Pacman.RIGHT);
       break;
-  }
-}
-
-function createGrid() {
-  return [
-    "                            ",
-    "                            ",
-    "                            ",
-    "############################",
-    "# ...........##............#",
-    "#.####.#####.##.#####.####.#",
-    "#.####.#####.##.#####.####.#",
-    "#.####.#####.##.#####.####.#",
-    "#..........................#",
-    "#.####.##.########.##.####.#",
-    "#.####.##.########.##.####.#",
-    "#......##....##....##......#",
-    "######.##### ## #####.######",
-    "     #.##### ## #####.#     ",
-    "     #.##          ##.#     ",
-    "     #.## ###  ### ##.#     ",
-    "######.## #      # ##.######",
-    "      .   #      #   .      ",
-    "######.## #      # ##.######",
-    "     #.## ######## ##.#     ",
-    "     #.##          ##.#     ",
-    "     #.## ######## ##.#     ",
-    "######.## ######## ##.######",
-    "#............##............#",
-    "#.####.#####.##.#####.####.#",
-    "#.####.#####.##.#####.####.#",
-    "#...##................##...#",
-    "###.##.##.########.##.##.###",
-    "###.##.##.########.##.##.###",
-    "#......##....##....##......#",
-    "#.##########.##.##########.#",
-    "#.##########.##.##########.#",
-    "#..........................#",
-    "############################",
-    "                            ",
-    "                            ",
-  ];
-}
-
-class Level {
-  static WALL = "#";
-  static EMPTY = " ";
-  static PELLET = ".";
-  
-  constructor(layout, pacmanStart, ghostStarts) {
-    this.layout = Level.convert(this.validate(layout));
-    this.height = this.layout.length;
-    this.width = this.layout[0].length;
-    this.pacmanStart = pacmanStart;
-    this.ghostStarts = ghostStarts;
-
-    this.pelletCount = this.countPellets();
-  }
-
-  validate(layout) {
-    if (!layout || !layout.length || !layout[0].length) {
-      throw new Error("Invalid level layout: Empty or missing data");
-    }
-
-    const rowLength = layout[0].length;
-    for (let i = 1; i < layout.length; i++) {
-      if (layout[i].length !== rowLength) {
-        throw new Error("Invalid level layout: Inconsistent row lengths");
-      }
-    }
-    return layout;
-  }
-
-  static convert(layout) {
-    return layout.map(row => row.split(''));
-  }
-
-  // Count the number of pellets in the layout
-  countPellets() {
-    let count = 0;
-    for (let row of this.layout) {
-      for (let cell of row) {
-        if (cell === '.') {
-          count++;
-        }
-      }
-    }
-    return count;
-  }
-
-  // Remove a pellet at the given coordinates
-  removePellet(x, y) {
-    if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
-      throw new Error("Invalid coordinates. Pellet removal outside level bounds.");
-    }
-
-    if (this.layout[y][x] === Level.PELLET) {
-      this.layout[y][x] = " ";
-      this.pelletCount--;
-    }
   }
 }
 
@@ -312,7 +227,7 @@ class Pacman {
   static DOWN = { x: 0, y: 1 };
 
   constructor(startPosition, size, speed) {
-    this.position = startPosition;
+    this.position = { x: startPosition.x * CELL_SIZE, y: startPosition.y * CELL_SIZE };
     this.size = size;
     this.speed = speed;
     this.direction = { x: 0, y: 0 }
@@ -347,7 +262,7 @@ class Pacman {
 
 class Ghost {
   constructor(startPosition, color) {
-    this.position = startPosition;
+    this.position = { x: startPosition.x * CELL_SIZE, y: startPosition.y * CELL_SIZE };;
     this.size = CELL_SIZE;
     this.direction = { x: 0, y: 0 };
     this.color = color;

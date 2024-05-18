@@ -1542,3 +1542,140 @@ Write a function in Javascript to convert an array of the form `["#..", "#.#"]` 
 
 > [!NOTE]
 > This is a simple refactoring, that is not worse dealing with complex LLM prompts.
+
+## Step 32
+
+**Problem:** Level layout and related information takes screen space and complicates working with code. Also it won't scale well adding more levels. Move it into a dedicated file.
+
+***Prompt:***
+In a Javascript project implementing the game Pacman, how to define levels in separate files, to be read from the main logic? Provide code example.
+
+> [!NOTE]
+> After dozens of tries with both Gemini and Copilot we encountered all possible hallucinations related to async processing, e.g.
+>
+> - (Copilot): `Promise.all(promises) maintains the order of the results based on the order of the promises, not the order of resolution.`
+> - (Gemini): `No, Promise.all(promises)  does not maintain the order of the results based on the order the promises were added to the array. It resolves with an array containing the results of the fulfilled promises in the order they resolved, not the order they were created in.`
+>
+> Gemini constantly hallucinates about `async`, e.g.
+>
+> - skipping `async` declaration while using `await`.
+> - seeing `async` where there is non declared.
+>
+> We really struggled with both LLMs and had a hard time to get a bug free code.
+
+***Prompt:***
+Generate javascript code that extracts the file name from a file path, e.g.
+path: `levels/1.json` answer: `1`
+
+***Prompt:***
+in javascript how to convert "1" (char) into 1 (int)?
+
+***Answer:***
+>p5play.js itself doesn't provide a direct way to stop the game entirely upon an exception. However, you can achieve a similar effect using a combination of error handling and potentially modifying your code structure. Here are two approaches:
+>
+>**1. Throwing an Error from Within Your Code:**
+>
+>**2. Conditional Execution based on Successful Preloading:**
+>
+>**Choosing the Approach:**
+>
+>* Throwing an error is a simpler approach for critical errors that prevent the game from functioning correctly.
+>* Conditional execution offers more flexibility for handling specific preload failures and providing alternative behavior (e.g., displaying an error message).
+>
+>Consider the nature of potential errors in your game and choose the approach that best suits your needs.
+>
+>**Additional Tips:**
+>
+>* You can use a similar approach to handle errors during the game loop (`draw` function) itself. If a critical error occurs during gameplay, throw an error or set `gameRunning` to `false` to stop the game.
+>* Consider using a global error handler using `window.onerror` to catch any unhandled errors that might occur during the game. This can provide a more robust error handling mechanism.
+
+***Prompt:***
+You are developing a Pacman game in Javascript. You code layout consists of files
+level.js declares class Level with an attribute layout.
+pacman.js contains an array of all instances of levels.
+levels is a directory holding javascript files containing data for each level, e.g. the level layout.
+levels/1.js, levels/2.js files etc. instantiate class Level defined in level.js and make it available for the pacman.js file.
+Generate code representing the above using ES6 syntax.
+
+> [!NOTE]
+>
+> - We don't want to convert Pacman into an async app. Async fetching JSON blobs isn't an option.
+> - Doing sync http requests don't look exciting either.
+> - Let's use code imports instead.
+
+***Prompt:***
+You are developing a Pacman game in Javascript. You code layout consists of files
+  - `level.js` declares class `Level` with an attribute `layout`.
+  - `pacman.js` contains an array of all instances of levels.
+  - `levels` is a directory holding javascript files containing data for each level, e.g. the level layout.
+  - `levels/1.js`, `levels/2.js` files etc. instantiate class Level defined in `level.js` and make it available for the `pacman.js` file.
+Generate code representing the above using ES6 syntax.
+
+***Prompt:***
+Explain export default { layout }; part, why not `export default layout;
+
+***Prompt:***
+Why am I getting "Cannot use import statement outside a module" error about pacman.js?
+
+***Answer (shortened):***
+>The error "Cannot use import statement outside a module" arises because you're trying to use `import` statements in a script that isn't treated as a module by your browser or environment.  Here's why and how to fix it:
+>
+>**Solutions:**
+>
+>1. **Use a Module Loader (e.g., Webpack, Parcel)**
+>
+>2. **Set the `type` Attribute in `<script>` Tags**
+>
+>* **For Larger Projects:**  Module loaders (Webpack, Parcel) are highly recommended for larger projects because they offer more control and features for managing dependencies.
+>* **For Smaller Projects or Prototypes:** The `type="module"` attribute is a simpler way to get started.
+
+***Prompt:***
+Content of file `1.js`:
+```
+const levelName = "Level 1";
+const difficulty = "Easy";
+export default { levelName, difficulty };
+```
+
+Content of file `2.js`:
+```
+const levelName = "Level 2";
+const difficulty = "Hard";
+export default { levelName, difficulty };
+```
+
+Give me an example on how to import all these variables in file `pacman.js`. If name clashes is a problem, suggest a solution.
+
+***Answer (shortened):***
+>You're right, name clashes are a problem when importing from multiple files with the same variable names. Here's how to handle this and a couple of solutions:
+>
+>**Direct Import with Renaming**
+>
+>
+>**Importing into Objects (Namespaces)**
+
+***Prompt:***
+`pacman.js` contains functions `setup()` and `draw()` that are called by p5play.js lib.
+After adding `type="module"` in front of `src="pacman.js"` in `index.html` these functions are no longer being called by the p5play lib. Why and how to fix it?
+
+***Answer (Gemini):***
+>The issue arises because adding `type="module"` in front of `src="pacman.js"` in `index.html` changes how the script is loaded. Here's the breakdown:
+>
+>Here are two ways to fix this:
+>
+>1. **Export Functions from pacman.js:**
+>
+>2. **Use the `window` Object:**
+
+***Answer (Copilot):***
+>
+>```javascript
+>// Add setup and draw to the global scope
+>window.setup = setup;
+>window.draw = draw;
+>```
+
+> [!NOTE]
+>
+> - Neither of 2 solutions from Gemini worked.
+> - Copilots solution did work.
