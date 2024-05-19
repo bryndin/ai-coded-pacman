@@ -61,12 +61,17 @@ class Renderer {
     static drawGhost(pos, size, color) {
         push(); // Save current drawing style
 
+        strokeWeight(0);
         translate(pos.x, pos.y); // Move to the center of the ghost
 
-        // Draw the body (semicircle)
+        const endAngle = 3*PI;
+        const skirtHeight = size/5;
+        const skirtShiftY = size/2 - skirtHeight;
 
+        // Draw the body
         fill(color);
         arc(0, 0, size, size, PI, 2*PI, CHORD);
+        rect(-size/2, 0, size, size/2 - skirtHeight);
 
         // Draw the eyes
         fill(255); // White eyes
@@ -77,33 +82,15 @@ class Renderer {
 
         // Draw the bottom "skirt"
         fill(color);
-
-        // TODO: fix the code for ghost skirt
-        rect(-size/2, 0, size, size/2);
-
-        // Draw the bottom "skirt" - Corrected Logic
-        // beginShape();
-        // for (let i = 0; i <= 8; i++) {
-        //     const skirtHeight = size / 3; // Adjust skirt height as needed
-        //     let angle = map(i, 0, 8, PI, TWO_PI);
-        //     let x = (size / 2) * cos(angle);
-        //     // Create a wavy pattern below the body that slopes down at the edges
-        //     let y = skirtHeight * sin(angle * 3) + size / 2 + skirtHeight / 2;
-        //     vertex(x, y);
-        // }
-        // endShape(CLOSE);
-
+        beginShape();
+        for (let x = 0; x <= size; x++) {
+          let y = skirtShiftY + Math.abs(skirtHeight * sin(x * endAngle / size));
+          vertex(x-size/2, y);
+        }
+        endShape();
+      
         pop(); // Restore previous drawing style
     }
-
-    // static drawGhost(pos, size, color) {
-    //     fill(color);
-    //     ellipse(pos.x, pos.y + CELL_SIZE / 2, size, size);
-    //     triangle(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, pos.x + CELL_SIZE / 2, pos.y, pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3);
-    //     fill(0);
-    //     ellipse(pos.x + CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
-    //     ellipse(pos.x + CELL_SIZE - CELL_SIZE / 3, pos.y + CELL_SIZE / 3, size / 5, size / 5);
-    // }
 
     static drawWall(x, y, size) {
         fill(220);

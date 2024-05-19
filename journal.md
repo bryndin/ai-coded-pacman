@@ -1784,3 +1784,10 @@ Is the vertex calculation correct?  It doesn't look like a skirt.
 >
 > Gemini 1.5 Pro struggles to create proper logic for drawing a ghost. It's not clear why it suggests drawing a bottom semicircle, for the ghosts head when it have to be the top. It can't get the proper trigonometric functions to draw the wavy skirt in several attempts.
 > For now we disable the skirt logic and replace it with a rectangle.
+
+## Step 38
+
+**Problem:** Ghosts rendering logic is broken, see if it can be fixed.
+
+> [!NOTE]
+> We fixed the drawing logic by hand as LLMs kept hallucinating with trig functions.
