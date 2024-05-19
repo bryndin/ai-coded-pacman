@@ -1730,7 +1730,7 @@ For Pacman game is it better to operate with the sprite center or a top-left cor
 >
 >* **Collision Detection:** Collision detection becomes more intuitive and accurate when working with centers. You can easily check if the distance between the centers of two sprites is less than the sum of their radii to determine a collision.
 >* **Movement Logic:**  When moving characters, thinking about them moving from center to center of grid cells makes the logic more straightforward. You're aiming for specific points on the grid rather than dealing with corner alignments.
->* **Rotation:** If you plan to implement any rotation for Pacman or the ghosts, rotating around the center is much simpler than rotating around a corner. 
+>* **Rotation:** If you plan to implement any rotation for Pacman or the ghosts, rotating around the center is much simpler than rotating around a corner.
 >
 >**While using the top-left corner might seem easier at first:**
 >
@@ -1743,6 +1743,10 @@ For Pacman game is it better to operate with the sprite center or a top-left cor
 >
 > Gemini 1.5 Pro is very impressive. It generated a very clean and well written code for the ghost AI that worked right away.
 > The suggestion to use center of the cell instead of the top-left corner also makes sense.
+
+## Step 37
+
+**Problem:** Ghosts rendering logic is broken, see if it can be fixed.
 
 ***Prompt:***
 Generate code for drawing a Pacman ghost in JS using p5.js game lib. The function signature: `drawGhost(pos, size, color)` where `pos` are the coordinates of the sprite center in the form `{x: 1, y: 4}`, `size` is the sprite size and color is the ghost color.
@@ -1761,4 +1765,22 @@ Isn't it the same code as before?
 >
 >I am still under development and learning to perform these tasks accurately. It seems I made a copy-paste error and did not properly implement the correction I described.
 >
->I am working on improving my ability to generate and verify code accurately. Thank you for pointing out the error! 
+>I am working on improving my ability to generate and verify code accurately. Thank you for pointing out the error!
+
+***Prompt:***
+in p5.js lib, the function `arc` takes radians or degrees?  What setting defines the units used?
+
+> [!NOTE]
+>
+> While Gemini generates code in radians, for some reason the p5.js defaulted to degrees. Had to explicitly switch to radians.
+
+***Prompt:***
+Explain what is supposed to be drawn by `drawGhost` logic.  Is `arc` supposed to draw a lower semi-circle? Why `vertex` draw a shape resembling the upper semicircle?
+
+***Prompt:***
+Is the vertex calculation correct?  It doesn't look like a skirt.
+
+> [!NOTE]
+>
+> Gemini 1.5 Pro struggles to create proper logic for drawing a ghost. It's not clear why it suggests drawing a bottom semicircle, for the ghosts head when it have to be the top. It can't get the proper trigonometric functions to draw the wavy skirt in several attempts.
+> For now we disable the skirt logic and replace it with a rectangle.

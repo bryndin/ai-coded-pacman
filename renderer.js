@@ -8,6 +8,7 @@ class Renderer {
         this.canvasHeight = cellHeight * CELL_SIZE;
 
         createCanvas(this.canvasWidth, this.canvasHeight);
+        angleMode(RADIANS);
     }
 
     draw(game) {
@@ -65,8 +66,7 @@ class Renderer {
         // Draw the body (semicircle)
 
         fill(color);
-        // arc(0, 0, size, size, 0, PI, CHORD);
-        circle(0,0, size);
+        arc(0, 0, size, size, PI, 2*PI, CHORD);
 
         // Draw the eyes
         fill(255); // White eyes
@@ -76,17 +76,25 @@ class Renderer {
         ellipse(eyeOffset, -eyeOffset, eyeSize, eyeSize);
 
         // Draw the bottom "skirt"
-        beginShape();
-        for (let i = 0; i <= 8; i++) {
-          let angle = map(i, 0, 8, PI, TWO_PI);
-          let x = (size / 2) * cos(angle);
-          let y = (size / 2) * sin(angle) + (size / 4); // Adjust for skirt height
-          vertex(x, y);
-        }
-        endShape(CLOSE);
+        fill(color);
+
+        // TODO: fix the code for ghost skirt
+        rect(-size/2, 0, size, size/2);
+
+        // Draw the bottom "skirt" - Corrected Logic
+        // beginShape();
+        // for (let i = 0; i <= 8; i++) {
+        //     const skirtHeight = size / 3; // Adjust skirt height as needed
+        //     let angle = map(i, 0, 8, PI, TWO_PI);
+        //     let x = (size / 2) * cos(angle);
+        //     // Create a wavy pattern below the body that slopes down at the edges
+        //     let y = skirtHeight * sin(angle * 3) + size / 2 + skirtHeight / 2;
+        //     vertex(x, y);
+        // }
+        // endShape(CLOSE);
 
         pop(); // Restore previous drawing style
-      }
+    }
 
     // static drawGhost(pos, size, color) {
     //     fill(color);
