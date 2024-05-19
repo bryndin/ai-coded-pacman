@@ -1542,3 +1542,245 @@ Write a function in Javascript to convert an array of the form `["#..", "#.#"]` 
 
 > [!NOTE]
 > This is a simple refactoring, that is not worse dealing with complex LLM prompts.
+
+## Step 32
+
+**Problem:** Level layout and related information takes screen space and complicates working with code. Also it won't scale well adding more levels. Move it into a dedicated file.
+
+***Prompt:***
+In a Javascript project implementing the game Pacman, how to define levels in separate files, to be read from the main logic? Provide code example.
+
+> [!NOTE]
+> After dozens of tries with both Gemini and Copilot we encountered all possible hallucinations related to async processing, e.g.
+>
+> - (Copilot): `Promise.all(promises) maintains the order of the results based on the order of the promises, not the order of resolution.`
+> - (Gemini): `No, Promise.all(promises)  does not maintain the order of the results based on the order the promises were added to the array. It resolves with an array containing the results of the fulfilled promises in the order they resolved, not the order they were created in.`
+>
+> Gemini constantly hallucinates about `async`, e.g.
+>
+> - skipping `async` declaration while using `await`.
+> - seeing `async` where there is non declared.
+>
+> We really struggled with both LLMs and had a hard time to get a bug free code.
+
+***Prompt:***
+Generate javascript code that extracts the file name from a file path, e.g.
+path: `levels/1.json` answer: `1`
+
+***Prompt:***
+in javascript how to convert "1" (char) into 1 (int)?
+
+***Answer:***
+>p5play.js itself doesn't provide a direct way to stop the game entirely upon an exception. However, you can achieve a similar effect using a combination of error handling and potentially modifying your code structure. Here are two approaches:
+>
+>**1. Throwing an Error from Within Your Code:**
+>
+>**2. Conditional Execution based on Successful Preloading:**
+>
+>**Choosing the Approach:**
+>
+>* Throwing an error is a simpler approach for critical errors that prevent the game from functioning correctly.
+>* Conditional execution offers more flexibility for handling specific preload failures and providing alternative behavior (e.g., displaying an error message).
+>
+>Consider the nature of potential errors in your game and choose the approach that best suits your needs.
+>
+>**Additional Tips:**
+>
+>* You can use a similar approach to handle errors during the game loop (`draw` function) itself. If a critical error occurs during gameplay, throw an error or set `gameRunning` to `false` to stop the game.
+>* Consider using a global error handler using `window.onerror` to catch any unhandled errors that might occur during the game. This can provide a more robust error handling mechanism.
+
+***Prompt:***
+You are developing a Pacman game in Javascript. You code layout consists of files
+level.js declares class Level with an attribute layout.
+pacman.js contains an array of all instances of levels.
+levels is a directory holding javascript files containing data for each level, e.g. the level layout.
+levels/1.js, levels/2.js files etc. instantiate class Level defined in level.js and make it available for the pacman.js file.
+Generate code representing the above using ES6 syntax.
+
+> [!NOTE]
+>
+> - We don't want to convert Pacman into an async app. Async fetching JSON blobs isn't an option.
+> - Doing sync http requests don't look exciting either.
+> - Let's use code imports instead.
+
+***Prompt:***
+You are developing a Pacman game in Javascript. You code layout consists of files
+  - `level.js` declares class `Level` with an attribute `layout`.
+  - `pacman.js` contains an array of all instances of levels.
+  - `levels` is a directory holding javascript files containing data for each level, e.g. the level layout.
+  - `levels/1.js`, `levels/2.js` files etc. instantiate class Level defined in `level.js` and make it available for the `pacman.js` file.
+Generate code representing the above using ES6 syntax.
+
+***Prompt:***
+Explain export default { layout }; part, why not `export default layout;
+
+***Prompt:***
+Why am I getting "Cannot use import statement outside a module" error about pacman.js?
+
+***Answer (shortened):***
+>The error "Cannot use import statement outside a module" arises because you're trying to use `import` statements in a script that isn't treated as a module by your browser or environment.  Here's why and how to fix it:
+>
+>**Solutions:**
+>
+>1. **Use a Module Loader (e.g., Webpack, Parcel)**
+>
+>2. **Set the `type` Attribute in `<script>` Tags**
+>
+>* **For Larger Projects:**  Module loaders (Webpack, Parcel) are highly recommended for larger projects because they offer more control and features for managing dependencies.
+>* **For Smaller Projects or Prototypes:** The `type="module"` attribute is a simpler way to get started.
+
+***Prompt:***
+Content of file `1.js`:
+```
+const levelName = "Level 1";
+const difficulty = "Easy";
+export default { levelName, difficulty };
+```
+
+Content of file `2.js`:
+```
+const levelName = "Level 2";
+const difficulty = "Hard";
+export default { levelName, difficulty };
+```
+
+Give me an example on how to import all these variables in file `pacman.js`. If name clashes is a problem, suggest a solution.
+
+***Answer (shortened):***
+>You're right, name clashes are a problem when importing from multiple files with the same variable names. Here's how to handle this and a couple of solutions:
+>
+>**Direct Import with Renaming**
+>
+>
+>**Importing into Objects (Namespaces)**
+
+***Prompt:***
+`pacman.js` contains functions `setup()` and `draw()` that are called by p5play.js lib.
+After adding `type="module"` in front of `src="pacman.js"` in `index.html` these functions are no longer being called by the p5play lib. Why and how to fix it?
+
+***Answer (Gemini):***
+>The issue arises because adding `type="module"` in front of `src="pacman.js"` in `index.html` changes how the script is loaded. Here's the breakdown:
+>
+>Here are two ways to fix this:
+>
+>1. **Export Functions from pacman.js:**
+>
+>2. **Use the `window` Object:**
+
+***Answer (Copilot):***
+>
+>```javascript
+>// Add setup and draw to the global scope
+>window.setup = setup;
+>window.draw = draw;
+>```
+
+> [!NOTE]
+>
+> - Neither of 2 solutions from Gemini worked.
+> - Copilots solution did work.
+
+## Step 33
+
+**Problem:** Move Renderer class into a separate file.
+
+## Step 34
+
+**Problem:** Factor out the rest of classes into separate files.
+
+## Step 35
+
+**Problem:** Ghosts must be able to move not only to empty space, but any space that is not a wall.
+
+***Prompt:***
+Does Javascript have a concept of set, a data structure to quickly lookup at?
+
+## Step 36
+
+**Problem:** Ghosts navigation is broken.
+
+***Prompt:***
+You are developing a Pacman game in Javascript. You have class `Ghost` listed below and variable `layout` that is a 2D array of the level, where the wall is defined by the constant `WALL`. Ghost has a method `move(layout, targetPosition)` with arguments of current level layout and the position of Pacman to go to, `targetPosition` is an object with x,y coordinates, e.g. `{x: 1, y: 4}`.
+Ghost moves in canvas coordinates. Size of one level layout cell is stored in `CELL_SIZE` constant.
+
+Generate code that finds an optimal path in the level maze defined by `layout` array and moves the ghost towards the given `targePosition` using the `speed` attribute.
+
+const CELL_SIZE = 16;
+
+class Ghost {
+    constructor(startPositionInCellCoordinates) {
+        this.position = { x: startPosition.x * CELL_SIZE, y: startPosition.y * CELL_SIZE };;
+        this.size = CELL_SIZE;
+        this.speed = 2;
+    }
+
+    move(layout, targetPosition) {
+        // TODO generate movement logic based on the movement speed
+    }
+}
+
+***Prompt:***
+This is great, the only problem is  `this.position` is a coordinate of the top left corner, not the center of the ghost.  Modify logic accordingly.
+
+***Prompt:***
+For Pacman game is it better to operate with the sprite center or a top-left corner of the sprite for  pacman and ghost positions
+
+***Answer (Gemini 1.5 Pro):***
+>For a Pacman game, it's generally better to **operate with the center of the sprite** for both Pacman and ghost positions. Here's why:
+>
+>* **Collision Detection:** Collision detection becomes more intuitive and accurate when working with centers. You can easily check if the distance between the centers of two sprites is less than the sum of their radii to determine a collision.
+>* **Movement Logic:**  When moving characters, thinking about them moving from center to center of grid cells makes the logic more straightforward. You're aiming for specific points on the grid rather than dealing with corner alignments.
+>* **Rotation:** If you plan to implement any rotation for Pacman or the ghosts, rotating around the center is much simpler than rotating around a corner.
+>
+>**While using the top-left corner might seem easier at first:**
+>
+>* It often leads to more complex calculations when determining cell positions, especially when considering the size of the sprite.
+>* Collision detection becomes less intuitive, requiring adjustments based on sprite dimensions.
+>
+>**In summary:**  Center-based coordinates provide a more intuitive and convenient system for sprite positioning, movement, and collision detection in a Pacman game, making your development process smoother. 
+
+> [!NOTE]
+>
+> Gemini 1.5 Pro is very impressive. It generated a very clean and well written code for the ghost AI that worked right away.
+> The suggestion to use center of the cell instead of the top-left corner also makes sense.
+
+## Step 37
+
+**Problem:** Ghosts rendering logic is broken, see if it can be fixed.
+
+***Prompt:***
+Generate code for drawing a Pacman ghost in JS using p5.js game lib. The function signature: `drawGhost(pos, size, color)` where `pos` are the coordinates of the sprite center in the form `{x: 1, y: 4}`, `size` is the sprite size and color is the ghost color.
+
+***Prompt:***
+In your `drawGhost` code only the eyes are drawn, why?
+
+***Answer (Gemini 1.5 Pro, shortened)***
+>You are absolutely correct! There was an error in the previous `drawGhost` function. The `arc()` function was only drawing the eyes because I accidentally set the start and end angles to `0` and `PI`, which creates a semicircle representing the eyes.
+
+***Prompt:***
+Isn't it the same code as before?
+
+***Answer (Gemini 1.5 Pro, shortened)***
+>You are absolutely right!  I apologize for the mistake. The code I provided in the previous response was indeed **exactly the same as the original incorrect code**.
+>
+>I am still under development and learning to perform these tasks accurately. It seems I made a copy-paste error and did not properly implement the correction I described.
+>
+>I am working on improving my ability to generate and verify code accurately. Thank you for pointing out the error!
+
+***Prompt:***
+in p5.js lib, the function `arc` takes radians or degrees?  What setting defines the units used?
+
+> [!NOTE]
+>
+> While Gemini generates code in radians, for some reason the p5.js defaulted to degrees. Had to explicitly switch to radians.
+
+***Prompt:***
+Explain what is supposed to be drawn by `drawGhost` logic.  Is `arc` supposed to draw a lower semi-circle? Why `vertex` draw a shape resembling the upper semicircle?
+
+***Prompt:***
+Is the vertex calculation correct?  It doesn't look like a skirt.
+
+> [!NOTE]
+>
+> Gemini 1.5 Pro struggles to create proper logic for drawing a ghost. It's not clear why it suggests drawing a bottom semicircle, for the ghosts head when it have to be the top. It can't get the proper trigonometric functions to draw the wavy skirt in several attempts.
+> For now we disable the skirt logic and replace it with a rectangle.
