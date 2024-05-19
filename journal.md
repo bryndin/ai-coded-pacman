@@ -1791,3 +1791,17 @@ Is the vertex calculation correct?  It doesn't look like a skirt.
 
 > [!NOTE]
 > We fixed the drawing logic by hand as LLMs kept hallucinating with trig functions.
+
+## Step 39
+
+**Problem:** Render Pacman with the mouth open.
+
+***Prompt (Gemini 1.5 Pro):***
+Using p5.js lib generate code to draw Pacman of size `size`, at position x,y and heading the direction `dir`.
+
+***Prompt (Gemini 1.5 Pro):***
+Can you rewrite `drawPacman` using `rotate` function from p5.js?
+
+> [!NOTE]
+> While generated code looked reasonable, some p5.js defaults on angles got in the way. Rotating image is easier to handle.
+> Other than that, good job Gemini.
