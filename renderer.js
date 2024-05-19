@@ -1,4 +1,5 @@
 import Level from './level.js';
+import Pacman from './pacman.js';
 
 const CELL_SIZE = 16;
 
@@ -9,6 +10,8 @@ class Renderer {
 
         createCanvas(this.canvasWidth, this.canvasHeight);
         angleMode(RADIANS);
+        noStroke();
+        // strokeWeight(1);
     }
 
     draw(game) {
@@ -39,39 +42,33 @@ class Renderer {
     }
 
     static drawPacman(pos, size, dir) {
-        function getAngle(dir) {
-            if (dir.x > 0) {
-                return 0;
-            } else if (dir.x < 0) {
-                return PI;
-            } else if (dir.y > 0) {
-                return PI / 2;
-            } else {
-                return -PI / 2;
-            }
-        }
+        let angle = 0;
+        if (dir === Pacman.LEFT) angle = PI; // Left
+        else if (dir === Pacman.UP) angle = 3 * PI / 2; // Up
+        else if (dir === Pacman.DOWN) angle = PI / 2; // Down
 
+        push();
+        // TODO: update when switching game logic to center coords
+        translate(pos.x + size / 2, pos.y + size / 2);
+        rotate(angle);
         fill(255, 255, 0);
-        ellipse(pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2, size, size);
-        const angle = getAngle(dir);
-        fill(0);
-        arc(pos.x + CELL_SIZE / 2, pos.y + CELL_SIZE / 2, size / 2, size / 2, angle - PI / 7, angle + PI / 7);
+        arc(0, 0, size, size, PI / 6, TWO_PI - PI / 6, PIE);
+        pop();
     }
 
     static drawGhost(pos, size, color) {
         push(); // Save current drawing style
 
-        strokeWeight(0);
         translate(pos.x, pos.y); // Move to the center of the ghost
 
-        const endAngle = 3*PI;
-        const skirtHeight = size/5;
-        const skirtShiftY = size/2 - skirtHeight;
+        const endAngle = 3 * PI;
+        const skirtHeight = size / 5;
+        const skirtShiftY = size / 2 - skirtHeight;
 
         // Draw the body
         fill(color);
-        arc(0, 0, size, size, PI, 2*PI, CHORD);
-        rect(-size/2, 0, size, size/2 - skirtHeight);
+        arc(0, 0, size, size, PI, 2 * PI, CHORD);
+        rect(-size / 2, 0, size, size / 2 - skirtHeight);
 
         // Draw the eyes
         fill(255); // White eyes
@@ -84,11 +81,11 @@ class Renderer {
         fill(color);
         beginShape();
         for (let x = 0; x <= size; x++) {
-          let y = skirtShiftY + Math.abs(skirtHeight * sin(x * endAngle / size));
-          vertex(x-size/2, y);
+            let y = skirtShiftY + Math.abs(skirtHeight * sin(x * endAngle / size));
+            vertex(x - size / 2, y);
         }
         endShape();
-      
+
         pop(); // Restore previous drawing style
     }
 
