@@ -1938,3 +1938,7 @@ Wouldn't we want to calculate the new path when the path is empty and ghosts are
 >
 > - It does look like Gemini Pro have hard time to reason with math logic.
 > - Logic for Blinky and Clyde are working, Pinky and Inky require some work.
+
+## Step 42
+
+**Problem:** Code needs a number of small refactorings.
