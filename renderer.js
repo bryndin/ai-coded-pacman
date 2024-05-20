@@ -1,7 +1,7 @@
 import Level from './level.js';
 import Pacman from './pacman.js';
 
-class Renderer {
+export class Renderer {
     static CELL_SIZE = 16;
 
     constructor(cellWidth, cellHeight) {
@@ -119,4 +119,8 @@ class Renderer {
     }
 }
 
-export default Renderer;
+// Helper functions
+
+export function getCell(canvasPosition) {
+    return { x: Math.floor(canvasPosition.x / CELL_SIZE), y: Math.floor(canvasPosition.y / CELL_SIZE) };
+};

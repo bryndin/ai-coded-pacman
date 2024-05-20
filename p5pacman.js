@@ -1,6 +1,6 @@
 import Game from "./game.js";
 import Pacman from "./pacman.js";
-import Renderer from "./renderer.js";
+import { Renderer } from "./renderer.js";
 
 // Add setup and draw to the global scope
 window.setup = setup;
