@@ -2061,12 +2061,172 @@ Generate a Javascript function that returns coordinates of all cells reachable f
 
 **Problem:** Need debugging visualization for scatter and target points for ghosts.
 
-***Prompt:***
+***Prompt (LLama3-70b):***
 How to draw a diagonal cross using p5.js lib?
 
-***Prompt:***
+***Prompt (LLama3-70b):***
 In p5.lib How to add handling of functional keys, e.g. F1 to function keyPress?
+
+***Prompt (LLama3-70b):***
+In p5.js lib how to set color for lines?
+
+***Prompt (LLama3-70b):***
+In p5.lib How to add handling of square brackets keys
 
 ## Step 46
 
 **Problem:** Ghost positions are offset by half a cell.
+
+## Step 47
+
+**Problem:** Logic behind Pinky and Inky are still broken.
+
+***Prompt:***
+Generate JSDoc comments for this function: `chase(pacmanCell, pacmanDirection, blinkyCell, blinkyDirection) {}`.  It implements the chase strategy for a ghost.
+
+***Answer (Llama3-70b)***
+>Here is an example of JSDoc comments for the `chase` function:
+>
+>```javascript
+>/**
+> * Implements the chase strategy for a ghost.
+> * 
+> * This function determines the next move for the ghost based on the current position and direction of Pac-Man and the ghost itself.
+> * 
+> * @param {Object} pacmanCell - The current cell occupied by Pac-Man.
+> * @param {string} pacmanDirection - The current direction Pac-Man is moving (e.g. 'up', 'down', 'left', 'right').
+> * @param {Object} blinkyCell - The current cell occupied by the ghost (Blinky).
+> * @param {string} blinkyDirection - The current direction the ghost is moving (e.g. 'up', 'down', 'left', 'right').
+> * 
+> * @returns {string} The direction the ghost should move next to chase Pac-Man.
+> */
+>function chase(pacmanCell, pacmanDirection, blinkyCell, blinkyDirection) {
+>  // implementation...
+>}
+>```
+
+***Prompt (Gemini 1.5 Pro):***
+Describe the in-detail strategy algorithm for Inky ghost in classic game Pacman.
+
+***Answer(Gemini 1.5 Pro):***
+>Regrettably, the exact in-depth algorithm for Inky's behavior in the original Pac-Man is not publicly available. The specific strategies were secrets held closely by the game's developers.  However, we can piece together a good approximation based on observations and analysis:
+>
+>**Inky's Core Behavior:**
+>
+>Inky is often described as "shadowy" or "unpredictable," making him a challenging ghost to outmaneuver.  His strategy involves targeting a position that is relative to both Pac-Man and Blinky (the red ghost).
+>
+>**Inky's Algorithm - A Reasonable Approximation:**
+>
+>1. **Target Tile Calculation:**
+>   - Identify Blinky's current position.
+>   - Find the tile that is two spaces ahead of Pac-Man in his current direction of movement. 
+>   - Draw a vector from Blinky's position to this "target" tile.
+>   - Extend this vector outward, doubling its length. The end of this extended vector becomes Inky's desired destination.
+>
+>2. **Pathfinding:**
+>    - Inky utilizes the same fundamental pathfinding algorithm as the other ghosts. This algorithm calculates the shortest route through the maze to his target destination.
+>    - Inky's pathfinding takes into account walls and avoids other ghosts where possible.
+>
+>3. **Scatter Mode:**
+>    - Like all the ghosts, Inky periodically enters "Scatter Mode." During Scatter Mode, he ignores Pac-Man and instead heads towards his designated corner of the maze (the top-right corner).
+>    - Scatter Mode helps to prevent all the ghosts from constantly swarming Pac-Man and adds variability to the gameplay.
+>
+>4. **Frightened Mode:**
+>    - When Pac-Man eats a Power Pellet, Inky (and the other ghosts) enters "Frightened Mode."
+>    - In this mode, he turns blue, slows down, and moves in a more random, easily avoidable pattern. This gives Pac-Man an opportunity to eat him.
+>
+>**Why Inky is Unpredictable:**
+>
+>The key to Inky's unpredictable nature lies in his use of Blinky's position as a reference point. Because Blinky is constantly pursuing Pac-Man, Blinky's position changes frequently. This means Inky's target destination is also in a state of flux, leading to his seemingly erratic movements.
+>
+>**Factors Not Included in This Approximation:**
+>
+>- **Internal Timings:** The precise timing and duration of Scatter Mode and the intervals between target recalculations are not fully known.
+>- **Additional Behaviors:**  There might be subtle, undocumented behaviors or nuances in Inky's algorithm that contribute to his unique personality.
+>
+>**Conclusion:**
+>
+>While we can deduce a plausible approximation of Inky's strategy, the original game's code remains the definitive source. The beauty of Inky's behavior is that it achieves unpredictability through a relatively straightforward algorithm, making him a challenging and engaging opponent within the Pac-Man universe. 
+
+***Prompt (Gemini 1.5 Pro):***
+
+Implement `chase` logic in the code below for the ghost Inky from the classic game Pacman. Use `findPath(startCell, targetCell)` function to find a path in the level maze.
+
+```Javascript
+class Ghost {
+    constructor(name, color, startCell, scatterCell, layout) {
+        this.name = name;
+        this.color = color;
+        this.scatterCell = scatterCell;
+        this.mode = CHASE_MODE;
+        this.position = { x: startCell.x * CELL_SIZE, y: startCell.y * CELL_SIZE };
+        this.direction = { x: 0, y: 0 }; // Initialize starting direction
+        this.speed = 2;
+        this.path = []; // Store the calculated path
+        this.layout = layout;
+        this.size = CELL_SIZE;
+    }
+    update(pacmanCell, pacmanDirection) {
+        if (this.mode === SCATTER_MODE) {
+            this.scatter();
+        } else {
+            this.chase(pacmanCell, pacmanDirection);
+        }
+        this.move();
+    }
+    scatter() {
+        // Scatter logic common for all ghosts
+        /* removed for simplicity */
+    }
+
+    /**
+     * Implements the chase strategy for a ghost.
+     * 
+     * This function determines the next move for the ghost based on the current position and direction of Pac-Man and the ghost itself.
+     * 
+     * @param {Object} pacmanCell - The current cell occupied by Pacman (e.g. {x: 1, y: 10}).
+     * @param {string} pacmanDirection - The current direction Pacman is moving (e.g. 'up' = {x: 0; y: -1}).
+     * @param {Object} blinkyCell - The current cell occupied by the ghost (Blinky).
+     * @param {string} blinkyDirection - The current direction the ghost is moving.
+     */
+    chase(pacmanCell, pacmanDirection, blinkyCell, blinkyDirection) {
+        /* Add Inky behavior logic here */
+    }
+
+    /** Moves the ghost along the path */
+    move() {
+        if (this.path.length > 0) {
+            // Move towards the next cell in the path
+            const nextCell = this.path[0];
+            this.moveTowardsCell(nextCell);
+
+            // If the ghost has reached the center of the next cell, remove it from the path
+            if (this.hasReachedCellCenter(nextCell)) {
+                this.path.shift();
+            }
+        }
+    }
+
+    findPath(startCell, targetCell) {
+        // Find path from startCell to targetCell
+    }
+```
+
+***Prompt:***
+There is a problem with ` this.path = this.findPath(this.getCellFromPosition(), inkyTarget);` line in `chase` function. If `inkyTarget` is a wall cell or a cell outside the level layout, `findPath` will fail to find a reachable path and will return an empty array. The ghost won't move.  Explain possible solutions and fix the code.
+
+***Answer ((Gemini 1.5 Pro, shortened):***
+>You are absolutely correct! If `inkyTarget` ends up being a wall cell or a location outside the maze, the `findPath` function would not be able to find a valid path, causing Inky to get stuck.
+>
+>Here are a few strategies to address this problem, along with code implementations:
+>
+>**1. Clamp the Target to Valid Cells**
+>
+>The simplest solution is to ensure that `inkyTarget` always falls within the bounds of the maze and is a walkable cell.
+>
+>**2. Handle Empty Paths**
+>
+>Another approach is to check if the `findPath` function returns an empty path. If so, you can implement a fallback strategy.
+
+***Prompt:***
+`findNearestWalkableCell` can still have problems finding an empty cell. Instead modify the code that checks for empty cells along the vector from Blinky to `inkyTarget`, backtracking from the `inkyTarget` cell.

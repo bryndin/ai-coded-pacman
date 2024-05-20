@@ -56,6 +56,7 @@ export class Renderer {
         }
     }
 
+    // pos is a center of the cell
     static drawPacman(pos, dir) {
         const size = CELL_SIZE;
 
@@ -72,6 +73,7 @@ export class Renderer {
         pop();
     }
 
+    // pos is a center of the cell
     static drawGhost(pos, color) {
         const size = CELL_SIZE;
 
@@ -107,6 +109,7 @@ export class Renderer {
         pop(); // Restore previous drawing style
     }
 
+    // x,y are the top-left corner
     static drawWall(x, y) {
         const size = CELL_SIZE;
 

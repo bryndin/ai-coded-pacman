@@ -2,7 +2,7 @@ import Level from './level.js';
 import Pacman from './pacman.js';
 import { Blinky, Pinky, Inky, Clyde } from './ghost.js';
 import Pellet from './pellet.js';
-import { CELL_SIZE } from './renderer.js';
+import { CELL_SIZE, getCell } from './renderer.js';
 
 // Import level data from individual files
 import level1 from './levels/1.js';
@@ -57,7 +57,11 @@ class Game {
                 const pacmanCellX = Math.floor(this.pacman.position.x / CELL_SIZE);
                 const pacmanCellY = Math.floor(this.pacman.position.y / CELL_SIZE);
 
-                this.ghosts.forEach(ghost => ghost.update({ x: pacmanCellX, y: pacmanCellY }, this.pacman.direction));
+                this.ghosts.forEach(ghost => ghost.update(
+                    { x: pacmanCellX, y: pacmanCellY }, 
+                    this.pacman.direction,
+                    getCell(this.ghosts[2].position), // TODO: replace array with map
+                ));
 
                 for (let dx = 0; dx <= 1; dx++) {
                     for (let dy = 0; dy <= 1; dy++) {
@@ -168,10 +172,10 @@ class Game {
         this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
 
         this.ghosts = [
-            new Blinky(level.blinkyStart.start, level.blinkyStart.scatter, level.layout),
-            new Pinky(level.pinkyStart.start, level.pinkyStart.scatter, level.layout),
-            new Inky(level.inkyStart.start, level.inkyStart.scatter, level.layout),
-            new Clyde(level.clydeStart.start, level.clydeStart.scatter, level.layout),
+            new Blinky(level.blinkyStart.start, level.blinkyStart.scatter, level),
+            new Pinky(level.pinkyStart.start, level.pinkyStart.scatter, level),
+            new Inky(level.inkyStart.start, level.inkyStart.scatter, level),
+            new Clyde(level.clydeStart.start, level.clydeStart.scatter, level),
         ];
     }
 }
