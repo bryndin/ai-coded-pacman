@@ -32,7 +32,7 @@ class Ghost {
         const scatterY = this.scatterCell.y * CELL_SIZE + CELL_SIZE / 2;
 
         if (this.path.length === 0 && (this.position.x !== scatterX && this.position.y !== scatterY)) {
-            this.path = this.findPath(this.getCellCoordinates(), this.scatterCell);
+            this.path = this.findPath(getCell(this.position), this.scatterCell);
         }
     }
 
@@ -58,10 +58,6 @@ class Ghost {
     }
 
     // Helper functions
-
-    getCellCoordinates() {
-        return { x: Math.floor(this.position.x / CELL_SIZE), y: Math.floor(this.position.y / CELL_SIZE) };
-    }
 
     moveTowardsCell(cell) {
         const targetX = cell.x * CELL_SIZE + CELL_SIZE / 2;
@@ -139,7 +135,7 @@ class Ghost {
 
     calculateDistance(target) {
         // Calculate distance between ghost and target
-        const cellPosition = this.getCellCoordinates();
+        const cellPosition = getCell(this.position);
         let dx = cellPosition.x - target.x;
         let dy = cellPosition.y - target.y;
         return Math.sqrt(dx * dx + dy * dy);
@@ -160,7 +156,7 @@ export class Blinky extends Ghost {
         if (this.path.length === 0 ||
             this.path[this.path.length - 1].x !== pacmanCell.x ||
             this.path[this.path.length - 1].y !== pacmanCell.y) {
-            this.path = this.findPath(this.getCellCoordinates(), pacmanCell);
+            this.path = this.findPath(getCell(this.position), pacmanCell);
         }
     }
 }
@@ -181,7 +177,7 @@ export class Pinky extends Ghost {
         if (this.path.length === 0 ||
             this.path[this.path.length - 1].x !== pacmanCell.x ||
             this.path[this.path.length - 1].y !== pacmanCell.y) {
-            this.path = this.findPath(this.getCellCoordinates(), targetCell);
+            this.path = this.findPath(getCell(this.position), targetCell);
         }
     }
 }
@@ -220,7 +216,7 @@ export class Clyde extends Ghost {
             if (this.path.length === 0 ||
                 this.path[this.path.length - 1].x !== pacmanCell.x ||
                 this.path[this.path.length - 1].y !== pacmanCell.y) {
-                this.path = this.findPath(this.getCellCoordinates(), pacmanCell);
+                this.path = this.findPath(getCell(this.position), pacmanCell);
             }
 
             this.lastMode = CHASE_MODE;
