@@ -1,6 +1,6 @@
 import Level from './level.js';
 import Pacman from './pacman.js';
-import Ghost from './ghost.js';
+import { Blinky, Pinky, Inky, Clyde } from './ghost.js';
 import Pellet from './pellet.js';
 
 // Import level data from individual files
@@ -23,7 +23,7 @@ class Game {
 
     constructor() {
         this.levels = [
-            new Level(level1.layout, level1.pacman, level1.ghosts),
+            new Level(level1.layout, level1.pacman, level1.blinky, level1.pinky, level1.inky, level1.clyde),
         ];
         this.score = 0;
         this.lives = 3;
@@ -58,7 +58,7 @@ class Game {
                 const pacmanCellX = Math.floor(this.pacman.position.x / CELL_SIZE);
                 const pacmanCellY = Math.floor(this.pacman.position.y / CELL_SIZE);
 
-                this.ghosts.forEach(ghost => ghost.move(level.layout, { x: pacmanCellX, y: pacmanCellY }));
+                this.ghosts.forEach(ghost => ghost.update({ x: pacmanCellX, y: pacmanCellY }, this.pacman.direction));
 
                 for (let dx = 0; dx <= 1; dx++) {
                     for (let dy = 0; dy <= 1; dy++) {
@@ -133,9 +133,7 @@ class Game {
 
     checkPacmanGhostCollision() {
         for (const ghost of this.ghosts) {
-            // TODO: ghost's position is the center of ghost, pacman's is top-left corner. Remove when Pacman is switched to center.
-            const pos = { x: ghost.position.x - CELL_SIZE / 2, y: ghost.position.y - CELL_SIZE / 2 };
-            if (checkForOverlap(this.pacman.position, pos, this.pacman.size, ghost.size)) {
+            if (checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
                 return ghost;
             }
         }
@@ -170,10 +168,12 @@ class Game {
         const level = this.getCurrentLevel();
         this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
 
-        this.ghosts = [];
-        for (const color in level.ghostStarts) {
-            this.ghosts.push(new Ghost(level.ghostStarts[color], color));
-        }
+        this.ghosts = [
+            new Blinky(level.blinkyStart.start, level.blinkyStart.scatter, level.layout),
+            new Pinky(level.pinkyStart.start, level.pinkyStart.scatter, level.layout),
+            new Inky(level.inkyStart.start, level.inkyStart.scatter, level.layout),
+            new Clyde(level.clydeStart.start, level.clydeStart.scatter, level.layout),
+        ];
     }
 }
 

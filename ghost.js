@@ -2,31 +2,46 @@ import Level from "./level.js";
 
 const CELL_SIZE = 16;
 
+const SCATTER_MODE = 'scatter';
+const CHASE_MODE = 'chase';
+
 class Ghost {
-    static CHASE = "chase";
-    static SCATTER = "scatter";
-    static FRIGHTENED = "frightened";
-
-    constructor(startPosition, color) {
-        this.position = { x: startPosition.x * CELL_SIZE, y: startPosition.y * CELL_SIZE };
-        this.size = CELL_SIZE;
-        this.direction = { x: 0, y: 0 };
+    constructor(name, color, startCell, scatterCell, layout) {
+        this.name = name;
         this.color = color;
-        this.mode = "CHASE";
-        this.chaseThreshold = 8; // Chasing within these cells
+        this.scatterCell = scatterCell;
+        this.mode = CHASE_MODE;
+        this.position = { x: startCell.x * CELL_SIZE, y: startCell.y * CELL_SIZE };
+        this.direction = { x: 0, y: 0 }; // Initialize starting direction
         this.speed = 2;
-
         this.path = []; // Store the calculated path
+        this.layout = layout;
+        this.size = CELL_SIZE;
     }
 
-    move(layout, targetPosition) {
-        // Calculate the path only if it's not already calculated or the target has moved
-        if (this.path.length === 0 ||
-            this.path[this.path.length - 1].x !== targetPosition.x ||
-            this.path[this.path.length - 1].y !== targetPosition.y) {
-            this.path = this.findPath(layout, this.getCellCoordinates(), targetPosition);
+    update(pacmanCell, pacmanDirection) {
+        if (this.mode === SCATTER_MODE) {
+            this.scatter();
+        } else {
+            this.chase(pacmanCell, pacmanDirection);
         }
+        this.move();
+    }
 
+    scatter() {
+        const scatterX = this.scatterCell.x * CELL_SIZE + CELL_SIZE / 2;
+        const scatterY = this.scatterCell.y * CELL_SIZE + CELL_SIZE / 2;
+
+        if (this.path.length === 0 && (this.position.x !== scatterX && this.position.y !== scatterY)) {
+            this.path = this.findPath(this.getCellCoordinates(), this.scatterCell);
+        }
+    }
+
+    chase(pacmanCell, pacmanDirection) {
+        // Chase behavior depends on the specific ghost
+    }
+
+    move() {
         if (this.path.length > 0) {
             // Move towards the next cell in the path
             const nextCell = this.path[0];
@@ -37,6 +52,10 @@ class Ghost {
                 this.path.shift();
             }
         }
+    }
+
+    setMode(newMode) {
+        this.mode = newMode;
     }
 
     // Helper functions
@@ -60,23 +79,24 @@ class Ghost {
         return Math.abs(this.position.x - cellCenterX) < this.speed &&
             Math.abs(this.position.y - cellCenterY) < this.speed;
     }
-    findPath(layout, startPosition, targetPosition) {
+
+    findPath(startCell, targetCell) {
         // Implementation of Breadth-First Search (BFS) algorithm
         const queue = [];
         const visited = new Set();
         const parents = {};
 
-        queue.push(startPosition);
-        visited.add(`${startPosition.x},${startPosition.y}`);
+        queue.push(startCell);
+        visited.add(`${startCell.x},${startCell.y}`);
 
         while (queue.length > 0) {
             const current = queue.shift();
-            if (current.x === targetPosition.x && current.y === targetPosition.y) {
+            if (current.x === targetCell.x && current.y === targetCell.y) {
 
-                return this.reconstructPath(parents, targetPosition);
+                return this.reconstructPath(parents, targetCell);
             }
 
-            for (const neighbor of this.getNeighbors(layout, current)) {
+            for (const neighbor of this.getNeighbors(current)) {
                 const neighborKey = `${neighbor.x},${neighbor.y}`;
                 if (!visited.has(neighborKey)) {
                     queue.push(neighbor);
@@ -89,7 +109,7 @@ class Ghost {
         return []; // No path found
     }
 
-    getNeighbors(layout, cell) {
+    getNeighbors(cell) {
         const neighbors = [];
         const directions = [[0, -1], [0, 1], [-1, 0], [1, 0]];
 
@@ -97,7 +117,7 @@ class Ghost {
             const newX = cell.x + direction[0];
             const newY = cell.y + direction[1];
 
-            if (newX >= 0 && newY >= 0 && newX < layout[0].length && newY < layout.length && layout[newY][newX] !== Level.WALL) {
+            if (newX >= 0 && newY >= 0 && newX < this.layout[0].length && newY < this.layout.length && this.layout[newY][newX] !== Level.WALL) {
                 neighbors.push({ x: newX, y: newY });
             }
         }
@@ -105,9 +125,9 @@ class Ghost {
         return neighbors;
     }
 
-    reconstructPath(parents, targetPosition) {
+    reconstructPath(parents, targetCell) {
         const path = [];
-        let current = targetPosition;
+        let current = targetCell;
 
         while (current) {
             path.unshift(current);
@@ -117,6 +137,108 @@ class Ghost {
 
         return path;
     }
+
+    calculateDistance(target) {
+        // Calculate distance between ghost and target
+        const cellPosition = this.getCellCoordinates();
+        let dx = cellPosition.x - target.x;
+        let dy = cellPosition.y - target.y;
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+
 }
 
-export default Ghost;
+
+export class Blinky extends Ghost {
+    constructor(startCell, scatterCell, layout) {
+        super('Blinky', 'red', startCell, scatterCell, layout);
+    }
+
+    chase(pacmanCell, pacmanDirection) {
+        // Directly target Pac-Man's position
+
+        // Calculate the path only if it's not already calculated or the target has moved
+        if (this.path.length === 0 ||
+            this.path[this.path.length - 1].x !== pacmanCell.x ||
+            this.path[this.path.length - 1].y !== pacmanCell.y) {
+            this.path = this.findPath(this.getCellCoordinates(), pacmanCell);
+        }
+    }
+}
+
+export class Pinky extends Ghost {
+    constructor(startCell, scatterCell, layout) {
+        super('Pinky', 'pink', startCell, scatterCell, layout);
+    }
+
+    chase(pacmanCell, pacmanDirection) {
+        // Target 4 tiles ahead of Pac-Man's direction
+        let targetCell = {
+            x: pacmanCell.x + pacmanDirection.x * 4,
+            y: pacmanCell.y + pacmanDirection.y * 4
+        };
+        // this.direction = this.calculateDirection(targetCell);
+
+        if (this.path.length === 0 ||
+            this.path[this.path.length - 1].x !== pacmanCell.x ||
+            this.path[this.path.length - 1].y !== pacmanCell.y) {
+            this.path = this.findPath(this.getCellCoordinates(), targetCell);
+        }
+    }
+}
+
+export class Inky extends Ghost {
+    constructor(startCell, scatterCell, layout) {
+        super('Inky', 'cyan', startCell, scatterCell, layout);
+    }
+
+    chase(pacmanCell, pacmanDirection) {
+        // Target based on Pac-Man's position and Blinky's position
+
+        // let offset = {
+        //     x: pacmanCell.x + pacmanDirection.x * 2,
+        //     y: pacmanCell.y + pacmanDirection.y * 2
+        // };
+        // let target = {
+        //     x: 2 * offset.x - this.position.x,
+        //     y: 2 * offset.y - this.position.y
+        // };
+        // this.direction = this.calculateDirection(target);
+    }
+}
+
+export class Clyde extends Ghost {
+    constructor(startCell, scatterCell, layout) {
+        super('Clyde', 'orange', startCell, scatterCell, layout);
+
+        this.lastMode = this.mode;
+    }
+
+    chase(pacmanCell, pacmanDirection) {
+        let distance = this.calculateDistance(pacmanCell);
+        if (distance > 8) {
+            // Target Pac-Man directly
+            if (this.path.length === 0 ||
+                this.path[this.path.length - 1].x !== pacmanCell.x ||
+                this.path[this.path.length - 1].y !== pacmanCell.y) {
+                this.path = this.findPath(this.getCellCoordinates(), pacmanCell);
+            }
+
+            this.lastMode = CHASE_MODE;
+        } else {
+            // Scatter to the bottom left corner
+            if (this.lastMode === CHASE_MODE) {
+                this.path = [];
+            }
+            this.scatter();
+            this.lastMode = SCATTER_MODE;
+        }
+    }
+}
+
+Ghost.prototype.calculateDirection = function (target) {
+    // Calculate direction towards target
+    let dx = target.x - this.position.x;
+    let dy = target.y - this.position.y;
+    return { x: Math.sign(dx), y: Math.sign(dy) };
+};

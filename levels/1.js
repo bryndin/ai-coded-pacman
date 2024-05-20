@@ -1,11 +1,9 @@
-// import Level from '../level.js';
-
 const layout = [
     "                            ",
     "                            ",
     "                            ",
     "############################",
-    "# ...........##............#",
+    "#............##............#",
     "#.####.#####.##.#####.####.#",
     "#.####.#####.##.#####.####.#",
     "#.####.#####.##.#####.####.#",
@@ -40,9 +38,21 @@ const layout = [
 ];
 
 const pacman = { "x": 13, "y": 26 };
-const ghosts = { "red": { "x": 13, "y": 17 }, "blue": { "x": 14, "y": 17 } };
+const blinky = {
+    "start": { "x": 12, "y": 17 },
+    "scatter": { "x": 26, "y": 4 },
+};
+const pinky = {
+    "start": { "x": 13, "y": 17 },
+    "scatter": { "x": 1, "y": 4 },
+};
+const inky = {
+    "start": { "x": 14, "y": 17 },
+    "scatter": { "x": 26, "y": 32 },
+};
+const clyde = {
+    "start": { "x": 15, "y": 17 },
+    "scatter": { "x": 1, "y": 32 },
+};
 
-// const level1 = new Level(layout, pacman, ghosts);
-
-// export default {level1};
-export default {layout, pacman, ghosts};
+export default { layout, pacman, blinky, pinky, inky, clyde };

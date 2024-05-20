@@ -4,12 +4,15 @@ class Level {
     static PELLET = ".";
     static MOVABLE = new Set([this.EMPTY, this.PELLET]);
 
-    constructor(layout, pacmanStart, ghostStarts) {
+    constructor(layout, pacman, blinky, pinky, inky, clyde) {
         this.layout = Level.convert(this.validate(layout));
         this.height = this.layout.length;
         this.width = this.layout[0].length;
-        this.pacmanStart = pacmanStart;
-        this.ghostStarts = ghostStarts;
+        this.pacmanStart = pacman;
+        this.blinkyStart = blinky;
+        this.pinkyStart = pinky;
+        this.inkyStart = inky;
+        this.clydeStart = clyde;
 
         this.pelletCount = this.countPellets();
     }

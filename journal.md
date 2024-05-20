@@ -1812,3 +1812,129 @@ Can you rewrite `drawPacman` using `rotate` function from p5.js?
 
 > [!NOTE]
 > Simple refactoring
+
+## Step 41
+
+**Problem:** We need 4 ghosts with different personalities.
+
+***Prompt (Gemini 1.5 Pro):***
+Define the AI behavior of ghosts in the classical Pacman game.
+
+***Answer (Gemini 1.5 Pro):***
+>The ghosts in the classic Pac-Man game don't use Artificial Intelligence in the modern sense. They operate on a system of pre-programmed behaviors and simple algorithms, often referred to as Finite State Machines. 
+>
+>Here's how their "AI" works:
+>
+>* **Scatter Mode:** Each ghost has a designated corner of the maze they head towards in this mode. This creates the illusion of random movement.
+>* **Chase Mode:** Ghosts switch to aggressively pursuing Pac-Man, each using a different strategy:
+>    * **Blinky (Red):** Directly targets Pac-Man's current position.
+>    * **Pinky (Pink):** Tries to ambush Pac-Man by aiming 4 tiles ahead of his direction.
+>    * **Inky (Cyan):** Uses a more complex strategy based on both Pac-Man's position and Blinky's position.
+>    * **Clyde (Orange):** Targets Pac-Man directly when far away but switches to scatter mode when getting too close, creating erratic behavior.
+>* **Frightened Mode:** When Pac-Man eats a Power Pellet, ghosts turn blue, slow down, and reverse their movement direction. Pac-Man can eat them in this state.
+>* **Eaten Mode:** After being eaten, ghosts return to the center box, vulnerable and regenerating before rejoining the chase.
+
+***Prompt:***
+
+1. Explain what causes the transition between Scatter and Chase modes. 2. Explain how corners are selected per ghost. 3. Explain Clyde's strategy in more detail.
+
+***Answer (Gemini 1.5 Pro):***
+>Here's a breakdown of the ghost behavior you asked about:
+>
+>1. **Transition between Scatter and Chase Modes:**
+>
+>   The transitions between Scatter and Chase modes are based on timers.  The game cycles through pre-defined periods of Scatter and Chase modes:
+>
+>   * **Level 1:** 7 seconds Scatter, 20 seconds Chase, 7 seconds Scatter, 20 seconds Chase, 5 seconds Scatter, 20 seconds Chase, 5 seconds Scatter, remaining time Chase.
+>   * **Levels 2-4:** 7 seconds Scatter, 20 seconds Chase, 7 seconds Scatter, 20 seconds Chase, 5 seconds Scatter, 1033 seconds Chase, 1/60 second Scatter, remaining time Chase.
+>   * **Level 5 onward:** 5 seconds Scatter, 20 seconds Chase, 5 seconds Scatter, 20 seconds Chase, 5 seconds Scatter, 1037 seconds Chase, 1/60 second Scatter, remaining time Chase.
+>
+>2. **Corner Selection per Ghost:**
+>
+>   Each ghost has a designated "home corner" they target during Scatter mode:
+>
+>   * **Blinky (Red):** Top right corner
+>   * **Pinky (Pink):** Top left corner
+>   * **Inky (Cyan):** Bottom right corner
+>   * **Clyde (Orange):** Bottom left corner
+>
+>3. **Clyde's Strategy in Detail:**
+>
+>   Clyde is known for his seemingly erratic behavior, which stems from a unique chase strategy:
+>
+>   * **Distance-Based Switching:** Clyde targets Pac-Man's current position directly when he is *further* than 8 tiles away. 
+>   * **Scatter Mode Trigger:** However, when Clyde gets *within* 8 tiles of Pac-Man, he switches to his designated Scatter mode behavior (heading for the bottom left corner).
+>
+>   This creates the illusion that Clyde is "shy" or "stupid" as he frequently abandons direct pursuit to retreat to his corner. In reality, this strategy makes him unpredictable and can catch players off guard, especially when navigating tight spaces where Clyde can suddenly shift from chasing to retreating.
+
+***Prompt:***
+Generate Javascript code defining these 4 ghosts and their chase behavior.
+
+***Prompt:***
+Update the code to use the function `findPath(currentPosition, targetPosition)`. This function returns a path from `currentPosition` to `targetPosition`, where these positions are in the level cell coordinates.
+
+***Prompt:***
+Give code for `chase()` function for Blinky.
+
+***Prompt:***
+Ghost class is unaware of "game" class. Class Game can access Ghost class but not vice versa.  Update the logic accordingly.
+
+***Prompt:***
+Explain the logic in `scatter()`. Is it correct?
+
+***Answer (Gemini 1.5 Pro, shortened):***
+>The condition `this.position.x === this.scatterTarget.x && this.position.y === this.scatterTarget.y` checks if the ghost has reached the *exact* center of its scatter target cell. However, due to the discrete movement of the ghost (moving one cell at a time), it's highly unlikely that the ghost will land precisely at the center. This means the `findPath` function might not be called again, leaving the ghost stuck even if it's very close to its target.
+
+***Prompt:***
+In this condition `if (this.path.length === 0 || this.position.x === this.scatterTarget.x && this.position.y === this.scatterTarget.y)` should the coordinates be not equal,  instead of equal?
+
+***Answer (Gemini 1.5 Pro):***
+>You are absolutely right! In the original condition:
+>
+>```javascript
+>if (this.path.length === 0 || this.position.x === this.scatterTarget.x && this.position.y === this.scatterTarget.y) 
+>```
+>
+>The logic is incorrect. The condition should check if the ghost's position is **not equal** to the scatter target coordinates. 
+>
+>Here's the corrected condition:
+>
+>```javascript
+>if (this.path.length === 0 || this.position.x !== this.scatterTarget.x || this.position.y !== this.scatterTarget.y) 
+>```
+>
+>**Explanation:**
+>
+>- We want to calculate a new path if either:
+>    - The ghost has no current path (`this.path.length === 0`).
+>    - The ghost's current position is **not** the same as its scatter target position (`this.position.x !== this.scatterTarget.x` **or** `this.position.y !== this.scatterTarget.y`).
+>
+>Using the **not equal** (`!==`) operator ensures that `findPath()` is called when the ghost needs to move towards its scatter target.
+>
+>The corrected logic makes much more sense! Thanks for pointing out the error.
+
+***Prompt:***
+Wouldn't we want to calculate the new path when the path is empty and ghosts aren't in the scattering spot?
+
+***Answer(Gemini 1.5 Pro):***
+>You are absolutely correct! We need to calculate a new path when both of these conditions are true:
+>
+>1. **The path is empty (`this.path.length === 0`):**  This means the ghost has either completed its previous path or is starting its movement.
+>2. **The ghost is not near its scatter target (`!this.isNearTarget(this.scatterTarget)`):** This ensures that we don't recalculate a path if the ghost is already at (or very close to) its destination.
+>
+>Therefore, the correct condition for calling `findPath()` in the `scatter()` method is:
+>
+>```javascript
+>if (this.path.length === 0 && !this.isNearTarget(this.scatterTarget)) {
+>    this.path = findPath(this.position, this.scatterTarget);
+>}
+>```
+>
+>We need to use the logical **AND** operator (`&&`) to combine the two conditions. `findPath()` will only be executed if **both** conditions are true.
+>
+>Thank you for pointing out this crucial logical error. You've helped refine the code to be more accurate and efficient! 
+
+> [!NOTE]
+>
+> - It does look like Gemini Pro have hard time to reason with math logic.
+> - Logic for Blinky and Clyde are working, Pinky and Inky require some work.
