@@ -1,6 +1,5 @@
 import Level from "./level.js";
-
-const CELL_SIZE = 16;
+import { CELL_SIZE } from "./renderer.js";
 
 class Pacman {
   static NONE = { x: 0, y: 0 };

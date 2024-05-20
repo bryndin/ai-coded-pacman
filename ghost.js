@@ -1,6 +1,5 @@
 import Level from "./level.js";
-
-const CELL_SIZE = 16;
+import { getCell, CELL_SIZE } from "./renderer.js";
 
 const SCATTER_MODE = 'scatter';
 const CHASE_MODE = 'chase';

@@ -1,7 +1,7 @@
 import Level from './level.js';
 import Pacman from './pacman.js';
 
-const CELL_SIZE = 16;
+export const CELL_SIZE = 16;
 
 export class Renderer {
     constructor(cellWidth, cellHeight) {

@@ -2,11 +2,10 @@ import Level from './level.js';
 import Pacman from './pacman.js';
 import { Blinky, Pinky, Inky, Clyde } from './ghost.js';
 import Pellet from './pellet.js';
+import { CELL_SIZE } from './renderer.js';
 
 // Import level data from individual files
 import level1 from './levels/1.js';
-
-const CELL_SIZE = 16;
 
 class Game {
     static PELLET_SCORE = 1;
