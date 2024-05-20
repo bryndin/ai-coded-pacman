@@ -11,6 +11,16 @@ const CELL_SIZE = 16;
 class Game {
     static PELLET_SCORE = 1;
 
+    static states = {
+        START: "START",
+        RUNNING: "RUNNING",
+        PACMAN_DEAD: "PACMAN_DEAD",
+        LEVEL_COMPLETE: "LEVEL_COMPLETE",
+        PAUSED: "PAUSED",
+        GAME_OVER: "GAME_OVER",
+        POWERUP: "POWERUP",
+    };
+
     constructor() {
         this.levels = [
             new Level(level1.layout, level1.pacman, level1.ghosts),
@@ -23,16 +33,6 @@ class Game {
         this.pacman = null;
         this.ghosts = [];
     }
-
-    static states = {
-        START: "START",
-        RUNNING: "RUNNING",
-        PACMAN_DEAD: "PACMAN_DEAD",
-        LEVEL_COMPLETE: "LEVEL_COMPLETE",
-        PAUSED: "PAUSED",
-        GAME_OVER: "GAME_OVER",
-        POWERUP: "POWERUP",
-    };
 
     getCurrentLevel() {
         return this.levels[this.currentLevelIndex];
@@ -58,7 +58,7 @@ class Game {
                 const pacmanCellX = Math.floor(this.pacman.position.x / CELL_SIZE);
                 const pacmanCellY = Math.floor(this.pacman.position.y / CELL_SIZE);
 
-                this.ghosts.forEach(ghost => ghost.move(level.layout, {x: pacmanCellX, y: pacmanCellY}));
+                this.ghosts.forEach(ghost => ghost.move(level.layout, { x: pacmanCellX, y: pacmanCellY }));
 
                 for (let dx = 0; dx <= 1; dx++) {
                     for (let dy = 0; dy <= 1; dy++) {
@@ -134,7 +134,7 @@ class Game {
     checkPacmanGhostCollision() {
         for (const ghost of this.ghosts) {
             // TODO: ghost's position is the center of ghost, pacman's is top-left corner. Remove when Pacman is switched to center.
-            const pos = {x: ghost.position.x - CELL_SIZE/2, y: ghost.position.y - CELL_SIZE/2};
+            const pos = { x: ghost.position.x - CELL_SIZE / 2, y: ghost.position.y - CELL_SIZE / 2 };
             if (checkForOverlap(this.pacman.position, pos, this.pacman.size, ghost.size)) {
                 return ghost;
             }
