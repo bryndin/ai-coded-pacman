@@ -28,8 +28,8 @@ class Ghost {
     }
 
     scatter() {
-        const scatterX = this.scatterCell.x * CELL_SIZE + CELL_SIZE / 2;
-        const scatterY = this.scatterCell.y * CELL_SIZE + CELL_SIZE / 2;
+        const scatterX = (this.scatterCell.x + 0.5) * CELL_SIZE;
+        const scatterY = (this.scatterCell.y + 0.5) * CELL_SIZE;
 
         if (this.path.length === 0 && (this.position.x !== scatterX && this.position.y !== scatterY)) {
             this.path = this.findPath(getCell(this.position), this.scatterCell);
@@ -60,16 +60,16 @@ class Ghost {
     // Helper functions
 
     moveTowardsCell(cell) {
-        const targetX = cell.x * CELL_SIZE + CELL_SIZE / 2;
-        const targetY = cell.y * CELL_SIZE + CELL_SIZE / 2;
+        const targetX = (cell.x + 0.5) * CELL_SIZE;
+        const targetY = (cell.y + 0.5) * CELL_SIZE;
 
         this.position.x += Math.sign(targetX - this.position.x) * Math.min(this.speed, Math.abs(targetX - this.position.x));
         this.position.y += Math.sign(targetY - this.position.y) * Math.min(this.speed, Math.abs(targetY - this.position.y));
     }
 
     hasReachedCellCenter(cell) {
-        const cellCenterX = cell.x * CELL_SIZE + CELL_SIZE / 2;
-        const cellCenterY = cell.y * CELL_SIZE + CELL_SIZE / 2;
+        const cellCenterX = (cell.x + 0.5) * CELL_SIZE;
+        const cellCenterY = (cell.y + 0.5) * CELL_SIZE;
 
         return Math.abs(this.position.x - cellCenterX) < this.speed &&
             Math.abs(this.position.y - cellCenterY) < this.speed;
