@@ -1805,3 +1805,10 @@ Can you rewrite `drawPacman` using `rotate` function from p5.js?
 > [!NOTE]
 > While generated code looked reasonable, some p5.js defaults on angles got in the way. Rotating image is easier to handle.
 > Other than that, good job Gemini.
+
+## Step 40
+
+**Problem:** Inconsistent handling of sprites: Ghost position is in the center, Pacman etc are the top-left corner. Need to converge.
+
+> [!NOTE]
+> Simple refactoring
