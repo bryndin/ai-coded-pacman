@@ -1,12 +1,12 @@
 import Level from './level.js';
 import Pacman from './pacman.js';
 
-export class Renderer {
-    static CELL_SIZE = 16;
+const CELL_SIZE = 16;
 
+export class Renderer {
     constructor(cellWidth, cellHeight) {
-        this.canvasWidth = cellWidth * Renderer.CELL_SIZE;
-        this.canvasHeight = cellHeight * Renderer.CELL_SIZE;
+        this.canvasWidth = cellWidth * CELL_SIZE;
+        this.canvasHeight = cellHeight * CELL_SIZE;
 
         createCanvas(this.canvasWidth, this.canvasHeight);
         angleMode(RADIANS);
@@ -31,10 +31,10 @@ export class Renderer {
             for (let x = 0; x < level.width; x++) {
                 switch (level.layout[y][x]) {
                     case Level.WALL:
-                        Renderer.drawWall(x * Renderer.CELL_SIZE, y * Renderer.CELL_SIZE, Renderer.CELL_SIZE);
+                        Renderer.drawWall(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE);
                         break;
                     case Level.PELLET:
-                        Renderer.drawPellet(x * Renderer.CELL_SIZE, y * Renderer.CELL_SIZE);
+                        Renderer.drawPellet(x * CELL_SIZE, y * CELL_SIZE);
                         break;
                 }
             }
@@ -42,7 +42,7 @@ export class Renderer {
     }
 
     static drawPacman(pos, dir) {
-        const size = Renderer.CELL_SIZE;
+        const size = CELL_SIZE;
 
         let angle = 0;
         if (dir === Pacman.LEFT) angle = PI; // Left
@@ -58,7 +58,7 @@ export class Renderer {
     }
 
     static drawGhost(pos, color) {
-        const size = Renderer.CELL_SIZE;
+        const size = CELL_SIZE;
 
         push(); // Save current drawing style
 
@@ -93,17 +93,17 @@ export class Renderer {
     }
 
     static drawWall(x, y) {
-        const size = Renderer.CELL_SIZE;
+        const size = CELL_SIZE;
         
         fill(220);
         rect(x, y, size, size);
     }
 
     static drawPellet(x, y) {
-        const size = Renderer.CELL_SIZE / 3;
+        const size = CELL_SIZE / 3;
 
         fill(255, 255, 0);  // yellow
-        circle(x + Renderer.CELL_SIZE / 2, y + Renderer.CELL_SIZE / 2, size);
+        circle(x + CELL_SIZE / 2, y + CELL_SIZE / 2, size);
     }
 
     drawScore(score) {
