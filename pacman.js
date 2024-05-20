@@ -3,6 +3,7 @@ import canMove from "./shared.js";
 const CELL_SIZE = 16;
 
 class Pacman {
+  static NONE = { x: 0, y: 0 };
   static RIGHT = { x: 1, y: 0 };
   static LEFT = { x: -1, y: 0 };
   static UP = { x: 0, y: -1 };
@@ -12,8 +13,8 @@ class Pacman {
     this.position = { x: startPosition.x * CELL_SIZE, y: startPosition.y * CELL_SIZE };
     this.size = size;
     this.speed = speed;
-    this.direction = { x: 0, y: 0 }
-    this.desiredDirection = { x: 0, y: 0 };
+    this.direction = Pacman.NONE;
+    this.desiredDirection = Pacman.NONE;
   }
 
   move(layout) {
