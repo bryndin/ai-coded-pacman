@@ -2,13 +2,14 @@ import Level from './level.js';
 import Pacman from './pacman.js';
 
 export const CELL_SIZE = 16;
+const HEADER_HEIGHT = 3 * CELL_SIZE;
 
 export class Renderer {
     constructor(cellWidth, cellHeight) {
         this.canvasWidth = cellWidth * CELL_SIZE;
         this.canvasHeight = cellHeight * CELL_SIZE;
 
-        createCanvas(this.canvasWidth, this.canvasHeight);
+        createCanvas(this.canvasWidth, this.canvasHeight + HEADER_HEIGHT);
         angleMode(RADIANS);
         noStroke();
         // strokeWeight(1);
@@ -18,6 +19,9 @@ export class Renderer {
         background(0);
         this.drawScore(game.score);
         this.drawLives(game.lives);
+
+        translate(0, HEADER_HEIGHT);
+
         Renderer.drawLevel(game.getCurrentLevel());
 
         Renderer.drawPacman(game.pacman.position, game.pacman.direction);

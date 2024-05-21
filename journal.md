@@ -1942,3 +1942,7 @@ Wouldn't we want to calculate the new path when the path is empty and ghosts are
 ## Step 42
 
 **Problem:** Code needs a number of small refactorings.
+
+## Step 43
+
+**Problem:** Level layout is bigger than the actual play zone, confusing path trimming algorithms.
