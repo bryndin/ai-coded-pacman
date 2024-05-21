@@ -13,7 +13,7 @@ class Level {
         this.inkyStart = inky;
         this.clydeStart = clyde;
 
-        this.reachableCells = findReachableCells(this.layout, this.pacmanStart);
+        this.reachableCells = findReachableCells(this.layout, this.pacmanStart); // Set of `${x},${y}`
         this.pelletCount = this.countPellets();
 
     }
@@ -73,7 +73,7 @@ function findReachableCells(layout, start) {
         visited.add(`${x},${y}`);
 
         if (layout[y][x] !== Level.WALL) {
-            reachableCells.add({ x, y });
+            reachableCells.add(`${x},${y}`);
 
             for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
                 const nx = x + dx;
