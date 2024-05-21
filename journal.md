@@ -2230,3 +2230,7 @@ There is a problem with ` this.path = this.findPath(this.getCellFromPosition(), 
 
 ***Prompt:***
 `findNearestWalkableCell` can still have problems finding an empty cell. Instead modify the code that checks for empty cells along the vector from Blinky to `inkyTarget`, backtracking from the `inkyTarget` cell.
+
+## Step 48
+
+**Problem:** Logic behind Pinky is still broken.

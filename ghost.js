@@ -28,12 +28,19 @@ class Ghost {
     }
 
     scatter() {
+        if (this.path.length !== 0 &&
+            this.path[this.path.length - 1] !== this.scatterCell) {
+            this.path = [];
+        }
+
         const scatterX = (this.scatterCell.x + 0.5) * CELL_SIZE;
         const scatterY = (this.scatterCell.y + 0.5) * CELL_SIZE;
 
         if (this.path.length === 0 && (this.position.x !== scatterX && this.position.y !== scatterY)) {
             this.path = this.findPath(getCell(this.position), this.scatterCell);
         }
+        this.targetCell = this.scatterCell;   // dev visualization
+
     }
 
     /**
@@ -207,17 +214,20 @@ export class Pinky extends Ghost {
 
     chase(pacmanCell, pacmanDirection, blinkyCell) {
         // Target 4 tiles ahead of Pac-Man's direction
-        let targetCell = {
+        let pacmanFutureCell = {
             x: pacmanCell.x + pacmanDirection.x * 4,
             y: pacmanCell.y + pacmanDirection.y * 4
         };
-        // this.direction = this.calculateDirection(targetCell);
+
+        const walkableTarget = this.findWalkableTargetAlongVector(pacmanCell, pacmanFutureCell);
 
         if (this.path.length === 0 ||
-            this.path[this.path.length - 1].x !== pacmanCell.x ||
-            this.path[this.path.length - 1].y !== pacmanCell.y) {
-            this.path = this.findPath(getCell(this.position), targetCell);
+            this.path[this.path.length - 1].x !== walkableTarget.x ||
+            this.path[this.path.length - 1].y !== walkableTarget.y) {
+            this.path = this.findPath(getCell(this.position), walkableTarget);
         }
+
+        this.targetCell = walkableTarget;
     }
 }
 
@@ -255,16 +265,13 @@ export class Inky extends Ghost {
             this.path = this.findPath(getCell(this.position), walkableTarget);
         }
 
-        // dev visualization
-        this.targetCell = walkableTarget;
+        this.targetCell = walkableTarget;   // dev visualization
     }
 }
 
 export class Clyde extends Ghost {
     constructor(startCell, scatterCell, level) {
         super('Clyde', 'orange', startCell, scatterCell, level);
-
-        this.lastMode = this.mode;
     }
 
     chase(pacmanCell, pacmanDirection, blinkyCell) {
@@ -277,15 +284,11 @@ export class Clyde extends Ghost {
                 this.path = this.findPath(getCell(this.position), pacmanCell);
             }
 
-            this.lastMode = CHASE_MODE;
+            this.targetCell = pacmanCell;   // dev visualization
         } else {
-            // Scatter to the bottom left corner
-            if (this.lastMode === CHASE_MODE) {
-                this.path = [];
-            }
             this.scatter();
-            this.lastMode = SCATTER_MODE;
         }
+
     }
 }
 
