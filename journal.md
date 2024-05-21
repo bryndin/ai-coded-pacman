@@ -1946,3 +1946,113 @@ Wouldn't we want to calculate the new path when the path is empty and ghosts are
 ## Step 43
 
 **Problem:** Level layout is bigger than the actual play zone, confusing path trimming algorithms.
+
+## Step 44
+
+**Problem:** Some areas of the layout aren't reachable while being "not-wall" and it confuses the navigation algorithm.
+
+***Prompt:***
+Generate a Javascript function that returns coordinates of all cells reachable from some starting point. The function receives two arguments: 2D layout of the maze where constant `WALL` represents a wall, and a starting point object with coordinates x,y.
+
+***Prompt:***
+Use Jdocs style comments, not python docstrings
+
+***Prompt:***
+Would it be better to return the set of objects {x: 1, y:2} than arrays [x,y]?  Are they effective to do the quick lookups in the Set?
+
+***Answer (Gemini, shortened):***
+>You're right; returning objects with `x` and `y` properties might be a better choice for this scenario, even though both approaches work. Here's why:
+>
+>* **Readability:** Object notation (`{x: 1, y: 2}`) is generally considered more readable for representing coordinates compared to arrays. It explicitly defines the meaning of each value in the pair.
+>
+>* **Lookup Performance:** While both objects and arrays have roughly the same lookup performance (O(1) average), using objects might provide a slight advantage in Sets. Sets rely on a hashing mechanism for fast lookups. JavaScript uses object keys for hashing by default. When you use an array as a key in a Set, the entire array is hashed. In an object, however, only the object's reference (memory location) is used for hashing. This can be slightly more efficient, especially for complex objects within the array. 
+>
+>However, the performance difference between these approaches is usually negligible for most practical use cases. readability is often the more important factor.
+>
+>Here's the updated function returning objects:
+>
+>```javascript
+>/**
+> * @param {string[][]} maze - A 2D list representing the maze, where '#' represents a wall.
+> * @param {Object} start - An object containing the starting point coordinates with properties 'x' and 'y'.
+> * @returns {Set<Object>} - A set of objects representing the coordinates of all reachable cells.
+> */
+>const WALL = "#";
+>
+>function findReachableCells(maze, start) {
+>  // ... Rest of the function remains the same ...
+>
+>  // Return the set of reachable cells as objects.
+>  return reachableCells;
+>}
+>
+>// Modify example usage to create objects for coordinates
+>const reachableCells = findReachableCells(maze, start);
+>console.log(reachableCells);
+>```
+>
+>In conclusion, using objects for coordinates improves code readability and might offer a slight performance edge in Sets. But for most cases, the performance difference is minimal, so choose the approach that makes your code clearer.
+
+***Prompt:***
+This code goes into infinite loop.  What is the problem there?
+
+***Answer (Gemini):***
+>You're absolutely right, the provided code could potentially get stuck in an infinite loop in certain maze configurations. The issue lies in how the code handles walls:
+>
+>1. **Checking Walls Only Once:**  The code only checks if a cell is a wall (`maze[y][x] !== WALL`) when it's first added to the queue. 
+>2. **Re-exploring Visited Cells:**  If a reachable cell is surrounded by walls, it will be added to the `reachableCells` set. However, when exploring its neighbors, the code doesn't check if they've already been marked as reachable (visited). This can lead to re-exploring the same cell repeatedly if it's surrounded by walls.
+>
+>Here's how to fix the issue:
+>
+>**Solution 1: Modify Wall Check**
+>
+>Instead of checking for walls only when adding a cell to the queue, include a wall check inside the loop that iterates through neighbors. This ensures we don't explore neighbors that are walls or already visited.
+>
+>Here's the updated code snippet:
+>
+>```javascript
+>for (const [dx, dy] of directions) {
+>  const newX = x + dx;
+>  const newY = y + dy;
+>  if (0 <= newX && newX < maze[0].length && 0 <= newY && newY < maze.length && maze[newY][newX] !== WALL && !reachableCells.has([newX, newY])) {
+>    queue.push({ x: newX, y: newY });
+>  }
+>}
+>```
+>
+>**Solution 2: Use a Visited Set**
+>
+>Another approach is to maintain a separate set to track visited cells. This way, we can skip exploring neighbors that have already been visited, even if they're not walls.
+>
+>Here's the updated code using a visited set:
+>
+>```javascript
+>const visitedCells = new Set();
+>
+>while (queue.length > 0) {
+>  // ... Rest of the loop logic ...
+>
+>  if (!visitedCells.has([x, y]) && maze[y][x] !== WALL) {
+>    visitedCells.add([x, y]);
+>    // ... Rest of the logic to add neighbors to queue ...
+>  }
+>}
+>```
+>
+>Both solutions effectively prevent the infinite loop by ensuring cells are explored only once. Choose the approach that best suits your code structure and preference.
+
+***Prompt: (Gemini)***
+There is still a problem with your Solution 1 causing an infinite loop
+
+***Prompt (Llama3-70b)***
+Generate a Javascript function that returns coordinates of all cells reachable from some starting point. The function receives two arguments: 2D layout of the maze where constant `WALL` represents a wall, and a starting point object with coordinates x,y.
+
+> [!NOTE]
+>
+> Gemini had hallucinations on each prompt:
+>
+> - Used Python docstrings for comments in Javascript code
+> - Generated an updated function, where the needed change is not present due to a "... Rest of the function remains the same ..." lazy cut.
+> - Code didn't have an extra check and caused an infinite loop.
+> - Updated version wasn't working again.
+> - Lllama3-70b got the answer right from the first time.

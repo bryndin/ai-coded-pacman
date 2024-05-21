@@ -2,7 +2,6 @@ class Level {
     static WALL = "#";
     static EMPTY = " ";
     static PELLET = ".";
-    static MOVABLE = new Set([this.EMPTY, this.PELLET]);
 
     constructor(layout, pacman, blinky, pinky, inky, clyde) {
         this.layout = Level.convert(this.validate(layout));
@@ -14,7 +13,9 @@ class Level {
         this.inkyStart = inky;
         this.clydeStart = clyde;
 
+        this.reachableCells = findReachableCells(this.layout, this.pacmanStart);
         this.pelletCount = this.countPellets();
+
     }
 
     validate(layout) {
@@ -59,6 +60,32 @@ class Level {
             this.pelletCount--;
         }
     }
+}
+
+function findReachableCells(layout, start) {
+    const reachableCells = new Set();
+    const queue = [start];
+    const visited = new Set();
+
+    while (queue.length > 0) {
+        const { x, y } = queue.shift();
+        if (visited.has(`${x},${y}`)) continue;
+        visited.add(`${x},${y}`);
+
+        if (layout[y][x] !== Level.WALL) {
+            reachableCells.add({ x, y });
+
+            for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
+                const nx = x + dx;
+                const ny = y + dy;
+                if (nx >= 0 && nx < layout[0].length && ny >= 0 && ny < layout.length) {
+                    queue.push({ x: nx, y: ny });
+                }
+            }
+        }
+    }
+
+    return reachableCells;
 }
 
 export default Level;
