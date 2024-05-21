@@ -9,6 +9,9 @@ export class Renderer {
         this.canvasWidth = cellWidth * CELL_SIZE;
         this.canvasHeight = cellHeight * CELL_SIZE;
 
+        this.showScatterCells = false;
+        this.showGhostTargets = false;
+
         createCanvas(this.canvasWidth, this.canvasHeight + HEADER_HEIGHT);
         angleMode(RADIANS);
         noStroke();
@@ -27,6 +30,14 @@ export class Renderer {
         Renderer.drawPacman(game.pacman.position, game.pacman.direction);
         for (const ghost of game.ghosts) {
             Renderer.drawGhost(ghost.position, ghost.color);
+
+            if (this.showScatterCells) {
+                Renderer.drawScatterCells(ghost.scatterCell, ghost.color);
+            }
+
+            if (this.showGhostTargets) {
+                Renderer.drawGhostTargets(ghost.targetCell, ghost.color);
+            }
         }
     }
 
@@ -98,7 +109,7 @@ export class Renderer {
 
     static drawWall(x, y) {
         const size = CELL_SIZE;
-        
+
         fill(220);
         rect(x, y, size, size);
     }
@@ -120,6 +131,30 @@ export class Renderer {
         textSize(20);
         fill(255);
         text("Lives: " + lives, this.canvasWidth - 80, 20);
+    }
+
+    static drawScatterCells(pos, color) {
+        const size = CELL_SIZE;
+
+        fill(color);
+        rect(pos.x * CELL_SIZE, pos.y * CELL_SIZE, size, size);
+    }
+
+    static drawGhostTargets(pos, color) {
+        const size = CELL_SIZE;
+
+        push();
+
+        translate((pos.x - 0.5) * CELL_SIZE, (pos.y - 0.5) * CELL_SIZE);
+
+        stroke(color);
+        strokeWeight(4);
+
+        // Draw diagonal cross
+        line(0, 0, size, size);
+        line(size, 0, 0, size);
+
+        pop()
     }
 }
 

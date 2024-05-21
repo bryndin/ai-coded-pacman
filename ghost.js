@@ -16,6 +16,7 @@ class Ghost {
         this.path = []; // Store the calculated path
         this.layout = layout;
         this.size = CELL_SIZE;
+        this.targetCell = startCell;
     }
 
     update(pacmanCell, pacmanDirection) {

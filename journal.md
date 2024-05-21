@@ -2056,3 +2056,13 @@ Generate a Javascript function that returns coordinates of all cells reachable f
 > - Code didn't have an extra check and caused an infinite loop.
 > - Updated version wasn't working again.
 > - Lllama3-70b got the answer right from the first time.
+
+## Step 45In p5.lib How to add handling of functional keys, e.g. F1 to function keyPress
+
+**Problem:** Need debugging visualization for scatter and target points for ghosts.
+
+***Prompt:***
+How to draw a diagonal cross using p5.js lib?
+
+***Prompt:***
+In p5.lib How to add handling of functional keys, e.g. F1 to function keyPress?

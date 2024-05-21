@@ -42,5 +42,13 @@ export function keyPressed() {
         case 68: // D key
             game.pacman.setDesiredDirection(Pacman.RIGHT);
             break;
+
+        // Developers visualization
+        case 219: // [ key
+            renderer.showScatterCells = !renderer.showScatterCells;
+            break;
+        case 221: // ] key
+            renderer.showGhostTargets = !renderer.showGhostTargets;
+            break;
     }
 }
