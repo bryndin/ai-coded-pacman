@@ -145,7 +145,7 @@ export class Renderer {
 
         push();
 
-        translate((pos.x - 0.5) * CELL_SIZE, (pos.y - 0.5) * CELL_SIZE);
+        translate(pos.x * CELL_SIZE, pos.y * CELL_SIZE);
 
         stroke(color);
         strokeWeight(4);

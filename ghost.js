@@ -10,7 +10,7 @@ class Ghost {
         this.color = color;
         this.scatterCell = scatterCell;
         this.mode = CHASE_MODE;
-        this.position = { x: startCell.x * CELL_SIZE, y: startCell.y * CELL_SIZE };
+        this.position = { x: (startCell.x + 0.5) * CELL_SIZE, y: (startCell.y + 0.5) * CELL_SIZE };
         this.direction = { x: 0, y: 0 }; // Initialize starting direction
         this.speed = 2;
         this.path = []; // Store the calculated path
