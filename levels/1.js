@@ -1,7 +1,4 @@
 const layout = [
-    "                            ",
-    "                            ",
-    "                            ",
     "############################",
     "#............##............#",
     "#.####.#####.##.#####.####.#",
@@ -33,26 +30,24 @@ const layout = [
     "#.##########.##.##########.#",
     "#..........................#",
     "############################",
-    "                            ",
-    "                            "
 ];
 
-const pacman = { "x": 13, "y": 26 };
+const pacman = { "x": 13, "y": 23 };
 const blinky = {
-    "start": { "x": 12, "y": 17 },
-    "scatter": { "x": 26, "y": 4 },
+    "start": { "x": 12, "y": 14 },
+    "scatter": { "x": 26, "y": 1 },
 };
 const pinky = {
-    "start": { "x": 13, "y": 17 },
-    "scatter": { "x": 1, "y": 4 },
+    "start": { "x": 13, "y": 14 },
+    "scatter": { "x": 1, "y": 1 },
 };
 const inky = {
-    "start": { "x": 14, "y": 17 },
-    "scatter": { "x": 26, "y": 32 },
+    "start": { "x": 14, "y": 14 },
+    "scatter": { "x": 26, "y": 29 },
 };
 const clyde = {
-    "start": { "x": 15, "y": 17 },
-    "scatter": { "x": 1, "y": 32 },
+    "start": { "x": 15, "y": 14 },
+    "scatter": { "x": 1, "y": 29 },
 };
 
 export default { layout, pacman, blinky, pinky, inky, clyde };

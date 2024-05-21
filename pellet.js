@@ -1,4 +1,4 @@
-const CELL_SIZE = 16;
+import { CELL_SIZE } from "./renderer.js";
 
 class Pellet {
     constructor(cellPosition) {

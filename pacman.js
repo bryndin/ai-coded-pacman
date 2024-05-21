@@ -1,6 +1,5 @@
 import Level from "./level.js";
-
-const CELL_SIZE = 16;
+import { CELL_SIZE } from "./renderer.js";
 
 class Pacman {
   static NONE = { x: 0, y: 0 };
@@ -10,7 +9,7 @@ class Pacman {
   static DOWN = { x: 0, y: 1 };
 
   constructor(startPosition, size, speed) {
-    this.position = { x: startPosition.x * CELL_SIZE + CELL_SIZE / 2, y: startPosition.y * CELL_SIZE + CELL_SIZE / 2 };
+    this.position = { x: (startPosition.x + 0.5) * CELL_SIZE, y: (startPosition.y + 0.5) * CELL_SIZE };
     this.size = size;
     this.speed = speed;
     this.direction = Pacman.NONE;

@@ -1,6 +1,6 @@
 import Game from "./game.js";
 import Pacman from "./pacman.js";
-import Renderer from "./renderer.js";
+import { Renderer } from "./renderer.js";
 
 // Add setup and draw to the global scope
 window.setup = setup;
@@ -41,6 +41,14 @@ export function keyPressed() {
         case RIGHT_ARROW:
         case 68: // D key
             game.pacman.setDesiredDirection(Pacman.RIGHT);
+            break;
+
+        // Developers visualization
+        case 219: // [ key
+            renderer.showScatterCells = !renderer.showScatterCells;
+            break;
+        case 221: // ] key
+            renderer.showGhostTargets = !renderer.showGhostTargets;
             break;
     }
 }
