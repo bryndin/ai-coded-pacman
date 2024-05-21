@@ -2079,7 +2079,7 @@ In p5.lib How to add handling of square brackets keys
 
 ## Step 47
 
-**Problem:** Logic behind Pinky and Inky are still broken.
+**Problem:** Logic behind Inky is still broken.
 
 ***Prompt:***
 Generate JSDoc comments for this function: `chase(pacmanCell, pacmanDirection, blinkyCell, blinkyDirection) {}`.  It implements the chase strategy for a ghost.
