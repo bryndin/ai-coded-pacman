@@ -1,3 +1,4 @@
+import Game from './game.js';
 import Level from './level.js';
 import Pacman from './pacman.js';
 
@@ -39,6 +40,11 @@ export class Renderer {
                 Renderer.drawGhostTargets(ghost.targetCell, ghost.color);
             }
         }
+
+        if (game.state === Game.states.WAITING) {
+            this.displayWaitForKeyPressMessage();
+        }
+
     }
 
     static drawLevel(level) {
@@ -134,6 +140,17 @@ export class Renderer {
         textSize(20);
         fill(255);
         text("Lives: " + lives, this.canvasWidth - 80, 20);
+    }
+
+    displayWaitForKeyPressMessage() {
+        push();
+        stroke("black");
+        strokeWeight(7);
+        fill("red");
+        textAlign(CENTER);
+        textSize(32);
+        text("Press any key to continue", this.canvasWidth / 2, this.canvasHeight / 2);
+        pop();
     }
 
     static drawScatterCells(pos, color) {
