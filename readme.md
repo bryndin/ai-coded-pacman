@@ -4,14 +4,15 @@
 
 This is an experiment to see how capable LLMs are working with code. Can prompts replace coding? Is there a difference between LLMs? What are the most efficient ways to utilize LLMs in development?
 
-The goal is to make LLMs do the coding. We anticipate that manual involvement will be necessary, but we aim to keep it minimal and naive, mimicking an early career developer. No human-driven code refactoring is planned. Hopefully, LLM will produce quality code and perform code cleanups as it goes. If not, we may try refactoring via prompting.
+The goal is to make LLMs do the coding. We anticipate the manual involvement will be necessary, but we aim to keep it minimal. We will utilize AI for refactoring as much as possible while being productive. Hopefully, LLM will produce quality code and perform code cleanups as it goes. If not, we may try refactoring via prompting.
 
 ### LLMs and Tech Stack
 
-We picked [Pacman](https://en.wikipedia.org/wiki/Pac-Man) game for our implementation subject. Javascript for ease of deployment and the [p5play.js](https://p5js.org/) game dev library for the engine. [Github Pages](https://pages.github.com/) host the game.
+We picked [Pacman](https://en.wikipedia.org/wiki/Pac-Man) game for our implementation subject. Javascript for ease of deployment and the [p5.js](https://p5js.org/) game dev library for the engine. [Github Pages](https://pages.github.com/) host the game.
 
+The p5.js / Javascript combo fits our goals well. We have no prior experience with p5.js lib, nor do we use Javascript professionally as our main language.
 
-We plan to try different LLMs as we go. Freely available [Google Gemini](https://gemini.google.com/), [Microsoft Copilot](https://copilot.microsoft.com/) (ChatGPT4-Turbo?) and [ChatGPT 3.5](https://chatgpt.com/), as well as self-hosting Open Source models via [Oolama](https://ollama.com/).
+We plan to try different LLMs as we go. Freely available [Google Gemini](https://gemini.google.com/), [Microsoft Copilot](https://copilot.microsoft.com/) (ChatGPT4-Turbo?) and [ChatGPT 3.5](https://chatgpt.com/). Self-hosting Open Source models via [Oolama](https://ollama.com/). Paid variations of Gemini 1.5, and other LLMs that become available.
 
 ## Latest deploy
 🎮 https://bryndin.github.io/ai-coded-pacman
@@ -22,7 +23,7 @@ We plan to try different LLMs as we go. Freely available [Google Gemini](https:/
 There we track development progress. List the problem for each step to work on, prompts used, LLM answers, and our notes. It's THE essence of the project.
 
 ## Notes & Findings
-These are general summary notes. For the detailed development notes see the [Dev Journal](journal.md).
+These are general summary notes, for the detailed development notes see the [Dev Journal](journal.md).
 
 ### **LLM choice for a bootstrap** (ordered best to worst)
   - *Gemini*: good job generating a prototype with all major entities.
