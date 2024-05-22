@@ -25,18 +25,19 @@ There we track development progress. List the problem for each step to work on, 
 ## Notes & Findings
 These are general summary notes, for the detailed development notes see the [Dev Journal](journal.md).
 
-### **LLM choice for a bootstrap** (ordered best to worst)
-  - *Gemini*: good job generating a prototype with all major entities.
-  - *llama3:8b-instruct-q6_K*: usable prototype, less logically structured compared to Gemini.
-  - *MS Copilot* simple generic p5lib.js bootstrap. Not good.
-  - *deepseek-coder:6.7b* p5lib.js bootstrap, Pacman logic is a throwaway.
+### **LLM choice** (ordered best to worst)
+  - *Gemini 1.5 Pro*: Can accept, analyze, and reply with large chunks of code. Being more generous with the context windows is a major benefit. Other models suffer from crippled input/output limits affecting dev productivity. Superior reasoning and quality of code too.
+  - *Gemini* / *MS Copilot* / *LLama3-70b*: are reasonable thinkers and code generators, often providing comparable results. All suffer from artificial limits on prompt/answer sizes. They aren't as advanced as the paid pro models. Temperature balance has to be found, shooting for more concise answers can lead to oversimplified or less usable results.
+  - Smaller models (e.g. *llama3:8b-instruct-q6_K*, *deepseek-coder:6.7b*) have limited use in working with code, and tend to hallucinate hard on refactorings. Some (e.g. )llama3:8b*) had a role for the simpler questions. With some (e.g. *deepseek-coder*) we suffered to find a good use for them.
 
 ### "Averaged" generated code that varies upon regeneration
 There must be a volume of Pacman implementations, with many making it into the training sets. The LLM generated code feels "averaged". Regenerating it produces a similar, yet slightly different version. Global variables are replaced by function arguments, or class attributes and vice versa. Controls are based on arrows and/or WASD, etc.
 
-These variations complicate putting different code blobs together and require human attention to make them compatible. We still need a developer familiar with the programming language.
+These variations complicate putting different code blobs together and require human attention to make them compatible, especially when using different context sessions.
 
-### Limits on Context Window in LLMs
-With a larger codebase (>5k tokens) supplying code to LLMs via prompt becomes a challenge. Public LLMs don't publish their context window sizes. Even with large contexts, limits are smaller on the prompts and even stricter on the output. This leads to truncated generated code, or functions being replaced with "insert needed logic here" comments.
+### Crippling Limits on Context Window in LLMs
+Models, especially the free ones, suffer from a small context window size. Limits on prompt input and reply output further cripple the experience.  Public LLMs don't publish their context window sizes, they could be as small as 8k tokens. Input/output limits could even go to 1k by the feel of it.
 
-Possible solution is to refactor code into decoupled, smaller chunks to be used in prompts.
+With a larger codebase (>5k tokens) supplying code to LLMs via prompt becomes a challenge. Manually extracting subsets of code for the prompt is a distraction. Same with utilizing trunkated answers needing manual adaption. For example, code with "insert needed logic here" comments. 
+
+Keeping code decoupled, simplifies its use in prompts.
