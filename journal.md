@@ -2234,3 +2234,533 @@ There is a problem with ` this.path = this.findPath(this.getCellFromPosition(), 
 ## Step 48
 
 **Problem:** Logic behind Pinky is still broken.
+
+## Step 49
+
+**Problem:** Game starts right away, instead of waiting for initial key press.
+
+***Prompt:***
+You're developing a game in Javascript using p5.js library. The game must wait until any key press from the player to switch from `START` to `RUNNING` state. Implement needed logic, use `this.setState(Game.states.RUNNING);` to switch the state.
+
+```javascript
+class Game {
+    static states = {
+        START: "START",
+        RUNNING: "RUNNING",
+    }
+
+    constructor() {
+        this.state = Game.states.START;
+    }
+
+    setState(newState) {
+        this.state = newState;
+    }
+
+    main() {
+        switch (this.state) {
+            case Game.states.START:
+                /* logic to bootstrap the game */
+                
+                break;
+
+            case Game.states.RUNNING:
+                /* logic to bootstrap the game */
+                break;
+    }
+}
+
+export function keyPressed() {
+    switch (keyCode) {
+        case UP_ARROW:
+        case 87: // W key
+            /* logic to go UP */
+            break;
+        case DOWN_ARROW:
+        case 83: // S key
+            /* logic to go DOWN */
+            break;
+        /* etc */
+    }
+}
+```
+
+***Answer (Llama3-70b & MS Copilot & Gemini 1.5 Pro, shortened):***
+
+```javascript
+export function keyPressed() {
+    if (game.state === Game.states.START) {
+        game.setState(Game.states.RUNNING);
+    }
+    switch (keyCode) {
+        case UP_ARROW:
+        case 87: // W key
+            /* logic to go UP */
+            break;
+```
+
+***Answer (Gemini, shortened):***
+
+```javascript
+ constructor() {
+    this.state = Game.states.START;
+    this.listeningForKeyPress = false; // Flag to track key press listener state
+  }
+
+  setState(newState) {
+    this.state = newState;
+  }
+
+  startListeningForKeyPress() {
+    // Start listening for key presses only once
+    if (!this.listeningForKeyPress) {
+      window.addEventListener("keydown", this.handleKeyPress.bind(this));
+      this.listeningForKeyPress = true;
+    }
+  }
+
+  handleKeyPress(event) {
+    // Any key press triggers state change and removes listener
+    this.setState(Game.states.RUNNING);
+    window.removeEventListener("keydown", this.handleKeyPress);
+  }
+  ```
+
+> [!NOTE]
+>
+> - Llama3-70b, MS Copilot, and Gemini 1.5 Pro: all had a similar result. O top Gemini 1.5 Pro added logic to show `text("Press any key to start", width/2, height/2);`.
+> - Gemini: ignores the instructions about p5.js lib and the `keyPressed()` function from that lib. Adds generic kepress handling logic on top. Not good.
+
+***Prompt:***
+You're developing a game Pacman in Javascript using p5.js library. Modify the code below for the game to wait until any key press from the player before switching to `RUNNING` state. The state switch is done via `this.setState(Game.states.RUNNING);`. Add logic to show message that game is waiting for a key press.
+
+```javascript
+class Game {
+    static states = {
+        START: "START",
+        RUNNING: "RUNNING",
+        PACMAN_DEAD: "PACMAN_DEAD",
+        LEVEL_COMPLETE: "LEVEL_COMPLETE",
+        GAME_OVER: "GAME_OVER",
+    }
+
+    constructor() {
+        this.state = Game.states.START;
+        this.lives = 3;
+        this.currentLevelIndex = 0;  // current level, starting from 0
+    }
+
+    setState(newState) {
+        this.state = newState;
+    }
+
+    main() {
+        switch (this.state) {
+            case Game.states.START:
+                this.setLevel(0);
+                /* Switch to RUNNING happens upon the key press */
+                break;
+
+            case Game.states.RUNNING:
+                /* logic to bootstrap the game */
+                break;
+
+            case Game.states.PACMAN_DEAD:
+                // Handle Pacman death animation and options (restart, game over)
+                this.lives--;
+                if (this.lives === 0) {
+                    this.setState(Game.states.GAME_OVER);
+                } else {
+                    // Reset positions
+                    this.setLevel(this.currentLevelIndex);
+                    this.setState(Game.states.RUNNING);
+                }
+                break;
+
+            case Game.states.LEVEL_COMPLETE:
+                // Handle level completion logic (restart, next level)
+                // TODO: add more logic here.
+                this.currentLevelIndex++;
+
+                if (this.currentLevelIndex < this.levels.length) {
+                    this.setLevel(this.currentLevelIndex);
+                } else {
+                    this.setState(Game.states.GAME_OVER);
+                }
+                break;
+
+            case Game.states.GAME_OVER:
+                // Display final score and options (restart, exit)
+                console.log("Game Over!");
+                break;
+    }
+}
+
+export function keyPressed() {
+    switch (keyCode) {
+        case UP_ARROW:
+        case 87: // W key
+            /* logic to go UP */
+            break;
+        case DOWN_ARROW:
+        case 83: // S key
+            /* logic to go DOWN */
+            break;
+        /* etc */
+    }
+}
+```
+
+***Prompt:***
+The same waiting on keypress is needed when Pacman dies (`PACMAN_DEAD`) before going to `RUNNING` state, and on level completion `LEVEL_COMPLETE`, before switching to the next level. Feel free to refactor code as needed.
+
+***Answer (Gemini 1.5 Pro, shortened):***
+
+>```javascript
+>class Game {
+>    constructor() {
+>        this.state = Game.states.START;
+>        this.lives = 3;
+>        this.currentLevelIndex = 0;  // current level, starting from 0
+>        this.waitForKeyPress = false; // Flag to track if waiting for key press
+>    }
+>
+>    setState(newState) {
+>        this.state = newState;
+>        // Reset waitForKeyPress when transitioning to RUNNING state
+>        if (newState === Game.states.RUNNING) {
+>            this.waitForKeyPress = false;
+>        }
+>    }
+>
+>    main() {
+>        switch (this.state) {
+>            case Game.states.START:
+>                this.setLevel(0);
+>                this.displayWaitForKeyPressMessage();
+>                break;
+>
+>            case Game.states.RUNNING:
+>                /* logic to bootstrap the game */
+>                break;
+>
+>            case Game.states.PACMAN_DEAD:
+>                this.lives--;
+>                if (this.lives === 0) {
+>                    this.setState(Game.states.GAME_OVER);
+>                } else {
+>                    // Wait for key press before resetting
+>                    this.waitForKeyPress = true;
+>                    this.displayWaitForKeyPressMessage();
+>                }
+>                break;
+>
+>            case Game.states.LEVEL_COMPLETE:
+>                // Wait for key press before moving to next level
+>                this.waitForKeyPress = true;
+>                this.displayWaitForKeyPressMessage();
+>
+>                this.currentLevelIndex++;
+>
+>                if (this.currentLevelIndex < this.levels.length) {
+>                    this.setLevel(this.currentLevelIndex);
+>                } else {
+>                    this.setState(Game.states.GAME_OVER);
+>                }
+>                break;
+>
+>            case Game.states.GAME_OVER:
+>                // Display final score and options (restart, exit)
+>                console.log("Game Over!");
+>                break;
+>        }
+>    }
+>
+>    displayWaitForKeyPressMessage() {
+>        push();
+>        textAlign(CENTER);
+>        textSize(32);
+>        text("Press any key to continue", width / 2, height / 2);
+>        pop();
+>    }
+>}
+>
+>export function keyPressed() {
+>    if (game.waitForKeyPress) {
+>        game.waitForKeyPress = false;
+>        // Handle state transitions based on the current state
+>        switch (game.state) {
+>            case Game.states.PACMAN_DEAD:
+>                // Reset positions
+>                game.setLevel(game.currentLevelIndex);
+>                game.setState(Game.states.RUNNING);
+>                break;
+>            case Game.states.LEVEL_COMPLETE:
+>                // Move to the next level or game over
+>                game.setState(Game.states.RUNNING);
+>                break;
+>        }
+>    } else {
+>        // Handle key presses for movement in other states
+>        }
+>    }
+>}
+>```
+
+> [!NOTE]
+>
+> resulting code from Gemini 1.5 Pro is messy and convoluted.
+
+***Prompt:***
+Should the code in `START` state be changed to
+
+```javascript
+            case Game.states.START:
+                this.setLevel(this.currentLevelIndex);
+                this.displayWaitForKeyPressMessage();
+                break;
+```
+
+and simplify `keyPressed()` function? to have only `START` -> `RUNNING` logic?
+
+***Answer (Gemini 1.5 Pro)***
+Yes, you are absolutely right! You can simplify the code by using the `waitForKeyPress` flag for the `START` state as well. 
+
+Here's the modified code:
+
+```javascript
+class Game {
+    // ... (rest of the code)
+
+    main() {
+        switch (this.state) {
+            case Game.states.START:
+                // Always start with level 0
+                this.setLevel(0);
+                this.waitForKeyPress = true;
+                this.displayWaitForKeyPressMessage();
+                break;
+
+            // ... (rest of the states)
+        }
+    }
+
+    // ... (rest of the code)
+}
+
+export function keyPressed() {
+    if (game.waitForKeyPress) {
+        game.waitForKeyPress = false;
+        game.setState(Game.states.RUNNING);
+    } 
+}
+```
+
+**Explanation of Changes:**
+
+- **`START` State:**
+   - The `START` state now sets `this.waitForKeyPress = true;` so that the game waits for a key press before starting.
+   - The `this.setLevel(this.currentLevelIndex);` line is already correct as you'll always want to start at level 0.
+
+- **`keyPressed()` Function:**
+   - We have simplified `keyPressed()` to only handle the logic for switching from `START` to `RUNNING` when a key is pressed.
+
+Now, the game will behave as follows:
+
+1. **Start State:**
+   - When the game starts, it enters the `START` state.
+   - It sets `waitForKeyPress` to `true` and displays the "Press any key to continue" message.
+   - The game waits for a key press.
+
+2. **Key Press:**
+   - When a key is pressed, the `keyPressed()` function sets `waitForKeyPress` to `false` and transitions the game to the `RUNNING` state, starting the game loop.
+
+This approach is more elegant and consistent because you're using the same `waitForKeyPress` mechanism for all states where you need to wait for a key press. It also simplifies your code, making it easier to maintain.
+
+> [!NOTE]
+>
+> While some idea could be seen there, the code is incorrect.
+
+***Prompt:***
+What if states `PACMAN_DEAD` and `LEVEL_COMPLETE` would move to `START` state to reset the level, or switch level by adjusting `this.currentLevelIndex`?
+Here is the simplified code example:
+
+```javascript
+class Game {
+    // ... (rest of the code)
+
+    main() {
+        switch (this.state) {
+            case Game.states.START:
+                this.setLevel(this.currentLevelIndex);  // this will be 0 on the first instantiation via constructor
+                this.displayWaitForKeyPressMessage();
+                break;
+
+            case Game.states.PACMAN_DEAD:
+                this.lives--;
+                if (this.lives === 0) {
+                    this.setState(Game.states.GAME_OVER);
+                } else {
+                    // Reset positions
+                    this.setLevel(this.currentLevelIndex);
+                    this.setState(Game.states.START);
+                    //this.setState(Game.states.RUNNING);
+                }
+                break;
+
+            case Game.states.LEVEL_COMPLETE:
+                this.currentLevelIndex++;
+
+                if (this.currentLevelIndex < this.levels.length) {
+                    this.setLevel(this.currentLevelIndex);
+                    this.setState(Game.states.START);
+                } else {
+                    this.setState(Game.states.GAME_OVER);
+                }
+                break;
+
+            // ... (rest of the states)
+        }
+    }
+
+    // ... (rest of the code)
+}
+
+export function keyPressed() {
+    if (game.state === Game.states.START) {
+        game.setState(Game.states.RUNNING);
+    }
+    // ... (rest of the code)    
+}
+```
+
+***Answer (Gemini 1.5 Pro)***
+>You're absolutely right! Moving `PACMAN_DEAD` and `LEVEL_COMPLETE` states to `START` to handle level resets and transitions makes the logic cleaner and more consistent. It's a good choice because:
+>
+>- **Simpler State Transitions:**  You reduce the number of states and simplify state transitions, making the code more readable and maintainable.
+>- **Reusing `START` Logic:** You leverage the existing logic in the `START` state to handle waiting for a key press and resetting the level, avoiding redundancy.
+>- **Consistent Player Experience:**  The player always experiences a consistent "Press any key to continue" message when starting the game, after dying, or completing a level.
+>
+><- code ->
+>**Explanation:**
+>
+>- **Removed `PACMAN_DEAD` and `LEVEL_COMPLETE` States:**  These states are no longer needed.
+>- **Simplified `main()`:**  The code in `main()` is now more streamlined, with only the `START`, `RUNNING`, and `GAME_OVER` states.
+>- **Logic for `PACMAN_DEAD` and `LEVEL_COMPLETE`:**
+>    - When Pacman dies:
+>        -  Decrement `this.lives`.
+>        -  If `this.lives` is 0, set the state to `GAME_OVER`.
+>        -  Otherwise, set the state to `START` to reset the level.
+>    - When a level is complete:
+>        - Increment `this.currentLevelIndex`.
+>        - If it's not the last level, set the state to `START` to load the next level.
+>        - If it's the last level, set the state to `GAME_OVER`.
+>- **Simplified `keyPressed()`:** It now only handles the transition from `START` to `RUNNING`.
+>
+>This approach makes the code more readable and easier to understand, while still providing the same functionality and player experience.
+
+***Prompt:***
+Do we still need waitForKeyPress logic?
+
+***Answer (Gemini 1.5 Pro, shortened)***
+> You are right! We actually don't need the waitForKeyPress logic anymore with the current approach. The START state will handle the wait for key press before switching to RUNNING, and we are always transitioning to START after death or completing a level.
+
+***Prompt:***
+However, now on every call (60 times per second) `main()` being in `START` state will recreate all bootstrapping (re-read level, instantiate Pacman and Ghosts) via `this.setLevel(this.currentLevelIndex);` which is a waste of resources. Propose a better strategy to introduce the waiting for keypress, that won't execute `setLevel` continuously.
+
+***Answer (Gemini 1.5 Pro, shortened)***
+>```javascript
+>        switch (this.state) {
+>            case Game.states.START:
+>                if (!this.isLevelInitialized) {
+>                    // Initialize the level only once
+>                    this.setLevel(this.currentLevelIndex);
+>                    this.isLevelInitialized = true;
+>                }
+>                this.displayWaitForKeyPressMessage();
+>                break;
+>```
+
+***Prompt:***
+How does it compare to introducing a new state between `START` and `RUNNING`, specifically for waiting? What do you recommend.
+
+***Answer (Gemini 1.5 Pro)***
+>You're right, introducing a new state specifically for waiting has its merits. Let's compare the two approaches:
+>
+>**1. Using a Flag (`isLevelInitialized`)**
+>
+>- **Pros:**
+>    - Simple and straightforward.
+>    - Less code complexity as you don't need to add a new state.
+>    - More efficient if the waiting state only needs to happen once at the beginning.
+>
+>- **Cons:**
+>    - Less explicit state management.
+>    - Might be less readable if the waiting logic becomes more complex.
+>
+>**2. Introducing a New Waiting State**
+>
+>- **Pros:**
+>    - Explicit state management, which improves code readability.
+>    -  Allows for more complex waiting scenarios if needed (e.g., displaying different messages or animations).
+>    -  Better aligns with the concept of state machines.
+>
+>- **Cons:**
+>    - Requires adding a new state to the game logic, increasing code complexity.
+>    -  Might be overkill if you only need a simple wait-for-keypress functionality.
+>
+>**Recommendation:**
+>
+>For a simple scenario like waiting for a key press at the beginning of the game, **the flag approach is likely the better choice**. It's concise, efficient, and easy to understand.
+>
+>However, if your game has more complex waiting scenarios, such as:
+>
+>- Waiting for a player interaction after a cutscene.
+>- Displaying a loading screen while assets are loaded.
+>- Implementing a pause menu.
+>
+>Then, **introducing a new waiting state would be a better solution** because it provides better state management, readability, and flexibility.
+>
+>**Example with New Waiting State (`WAITING`)**
+>
+>```javascript
+>class Game {
+>    static states = {
+>        START: "START",
+>        WAITING: "WAITING", // New waiting state
+>        RUNNING: "RUNNING",
+>        GAME_OVER: "GAME_OVER",
+>    }
+>
+>    // ... (constructor and other methods)
+>
+>    main() {
+>        switch (this.state) {
+>            case Game.states.START:
+>                // Transition to WAITING state to handle key press
+>                this.setState(Game.states.WAITING);
+>                break;
+>
+>            case Game.states.WAITING:
+>                this.displayWaitForKeyPressMessage();
+>                break;
+>
+>            case Game.states.RUNNING:
+>                // ... (logic to bootstrap the game)
+>                break;
+>
+>            // ... (other states)
+>        }
+>    }
+>}
+>
+>export function keyPressed() {
+>    if (game.state === Game.states.WAITING) {
+>        game.setState(Game.states.RUNNING);
+>    }
+>}
+>```
+>
+>Ultimately, the choice depends on the complexity of your game and your personal preference for code organization.
+>
+>Let me know if you have any other questions or would like to explore more complex waiting scenarios! 

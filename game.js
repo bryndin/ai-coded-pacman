@@ -12,6 +12,7 @@ class Game {
 
     static states = {
         START: "START",
+        WAITING: "WAITING",
         RUNNING: "RUNNING",
         PACMAN_DEAD: "PACMAN_DEAD",
         LEVEL_COMPLETE: "LEVEL_COMPLETE",
@@ -45,8 +46,13 @@ class Game {
     main() {
         switch (this.state) {
             case Game.states.START:
-                this.setLevel(0);
-                this.setState(Game.states.RUNNING);
+                this.setLevel(this.currentLevelIndex);
+                this.setState(Game.states.WAITING);
+                break;
+
+            case Game.states.WAITING:
+                /* Waiting for a key press to switch to RUNNING, see keyPressed() */
+                return;
                 break;
 
             case Game.states.RUNNING:
@@ -58,7 +64,7 @@ class Game {
                 const pacmanCellY = Math.floor(this.pacman.position.y / CELL_SIZE);
 
                 this.ghosts.forEach(ghost => ghost.update(
-                    { x: pacmanCellX, y: pacmanCellY }, 
+                    { x: pacmanCellX, y: pacmanCellY },
                     this.pacman.direction,
                     getCell(this.ghosts[2].position), // TODO: replace array with map
                 ));
@@ -84,7 +90,7 @@ class Game {
                 }
 
                 if (this.isLevelComplete()) {
-                    this.setLevel(this.currentLevelIndex + 1);
+                    this.setState(Game.states.LEVEL_COMPLETE);
                     // TODO: add more logic here
                 }
 
@@ -103,7 +109,7 @@ class Game {
                 } else {
                     // Reset positions
                     this.setLevel(this.currentLevelIndex);
-                    this.setState(Game.states.RUNNING);
+                    this.setState(Game.states.START);
                 }
                 break;
 
@@ -114,6 +120,7 @@ class Game {
 
                 if (this.currentLevelIndex < this.levels.length) {
                     this.setLevel(this.currentLevelIndex);
+                    this.setState(Game.states.START);
                 } else {
                     this.setState(Game.states.GAME_OVER);
                 }

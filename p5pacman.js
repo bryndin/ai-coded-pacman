@@ -25,6 +25,10 @@ export function draw() {
 }
 
 export function keyPressed() {
+    if (game.state === Game.states.WAITING) {
+        game.setState(Game.states.RUNNING);
+    }
+
     switch (keyCode) {
         case UP_ARROW:
         case 87: // W key
