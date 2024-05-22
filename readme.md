@@ -36,8 +36,14 @@ There must be a volume of Pacman implementations, with many making it into the t
 These variations complicate putting different code blobs together and require human attention to make them compatible, especially when using different context sessions.
 
 ### Crippling Limits on Context Window in LLMs
-Models, especially the free ones, suffer from a small context window size. Limits on prompt input and reply output further cripple the experience.  Public LLMs don't publish their context window sizes, they could be as small as 8k tokens. Input/output limits could even go to 1k by the feel of it.
+Models, especially the free ones, suffer from a small context window size. Limits on prompt input and reply output further cripple the experience. Public LLMs don't publish their context window sizes, they could be as small as 8k tokens. Input/output limits could even go to 1k by the feel of it.
 
-With a larger codebase (>5k tokens) supplying code to LLMs via prompt becomes a challenge. Manually extracting subsets of code for the prompt is a distraction. Same with utilizing trunkated answers needing manual adaption. For example, code with "insert needed logic here" comments. 
+With a larger codebase (>5k tokens) supplying code to LLMs via prompt becomes a challenge. Manually extracting subsets of code for the prompt is a distraction. Same with utilizing truncated answers needing manual adaption. For example, code with "insert needed logic here" comments.
 
-Keeping code decoupled, simplifies its use in prompts.
+Finding a balance between the amount of code to give to prompt and the effort needed to integrate the response code back into the codebase could be a learning process initially. It also depends on your code organization.
+
+Suggestions:
+  - Keep code decoupled to simplify its use in prompts.
+  - Make a copy of the code and remove all parts non-related to your ask. Add text description and instructions on top to create a prompt. Expect a few tries may be needed to get the best solution.
+  - If the context window gets polluted with tries, start a new session or even switch to another LLM.
+  - Try other models with bigger context, and especially the input/output windows.
