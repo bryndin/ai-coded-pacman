@@ -2929,3 +2929,10 @@ Refactor the following JS code:  <- code from pellet.js ->
 
 ***Prompt:***
 Would it make sense to make `size` a static attribute?
+
+## Step 54
+
+**Problem:** Refactor game.js file.
+
+***Prompt:***
+Refactor the following JS code:  <- code from game.js ->
