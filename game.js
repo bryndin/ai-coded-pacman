@@ -23,15 +23,18 @@ class Game {
 
     constructor() {
         this.levels = [
-            new Level(level1.layout, level1.pacman, level1.blinky, level1.pinky, level1.inky, level1.clyde),
-        ];
+            new Level(
+                level1.layout,
+                level1.pacman,
+                new Map([["Blinky", level1.blinky], ["Pinky", level1.pinky], ["Inky", level1.inky], ["Clyde", level1.clyde]]),
+            )];
         this.score = 0;
         this.lives = 3;
         this.state = Game.states.START;
 
         this.currentLevelIndex = 0;
         this.pacman = null;
-        this.ghosts = [];
+        this.ghosts = new Map();
     }
 
     getCurrentLevel() {
@@ -63,11 +66,13 @@ class Game {
                 const pacmanCellX = Math.floor(this.pacman.position.x / CELL_SIZE);
                 const pacmanCellY = Math.floor(this.pacman.position.y / CELL_SIZE);
 
-                this.ghosts.forEach(ghost => ghost.update(
-                    { x: pacmanCellX, y: pacmanCellY },
-                    this.pacman.direction,
-                    getCell(this.ghosts[2].position), // TODO: replace array with map
-                ));
+                for (const ghost of this.ghosts.values()) {
+                    ghost.update(
+                        { x: pacmanCellX, y: pacmanCellY },
+                        this.pacman.direction,
+                        getCell(this.ghosts.get("Blinky").position), // TODO: replace array with map
+                    );
+                }
 
                 for (let dx = 0; dx <= 1; dx++) {
                     for (let dy = 0; dy <= 1; dy++) {
@@ -142,7 +147,7 @@ class Game {
     }
 
     checkPacmanGhostCollision() {
-        for (const ghost of this.ghosts) {
+        for (const ghost of this.ghosts.values()) {
             if (checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
                 return ghost;
             }
@@ -178,12 +183,22 @@ class Game {
         const level = this.getCurrentLevel();
         this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
 
-        this.ghosts = [
-            new Blinky(level.blinkyStart.start, level.blinkyStart.scatter, level),
-            new Pinky(level.pinkyStart.start, level.pinkyStart.scatter, level),
-            new Inky(level.inkyStart.start, level.inkyStart.scatter, level),
-            new Clyde(level.clydeStart.start, level.clydeStart.scatter, level),
-        ];
+        this.ghosts.set(
+            Blinky.name,
+            new Blinky(level.ghostStarts.get(Blinky.name).start, level.ghostStarts.get(Blinky.name).scatter, level)
+        )
+        this.ghosts.set(
+            Pinky.name,
+            new Pinky(level.ghostStarts.get(Pinky.name).start, level.ghostStarts.get(Pinky.name).scatter, level)
+        )
+        this.ghosts.set(
+            Inky.name,
+            new Inky(level.ghostStarts.get(Inky.name).start, level.ghostStarts.get(Inky.name).scatter, level)
+        )
+        this.ghosts.set(
+            Clyde.name,
+            new Clyde(level.ghostStarts.get(Clyde.name).start, level.ghostStarts.get(Clyde.name).scatter, level)
+        )
     }
 }
 

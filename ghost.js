@@ -4,8 +4,9 @@ const SCATTER_MODE = 'scatter';
 const CHASE_MODE = 'chase';
 
 class Ghost {
-    constructor(name, color, startCell, scatterCell, level) {
-        this.name = name;
+    static name = "Ghost";
+
+    constructor(color, startCell, scatterCell, level) {
         this.color = color;
         this.scatterCell = scatterCell;
         this.mode = CHASE_MODE;
@@ -190,8 +191,10 @@ class Ghost {
 
 
 export class Blinky extends Ghost {
+    static name = "Blinky";
+
     constructor(startCell, scatterCell, level) {
-        super('Blinky', 'red', startCell, scatterCell, level);
+        super('red', startCell, scatterCell, level);
     }
 
     chase(pacmanCell, pacmanDirection, blinkyCell) {
@@ -208,8 +211,10 @@ export class Blinky extends Ghost {
 }
 
 export class Pinky extends Ghost {
+    static name = "Pinky";
+
     constructor(startCell, scatterCell, level) {
-        super('Pinky', 'pink', startCell, scatterCell, level);
+        super('pink', startCell, scatterCell, level);
     }
 
     chase(pacmanCell, pacmanDirection, blinkyCell) {
@@ -232,8 +237,10 @@ export class Pinky extends Ghost {
 }
 
 export class Inky extends Ghost {
+    static name = "Inky";
+
     constructor(startCell, scatterCell, level) {
-        super('Inky', 'cyan', startCell, scatterCell, level);
+        super('cyan', startCell, scatterCell, level);
     }
 
     chase(pacmanCell, pacmanDirection, blinkyCell) {
@@ -270,8 +277,10 @@ export class Inky extends Ghost {
 }
 
 export class Clyde extends Ghost {
+    static name = "Clyde";
+    
     constructor(startCell, scatterCell, level) {
-        super('Clyde', 'orange', startCell, scatterCell, level);
+        super('orange', startCell, scatterCell, level);
     }
 
     chase(pacmanCell, pacmanDirection, blinkyCell) {

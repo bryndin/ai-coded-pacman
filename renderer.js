@@ -29,7 +29,7 @@ export class Renderer {
         Renderer.drawLevel(game.getCurrentLevel());
 
         Renderer.drawPacman(game.pacman.position, game.pacman.direction);
-        for (const ghost of game.ghosts) {
+        for (const ghost of game.ghosts.values()) {
             Renderer.drawGhost(ghost.position, ghost.color);
 
             if (this.showScatterCells) {

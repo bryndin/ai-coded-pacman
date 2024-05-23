@@ -5,15 +5,12 @@ class Level {
     static EMPTY = " ";
     static PELLET = ".";
 
-    constructor(layout, pacman, blinky, pinky, inky, clyde) {
+    constructor(layout, pacmanStart, ghostStarts) {
         this.layout = Level.convert(this.validate(layout));
         this.height = this.layout.length;
         this.width = this.layout[0].length;
-        this.pacmanStart = pacman;
-        this.blinkyStart = blinky;
-        this.pinkyStart = pinky;
-        this.inkyStart = inky;
-        this.clydeStart = clyde;
+        this.pacmanStart = pacmanStart;
+        this.ghostStarts = ghostStarts;
 
         this.reachableCells = this.findReachableCells(this.pacmanStart);
         this.pelletCount = this.countPellets();

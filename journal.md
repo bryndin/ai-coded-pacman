@@ -2912,3 +2912,10 @@ const DIRECTIONS = {
     RIGHT: { x: 1, y: 0 },
 };
 ```
+
+## Step 52
+
+**Problem:** Use map for ghosts, instead of an array.
+
+***Prompt:***
+In JS, can I iterate over map with forEach?
