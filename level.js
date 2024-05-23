@@ -1,32 +1,30 @@
+import DIRECTIONS from "./directions.js";
+
 class Level {
     static WALL = "#";
     static EMPTY = " ";
     static PELLET = ".";
 
-    constructor(layout, pacman, blinky, pinky, inky, clyde) {
+    constructor(layout, pacmanStart, ghostStarts) {
         this.layout = Level.convert(this.validate(layout));
         this.height = this.layout.length;
         this.width = this.layout[0].length;
-        this.pacmanStart = pacman;
-        this.blinkyStart = blinky;
-        this.pinkyStart = pinky;
-        this.inkyStart = inky;
-        this.clydeStart = clyde;
+        this.pacmanStart = pacmanStart;
+        this.ghostStarts = ghostStarts;
 
-        this.reachableCells = findReachableCells(this.layout, this.pacmanStart); // Set of `${x},${y}`
+        this.reachableCells = this.findReachableCells(this.pacmanStart);
         this.pelletCount = this.countPellets();
-
     }
 
     validate(layout) {
         if (!layout || !layout.length || !layout[0].length) {
-            throw new Error("Invalid level layout: Empty or missing data");
+            throw new Error("Invalid level layout: Layout cannot be empty.");
         }
 
         const rowLength = layout[0].length;
         for (let i = 1; i < layout.length; i++) {
             if (layout[i].length !== rowLength) {
-                throw new Error("Invalid level layout: Inconsistent row lengths");
+                throw new Error(`Invalid level layout: Row ${i} length does not match.`);
             }
         }
         return layout;
@@ -36,56 +34,51 @@ class Level {
         return layout.map(row => row.split(''));
     }
 
-    // Count the number of pellets in the layout
     countPellets() {
-        let count = 0;
-        for (let row of this.layout) {
-            for (let cell of row) {
-                if (cell === '.') {
-                    count++;
-                }
-            }
-        }
-        return count;
+        return this.layout.flat().filter(cell => cell === Level.PELLET).length;
     }
 
-    // Remove a pellet at the given coordinates
     removePellet(x, y) {
-        if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
-            throw new Error("Invalid coordinates. Pellet removal outside level bounds.");
+        if (this.isOutOfBounds(x, y)) {
+            throw new Error("Invalid coordinates: Pellet removal outside level bounds.");
         }
 
         if (this.layout[y][x] === Level.PELLET) {
-            this.layout[y][x] = " ";
+            this.layout[y][x] = Level.EMPTY;
             this.pelletCount--;
         }
     }
-}
 
-function findReachableCells(layout, start) {
-    const reachableCells = new Set();
-    const queue = [start];
-    const visited = new Set();
+    isOutOfBounds(x, y) {
+        return x < 0 || x >= this.width || y < 0 || y >= this.height;
+    }
 
-    while (queue.length > 0) {
-        const { x, y } = queue.shift();
-        if (visited.has(`${x},${y}`)) continue;
-        visited.add(`${x},${y}`);
+    findReachableCells(start) {
+        const reachableCells = new Set();
+        const queue = [start];
+        const visited = new Set();
 
-        if (layout[y][x] !== Level.WALL) {
-            reachableCells.add(`${x},${y}`);
+        while (queue.length > 0) {
+            const { x, y } = queue.shift();
+            const key = `${x},${y}`;
+            if (visited.has(key)) continue;
+            visited.add(key);
 
-            for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1], [0, 1]]) {
-                const nx = x + dx;
-                const ny = y + dy;
-                if (nx >= 0 && nx < layout[0].length && ny >= 0 && ny < layout.length) {
-                    queue.push({ x: nx, y: ny });
+            if (this.layout[y][x] !== Level.WALL) {
+                reachableCells.add(key);
+
+                for (const { x: dx, y: dy } of Object.values(DIRECTIONS)) {
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (!this.isOutOfBounds(nx, ny)) {
+                        queue.push({ x: nx, y: ny });
+                    }
                 }
             }
         }
-    }
 
-    return reachableCells;
+        return reachableCells;
+    }
 }
 
 export default Level;

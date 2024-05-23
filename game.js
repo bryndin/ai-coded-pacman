@@ -23,7 +23,16 @@ class Game {
 
     constructor() {
         this.levels = [
-            new Level(level1.layout, level1.pacman, level1.blinky, level1.pinky, level1.inky, level1.clyde),
+            new Level(
+                level1.layout,
+                level1.pacman,
+                new Map([
+                    ["Blinky", level1.blinky],
+                    ["Pinky", level1.pinky],
+                    ["Inky", level1.inky],
+                    ["Clyde", level1.clyde]
+                ]),
+            )
         ];
         this.score = 0;
         this.lives = 3;
@@ -31,7 +40,7 @@ class Game {
 
         this.currentLevelIndex = 0;
         this.pacman = null;
-        this.ghosts = [];
+        this.ghosts = new Map();
     }
 
     getCurrentLevel() {
@@ -53,27 +62,27 @@ class Game {
             case Game.states.WAITING:
                 /* Waiting for a key press to switch to RUNNING, see keyPressed() */
                 return;
-                break;
 
             case Game.states.RUNNING:
                 const level = this.getCurrentLevel();
                 this.pacman.move(level.layout);
 
+                const pacmanCell = getCell(this.pacman.position);
+
+                for (const ghost of this.ghosts.values()) {
+                    ghost.update(
+                        pacmanCell,
+                        this.pacman.direction,
+                        getCell(this.ghosts.get("Blinky").position)
+                    );
+                }
+
                 // Check for Pacman collision with pellets in four neighboring cells
-                const pacmanCellX = Math.floor(this.pacman.position.x / CELL_SIZE);
-                const pacmanCellY = Math.floor(this.pacman.position.y / CELL_SIZE);
-
-                this.ghosts.forEach(ghost => ghost.update(
-                    { x: pacmanCellX, y: pacmanCellY },
-                    this.pacman.direction,
-                    getCell(this.ghosts[2].position), // TODO: replace array with map
-                ));
-
                 for (let dx = 0; dx <= 1; dx++) {
                     for (let dy = 0; dy <= 1; dy++) {
-                        const cellX = pacmanCellX + dx;
-                        const cellY = pacmanCellY + dy;
-                        if (this.checkPelletCollision(cellX, cellY)) {
+                        const cellX = pacmanCell.x + dx;
+                        const cellY = pacmanCell.y + dy;
+                        if (this.isPelletCollision(cellX, cellY)) {
                             this.score++;
                             level.removePellet(cellX, cellY);
 
@@ -142,7 +151,7 @@ class Game {
     }
 
     checkPacmanGhostCollision() {
-        for (const ghost of this.ghosts) {
+        for (const ghost of this.ghosts.values()) {
             if (checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
                 return ghost;
             }
@@ -151,21 +160,21 @@ class Game {
         return null;
     }
 
-    checkPelletCollision(cellX, cellY) {
+    isPelletCollision(cellX, cellY) {
         const level = this.getCurrentLevel();
 
         // Check if the cell coordinates are within the layout limits
         if ((0 <= cellX && cellX < level.layout[0].length) && (0 <= cellY && cellY < level.layout.length) && level.layout[cellY][cellX] === Level.PELLET) {
             // Compute its collision box in canvas coordinates
             const pellet = new Pellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
-            return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, pellet.size);
+            return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, Pellet.size);
         }
         return false;
     }
 
     isLevelComplete() {
-        // Implement your logic to check if all pellets are eaten
-        return false;
+        const level = this.getCurrentLevel();
+        return level.pelletCount === 0;
     }
 
     setLevel(n) {
@@ -178,12 +187,22 @@ class Game {
         const level = this.getCurrentLevel();
         this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
 
-        this.ghosts = [
-            new Blinky(level.blinkyStart.start, level.blinkyStart.scatter, level),
-            new Pinky(level.pinkyStart.start, level.pinkyStart.scatter, level),
-            new Inky(level.inkyStart.start, level.inkyStart.scatter, level),
-            new Clyde(level.clydeStart.start, level.clydeStart.scatter, level),
-        ];
+        this.ghosts.set(
+            Blinky.name,
+            new Blinky(level.ghostStarts.get(Blinky.name).start, level.ghostStarts.get(Blinky.name).scatter, level)
+        );
+        this.ghosts.set(
+            Pinky.name,
+            new Pinky(level.ghostStarts.get(Pinky.name).start, level.ghostStarts.get(Pinky.name).scatter, level)
+        );
+        this.ghosts.set(
+            Inky.name,
+            new Inky(level.ghostStarts.get(Inky.name).start, level.ghostStarts.get(Inky.name).scatter, level)
+        );
+        this.ghosts.set(
+            Clyde.name,
+            new Clyde(level.ghostStarts.get(Clyde.name).start, level.ghostStarts.get(Clyde.name).scatter, level)
+        );
     }
 }
 

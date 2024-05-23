@@ -1,39 +1,35 @@
 import Level from "./level.js";
 import { CELL_SIZE } from "./renderer.js";
+import DIRECTIONS from "./directions.js";
 
 class Pacman {
-  static NONE = { x: 0, y: 0 };
-  static RIGHT = { x: 1, y: 0 };
-  static LEFT = { x: -1, y: 0 };
-  static UP = { x: 0, y: -1 };
-  static DOWN = { x: 0, y: 1 };
-
   constructor(startPosition, size, speed) {
-    this.position = { x: (startPosition.x + 0.5) * CELL_SIZE, y: (startPosition.y + 0.5) * CELL_SIZE };
+    this.position = {
+      x: (startPosition.x + 0.5) * CELL_SIZE,
+      y: (startPosition.y + 0.5) * CELL_SIZE
+    };
     this.size = size;
     this.speed = speed;
-    this.direction = Pacman.NONE;
-    this.desiredDirection = Pacman.NONE;
+    this.direction = DIRECTIONS.NONE;
+    this.desiredDirection = DIRECTIONS.NONE;
   }
 
   move(layout) {
+    this.attemptMove(this.desiredDirection, layout);
+    if (this.direction !== this.desiredDirection) {
+      this.attemptMove(this.direction, layout);
+    }
+  }
+
+  attemptMove(direction, layout) {
     const newPosition = {
-      x: this.position.x + this.speed * this.desiredDirection.x,
-      y: this.position.y + this.speed * this.desiredDirection.y,
+      x: this.position.x + this.speed * direction.x,
+      y: this.position.y + this.speed * direction.y,
     };
 
     if (this.canMove(layout, newPosition)) {
       this.position = newPosition;
-      this.direction = this.desiredDirection;
-    } else {
-      const currentPosition = {
-        x: this.position.x + this.speed * this.direction.x,
-        y: this.position.y + this.speed * this.direction.y,
-      };
-
-      if (this.canMove(layout, currentPosition)) {
-        this.position = currentPosition;
-      }
+      this.direction = direction;
     }
   }
 
@@ -46,11 +42,15 @@ class Pacman {
     const gridX2 = Math.floor((position.x + this.size / 2 - 1) / CELL_SIZE);
     const gridY1 = Math.floor((position.y - this.size / 2) / CELL_SIZE);
     const gridY2 = Math.floor((position.y + this.size / 2 - 1) / CELL_SIZE);
-    return layout[gridY1] && layout[gridY2] &&
-      layout[gridY2][gridX2] !== Level.WALL &&
-      layout[gridY1][gridX2] !== Level.WALL &&
-      layout[gridY2][gridX1] !== Level.WALL &&
-      layout[gridY1][gridX1] !== Level.WALL;
+
+    // Check all four corners for wall collisions
+    if (layout[gridY1]?.[gridX1] === Level.WALL ||
+      layout[gridY2]?.[gridX1] === Level.WALL ||
+      layout[gridY1]?.[gridX2] === Level.WALL ||
+      layout[gridY2]?.[gridX2] === Level.WALL) {
+      return false;
+    }
+    return true;
   }
 }
 
