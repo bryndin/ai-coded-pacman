@@ -1,6 +1,6 @@
+import DIRECTIONS from './directions.js';
 import Game from './game.js';
 import Level from './level.js';
-import Pacman from './pacman.js';
 
 export const CELL_SIZE = 16;
 const HEADER_HEIGHT = 3 * CELL_SIZE;
@@ -67,9 +67,9 @@ export class Renderer {
         const size = CELL_SIZE;
 
         let angle = 0;
-        if (dir === Pacman.LEFT) angle = PI; // Left
-        else if (dir === Pacman.UP) angle = 3 * PI / 2; // Up
-        else if (dir === Pacman.DOWN) angle = PI / 2; // Down
+        if (dir === DIRECTIONS.LEFT) angle = PI; // Left
+        else if (dir === DIRECTIONS.UP) angle = 3 * PI / 2; // Up
+        else if (dir === DIRECTIONS.DOWN) angle = PI / 2; // Down
 
         push();
         translate(pos.x, pos.y);

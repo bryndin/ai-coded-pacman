@@ -1,5 +1,5 @@
 import Game from "./game.js";
-import Pacman from "./pacman.js";
+import DIRECTIONS from "./directions.js";
 import { Renderer } from "./renderer.js";
 
 // Add setup and draw to the global scope
@@ -32,19 +32,19 @@ export function keyPressed() {
     switch (keyCode) {
         case UP_ARROW:
         case 87: // W key
-            game.pacman.setDesiredDirection(Pacman.UP);
+            game.pacman.setDesiredDirection(DIRECTIONS.UP);
             break;
         case DOWN_ARROW:
         case 83: // S key
-            game.pacman.setDesiredDirection(Pacman.DOWN);
+            game.pacman.setDesiredDirection(DIRECTIONS.DOWN);
             break;
         case LEFT_ARROW:
         case 65: // A key
-            game.pacman.setDesiredDirection(Pacman.LEFT);
+            game.pacman.setDesiredDirection(DIRECTIONS.LEFT);
             break;
         case RIGHT_ARROW:
         case 68: // D key
-            game.pacman.setDesiredDirection(Pacman.RIGHT);
+            game.pacman.setDesiredDirection(DIRECTIONS.RIGHT);
             break;
 
         // Developers visualization
