@@ -163,7 +163,7 @@ class Game {
         if ((0 <= cellX && cellX < level.layout[0].length) && (0 <= cellY && cellY < level.layout.length) && level.layout[cellY][cellX] === Level.PELLET) {
             // Compute its collision box in canvas coordinates
             const pellet = new Pellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
-            return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, pellet.size);
+            return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, Pellet.size);
         }
         return false;
     }
