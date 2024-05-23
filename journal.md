@@ -2919,3 +2919,13 @@ const DIRECTIONS = {
 
 ***Prompt:***
 In JS, can I iterate over map with forEach?
+
+## Step 53
+
+**Problem:** Refactor pellet.js file.
+
+***Prompt:***
+Refactor the following JS code:  <- code from pellet.js ->
+
+***Prompt:***
+Would it make sense to make `size` a static attribute?
