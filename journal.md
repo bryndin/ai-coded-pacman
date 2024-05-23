@@ -2892,3 +2892,23 @@ This is a Pacman class in Javascript that is used by the Pacman game. Suggest im
 >
 >
 >This updated code separates the movement logic into a separate function `calculatePosition`, which makes the code easier to read and understand. It also separates the collision detection into a separate function `checkCollision`, which makes the code easier to test and maintain.
+
+## Step 51
+
+**Problem:** Refactor level.js
+
+***Prompt:***
+This is a Level class representing a level in a Pacman game implemented in Javascript. Suggest improvements to the code, and generate an updated code.
+<- code in level.js ->
+
+***Prompt:***
+Generate a javascript function to convert the following object to an array of consts
+
+```javascript
+const DIRECTIONS = {
+    UP: { x: 0, y: -1 },
+    DOWN: { x: 0, y: 1 },
+    LEFT: { x: -1, y: 0 },
+    RIGHT: { x: 1, y: 0 },
+};
+```
