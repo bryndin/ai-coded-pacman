@@ -4,6 +4,7 @@ class Level {
     static WALL = "#";
     static EMPTY = " ";
     static PELLET = ".";
+    static POWER_PELLET = "O";
 
     constructor(layout, pacmanStart, ghostStarts) {
         this.layout = Level.convert(this.validate(layout));
@@ -46,6 +47,16 @@ class Level {
         if (this.layout[y][x] === Level.PELLET) {
             this.layout[y][x] = Level.EMPTY;
             this.pelletCount--;
+        }
+    }
+
+    removePowerPellet(x, y) {
+        if (this.isOutOfBounds(x, y)) {
+            throw new Error("Invalid coordinates: Power pellet removal outside level bounds.");
+        }
+
+        if (this.layout[y][x] === Level.POWER_PELLET) {
+            this.layout[y][x] = Level.EMPTY;
         }
     }
 

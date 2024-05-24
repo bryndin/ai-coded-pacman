@@ -1,7 +1,7 @@
 import Level from './level.js';
 import Pacman from './pacman.js';
 import { Blinky, Pinky, Inky, Clyde } from './ghost.js';
-import Pellet from './pellet.js';
+import { Pellet, PowerPellet } from './pellet.js';
 import { CELL_SIZE, getCell } from './renderer.js';
 
 // Import level data from individual files
@@ -77,7 +77,7 @@ class Game {
                     );
                 }
 
-                // Check for Pacman collision with pellets in four neighboring cells
+                // Check for Pacman collision with pellets in two neighboring cells
                 for (let dx = 0; dx <= 1; dx++) {
                     for (let dy = 0; dy <= 1; dy++) {
                         const cellX = pacmanCell.x + dx;
@@ -89,6 +89,12 @@ class Game {
                             if (level.pelletCount === 0) {
                                 this.setState(Game.states.LEVEL_COMPLETE);
                             }
+                        }
+
+                        if (this.isPowerPelletCollision(cellX, cellY)) {
+                            level.removePowerPellet(cellX, cellY);
+                            // TODO: add logic for eating power pellet effect
+                            console.log("Ate Power Pellet");
                         }
                     }
                 }
@@ -164,10 +170,22 @@ class Game {
         const level = this.getCurrentLevel();
 
         // Check if the cell coordinates are within the layout limits
-        if ((0 <= cellX && cellX < level.layout[0].length) && (0 <= cellY && cellY < level.layout.length) && level.layout[cellY][cellX] === Level.PELLET) {
+        if (!level.isOutOfBounds(cellX, cellY) && level.layout[cellY][cellX] === Level.PELLET) {
             // Compute its collision box in canvas coordinates
             const pellet = new Pellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
             return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, Pellet.size);
+        }
+        return false;
+    }
+
+    isPowerPelletCollision(cellX, cellY) {
+        const level = this.getCurrentLevel();
+
+        // Check if the cell coordinates are within the layout limits
+        if (!level.isOutOfBounds(cellX, cellY) && level.layout[cellY][cellX] === Level.POWER_PELLET) {
+            // Compute its collision box in canvas coordinates
+            const pellet = new PowerPellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
+            return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, PowerPellet.size);
         }
         return false;
     }

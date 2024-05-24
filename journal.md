@@ -2936,3 +2936,127 @@ Would it make sense to make `size` a static attribute?
 
 ***Prompt:***
 Refactor the following JS code:  <- code from game.js ->
+
+## Step 55
+
+**Problem:** Game has no powerup pellets.
+
+***Prompt:***
+What is the name of Pacmans power pellet?
+
+***Answer:***
+>Pac-Man's power pellets don't have a specific name.  They are simply called "power pellets". 
+
+***Prompt:***
+Given Javascript class `Pellet` representing a pellet in Pacman game, generate a class for Power Pellet, that is of bigger size.
+```javascript
+class Pellet {
+    static size = CELL_SIZE / 3;
+
+    constructor(cellPosition) {
+        this.position = this.calculatePosition(cellPosition);
+    }
+
+    calculatePosition(cellPosition) {
+        const offset = (CELL_SIZE - Pellet.size) / 2;
+        return {
+            x: cellPosition.x + offset,
+            y: cellPosition.y + offset
+        };
+    }
+}
+```
+
+***Answer (Gemini 1.5 Pro)***
+>```javascript
+>class PowerPellet extends Pellet {
+>  static size = Pellet.size * 2; // Assuming "bigger" means twice the size
+>
+>  constructor(cellPosition) {
+>    super(cellPosition); 
+>  }
+>
+>  // We inherit calculatePosition from Pellet, 
+>  // so it automatically uses the larger PowerPellet.size
+>} 
+>```
+>
+>**Explanation:**
+>
+>1. **Inheritance:** `PowerPellet extends Pellet` means it inherits all properties and methods from `Pellet`.
+>2. **Size:** We override the `static size` property to be twice the size of a regular `Pellet`.
+>3. **Constructor:**
+>   - We call `super(cellPosition)` in the `PowerPellet` constructor.  This does the following:
+>     - Calls the `Pellet` class constructor, ensuring the `position` is calculated.
+>     - Importantly, because `calculatePosition` is inherited and `PowerPellet.size` is now larger, the position calculation will automatically use the correct, bigger size for the power pellet.
+>
+>**Key Point:**  We minimize code duplication by inheriting the position calculation logic. The only change needed is defining the larger `PowerPellet.size`. 
+>
+
+***Prompt:***
+What does "pellet.js:4 Uncaught ReferenceError: Cannot access 'CELL_SIZE' before initialization" error mean in Javascipt in the following code
+```javascript
+import { CELL_SIZE } from "./renderer.js";
+
+export class Pellet {
+    static size = CELL_SIZE / 8;
+
+    constructor(cellPosition) {
+        this.position = this.calculatePosition(cellPosition);
+    }
+
+    calculatePosition(cellPosition) {
+        const offset = (CELL_SIZE - Pellet.size) / 2;
+        return {
+            x: cellPosition.x + offset,
+            y: cellPosition.y + offset
+        };
+    }
+}
+```
+
+***Answer (Gemini 1.5 Pro):***
+>The error "pellet.js:4 Uncaught ReferenceError: Cannot access 'CELL_SIZE' before initialization" means you are trying to use the value of `CELL_SIZE` before it has been fully defined and assigned a value by the `renderer.js` module. 
+>
+>**Here's why this happens:**
+>
+>* **Circular Dependency:**  There's likely a circular dependency between `pellet.js` and `renderer.js`. This means:
+>    1. `pellet.js` imports `CELL_SIZE` from `renderer.js`.
+>    2. `renderer.js` might be importing something from `pellet.js` as well. 
+>    3. This circular dependency creates a situation where the code tries to access `CELL_SIZE` in `pellet.js` before `renderer.js` has finished executing and setting its value.
+>
+>**How to fix it:**
+>
+>You need to break the circular dependency. Here are a few common approaches:
+>
+>1. **Move `CELL_SIZE` to a Separate Module:** Create a third file (e.g., `constants.js`) to store shared values:
+>
+>   ```javascript
+>   // constants.js
+>   export const CELL_SIZE = 20; 
+>   ```
+>
+>   Then, import from `constants.js` in both `pellet.js` and `renderer.js`.
+>
+>2. **Pass `CELL_SIZE` as an Argument:** If `renderer.js` is responsible for creating `Pellet` instances:
+>
+>   ```javascript
+>   // renderer.js
+>   import { Pellet } from "./pellet.js";
+>
+>   const CELL_SIZE = 20; 
+>
+>   const pellet = new Pellet(cellPosition, CELL_SIZE); 
+>
+>   // pellet.js
+>   export class Pellet {
+>       // ...
+>       constructor(cellPosition, cellSize) { 
+>           // ... use cellSize here
+>       }
+>   }
+>   ```
+>
+>3. **Refactor to Avoid the Cycle:**  Analyze your code structure. Can you redesign parts of `renderer.js` or `pellet.js` to avoid needing the circular import in the first place? This might involve moving code between the modules or changing how they interact.
+>
+>The best solution depends on your project's architecture, but the goal is always to eliminate the circular dependency to ensure variables are defined before they are used.
