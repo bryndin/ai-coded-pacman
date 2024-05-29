@@ -3292,3 +3292,27 @@ Add logic for ghosts frightened mode,  use the existing Javascript code for clas
 > [!NOTE]
 > Eating a pellet turns on the frieghtened mode. Nothing turns is off for now. No visuals. No ghot eating.
 
+## Step 57
+
+**Problem:** Frightened mode doesn't turn off. Need to turn it off via timer.
+
+***Prompt:***
+The logic below is a Javascript implementation of class Game for the classic Pacman game. It turns the ghost frightened mode on, but doesn't have logic for the timer that turns it off. Add that logic. Look at the line "// TODO: add logic for turning the frightened mode off via timer" where the ghost mode is turned on. <- code of Game class ->
+
+***Answer (ChatGPT-4o, code removed):***
+>To implement the logic for turning off the ghosts' frightened mode via a timer, we need to:
+>1. Set a timer when Pac-Man eats a power pellet.
+>2. Revert the ghosts back to their previous mode (scatter or chase) after the timer expires.
+>
+>We'll add a method to handle the timer and update the state transition logic accordingly. Here is the updated code:
+>
+>### Key Additions:
+>1. **Timer Logic for Frightened Mode**:
+>   - Added `activateFrightenedMode` and `deactivateFrightenedMode` methods.
+>   - `activateFrightenedMode` sets all ghosts to frightened mode and starts a timer.
+>   - When the timer expires, `deactivateFrightenedMode` is called to revert ghosts back to scatter mode.
+>
+>2. **Constants**:
+>   - Added `FRIGHTENED_MODE_DURATION` to define the duration of frightened mode.
+>
+>These changes ensure that the ghosts return to their previous mode after the frightened mode duration expires.

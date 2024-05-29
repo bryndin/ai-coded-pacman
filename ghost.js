@@ -1,7 +1,7 @@
 import { getCell, CELL_SIZE } from "./renderer.js";
 
-const SCATTER_MODE = 'scatter';
-const CHASE_MODE = 'chase';
+export const SCATTER_MODE = 'scatter';
+export const CHASE_MODE = 'chase';
 export const FRIGHTENED_MODE = 'frightened';
 
 class Ghost {
