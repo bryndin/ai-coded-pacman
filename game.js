@@ -1,6 +1,6 @@
 import Level from './level.js';
 import Pacman from './pacman.js';
-import { Blinky, Pinky, Inky, Clyde, FRIGHTENED_MODE} from './ghost.js';
+import { Blinky, Pinky, Inky, Clyde, FRIGHTENED_MODE, SCATTER_MODE, CHASE_MODE } from './ghost.js';
 import { Pellet, PowerPellet } from './pellet.js';
 import { CELL_SIZE, getCell } from './renderer.js';
 
@@ -9,6 +9,7 @@ import level1 from './levels/1.js';
 
 class Game {
     static PELLET_SCORE = 1;
+    static FRIGHTENED_MODE_DURATION = 7000; // 7 seconds
 
     static states = {
         START: "START",
@@ -18,7 +19,6 @@ class Game {
         LEVEL_COMPLETE: "LEVEL_COMPLETE",
         PAUSED: "PAUSED",
         GAME_OVER: "GAME_OVER",
-        POWERUP: "POWERUP",
     };
 
     constructor() {
@@ -41,6 +41,7 @@ class Game {
         this.currentLevelIndex = 0;
         this.pacman = null;
         this.ghosts = new Map();
+        this.frightenedModeTimer = null; // Timer for frightened mode
     }
 
     getCurrentLevel() {
@@ -93,11 +94,7 @@ class Game {
 
                         if (this.isPowerPelletCollision(cellX, cellY)) {
                             level.removePowerPellet(cellX, cellY);
-                            // TODO: add logic for eating power pellet effect
-                            for (const ghost of this.ghosts.values()) {
-                                ghost.setMode(FRIGHTENED_MODE);
-                            }
-                            console.log("Ate Power Pellet");
+                            this.activateFrightenedMode();
                         }
                     }
                 }
@@ -153,6 +150,27 @@ class Game {
                 console.log("Game Over!");
                 break;
         }
+    }
+
+    activateFrightenedMode() {
+        for (const ghost of this.ghosts.values()) {
+            ghost.setMode(FRIGHTENED_MODE);
+        }
+        if (this.frightenedModeTimer) {
+            clearTimeout(this.frightenedModeTimer);
+        }
+        this.frightenedModeTimer = setTimeout(() => {
+            this.deactivateFrightenedMode();
+        }, Game.FRIGHTENED_MODE_DURATION);
+    }
+
+    deactivateFrightenedMode() {
+        for (const ghost of this.ghosts.values()) {
+            // Revert to previous mode; defaulting to CHASE_MODE for simplicity
+            // You might want to store the previous mode and revert back to it
+            ghost.setMode(CHASE_MODE);
+        }
+        this.frightenedModeTimer = null;
     }
 
     checkGameCompletion() {
