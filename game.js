@@ -1,6 +1,6 @@
 import Level from './level.js';
 import Pacman from './pacman.js';
-import { Blinky, Pinky, Inky, Clyde } from './ghost.js';
+import { Blinky, Pinky, Inky, Clyde, FRIGHTENED_MODE} from './ghost.js';
 import { Pellet, PowerPellet } from './pellet.js';
 import { CELL_SIZE, getCell } from './renderer.js';
 
@@ -94,6 +94,9 @@ class Game {
                         if (this.isPowerPelletCollision(cellX, cellY)) {
                             level.removePowerPellet(cellX, cellY);
                             // TODO: add logic for eating power pellet effect
+                            for (const ghost of this.ghosts.values()) {
+                                ghost.setMode(FRIGHTENED_MODE);
+                            }
                             console.log("Ate Power Pellet");
                         }
                     }
