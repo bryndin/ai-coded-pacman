@@ -2,6 +2,7 @@ import { getCell, CELL_SIZE } from "./renderer.js";
 
 const SCATTER_MODE = 'scatter';
 const CHASE_MODE = 'chase';
+export const FRIGHTENED_MODE = 'frightened';
 
 class Ghost {
     static name = "Ghost";
@@ -11,19 +12,21 @@ class Ghost {
         this.scatterCell = scatterCell;
         this.mode = CHASE_MODE;
         this.position = { x: (startCell.x + 0.5) * CELL_SIZE, y: (startCell.y + 0.5) * CELL_SIZE };
-        this.direction = { x: 0, y: 0 }; // Initialize starting direction
         this.speed = 2;
         this.path = []; // Store the calculated path
         this.level = level;
         this.size = CELL_SIZE;
         this.targetCell = startCell;
+        this.lastDirection = null; // Store the last direction to prevent immediate reversals
     }
 
     update(pacmanCell, pacmanDirection, blinkyCell) {
         if (this.mode === SCATTER_MODE) {
             this.scatter();
-        } else {
+        } else if (this.mode === CHASE_MODE) {
             this.chase(pacmanCell, pacmanDirection, blinkyCell);
+        } else if (this.mode === FRIGHTENED_MODE) {
+            this.frightened();
         }
         this.move();
     }
@@ -41,7 +44,6 @@ class Ghost {
             this.path = this.findPath(getCell(this.position), this.scatterCell);
         }
         this.targetCell = this.scatterCell;   // dev visualization
-
     }
 
     /**
@@ -55,6 +57,28 @@ class Ghost {
      */
     chase(pacmanCell, pacmanDirection, blinkyCell) {
         // Chase behavior depends on the specific ghost
+    }
+
+    /**
+     * Implements the frightened mode movement for a ghost. 
+     * Ghosts move randomly, avoiding Pacman's cell.
+     */
+    frightened() {
+        if (this.path.length === 0) {
+            const currentCell = getCell(this.position);
+            const possibleDirections = this.getNeighbors(currentCell).filter(cell => {
+                const oppositeDirection = { x: currentCell.x - cell.x, y: currentCell.y - cell.y };
+                return !this.lastDirection ||
+                    (oppositeDirection.x !== this.lastDirection.x || oppositeDirection.y !== this.lastDirection.y);
+            });
+
+            if (possibleDirections.length > 0) {
+                const randomIndex = Math.floor(Math.random() * possibleDirections.length);
+                this.targetCell = possibleDirections[randomIndex];
+                this.path = this.findPath(currentCell, this.targetCell);
+                this.lastDirection = { x: this.targetCell.x - currentCell.x, y: this.targetCell.y - currentCell.y };
+            }
+        }
     }
 
     move() {
@@ -72,6 +96,11 @@ class Ghost {
 
     setMode(newMode) {
         this.mode = newMode;
+        if (newMode === FRIGHTENED_MODE) {
+            this.speed = 1; // Slow down the ghost in frightened mode
+        } else {
+            this.speed = 2; // Reset to normal speed
+        }
     }
 
     // Helper functions
@@ -186,9 +215,7 @@ class Ghost {
         let dy = cellPosition.y - target.y;
         return Math.sqrt(dx * dx + dy * dy);
     }
-
 }
-
 
 export class Blinky extends Ghost {
     static name = "Blinky";
@@ -278,7 +305,7 @@ export class Inky extends Ghost {
 
 export class Clyde extends Ghost {
     static name = "Clyde";
-    
+
     constructor(startCell, scatterCell, level) {
         super('orange', startCell, scatterCell, level);
     }
@@ -300,10 +327,3 @@ export class Clyde extends Ghost {
 
     }
 }
-
-Ghost.prototype.calculateDirection = function (target) {
-    // Calculate direction towards target
-    let dx = target.x - this.position.x;
-    let dy = target.y - this.position.y;
-    return { x: Math.sign(dx), y: Math.sign(dy) };
-};

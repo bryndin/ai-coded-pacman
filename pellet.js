@@ -1,7 +1,8 @@
 import { CELL_SIZE } from "./renderer.js";
 
-class Pellet {
-    static size = CELL_SIZE / 3;
+export class Pellet {
+    // TODO: size must be defined by the renderer
+    static size = CELL_SIZE / 8;
 
     constructor(cellPosition) {
         this.position = this.calculatePosition(cellPosition);
@@ -16,4 +17,11 @@ class Pellet {
     }
 }
 
-export default Pellet;
+export class PowerPellet extends Pellet {
+    // TODO: size must be defined by the renderer
+    static size = CELL_SIZE / 1.6;
+
+    constructor(cellPosition) {
+        super(cellPosition);
+    }
+}

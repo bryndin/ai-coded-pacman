@@ -57,6 +57,9 @@ export class Renderer {
                     case Level.PELLET:
                         Renderer.drawPellet(x * CELL_SIZE, y * CELL_SIZE);
                         break;
+                    case Level.POWER_PELLET:
+                        Renderer.drawPowerPellet(x * CELL_SIZE, y * CELL_SIZE);
+                        break;
                 }
             }
         }
@@ -124,7 +127,14 @@ export class Renderer {
     }
 
     static drawPellet(x, y) {
-        const size = CELL_SIZE / 3;
+        const size = CELL_SIZE / 8;
+
+        fill(255, 255, 0);  // yellow
+        circle(x + CELL_SIZE / 2, y + CELL_SIZE / 2, size);
+    }
+
+    static drawPowerPellet(x, y) {
+        const size = CELL_SIZE / 1.6;
 
         fill(255, 255, 0);  // yellow
         circle(x + CELL_SIZE / 2, y + CELL_SIZE / 2, size);
