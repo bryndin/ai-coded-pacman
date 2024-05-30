@@ -26,7 +26,7 @@ export function draw() {
 
 export function keyPressed() {
     if (game.state === Game.states.WAITING) {
-        game.setState(Game.states.RUNNING);
+        game.isKeypress = true;
     }
 
     switch (keyCode) {

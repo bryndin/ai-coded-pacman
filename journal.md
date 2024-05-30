@@ -3341,3 +3341,113 @@ Great, we have timer now, next implement the logic for pacman to eat Ghosts when
 
 > [!NOTE]
 > Notice that ChatGPT-4o ran out of output context size
+
+## Step 59
+
+**Problem:** Ghosts must switch between scatter and chase modes periodically
+
+***Prompt:***
+Ghosts in the Classic Pacman game periodically switch between chase and scatter modes. Implement the similar logic.
+
+***Answer (ChatGPT-4o, code removed):***
+>To implement the logic for ghosts switching between chase and scatter modes, we'll need to add periodic timers that switch the ghosts' modes at defined intervals. Here's how you can implement this logic:
+>
+>1. **Define the chase and scatter intervals.**
+>2. **Set up timers to switch between chase and scatter modes.**
+>3. **Reset the timers when the game state changes or when a new level starts.**
+>
+>Below is the updated `Game` class with the chase and scatter mode switching logic added:
+>
+>### Key Additions:
+>1. **`SCATTER_MODE_DURATION`** and **`CHASE_MODE_DURATION`**: Added constants to define the duration of scatter and chase modes.
+>2. **`startScatterChaseModeCycle` Method**: A method to start the cycle of switching between scatter and chase modes.
+>3. **`switchModes` Function**: Nested inside `startScatterChaseModeCycle`, it switches between scatter and chase modes and sets the corresponding timers.
+>4. **`setLevel` Method**: Ensures the scatter and chase mode cycle starts when a new level is set.
+>5. **`deactivateFrightenedMode` Method**: Restarts the scatter and chase mode cycle after frightened mode ends.
+>
+>This implementation ensures that ghosts switch between scatter and chase modes periodically, mimicking the behavior in the classic Pac-Man game.
+
+> [!NOTE]
+> There are several bugs in the implementation:
+>
+> ```javascript
+>    startScatterChaseModeCycle() {
+>        let scatterMode = true;
+>
+>        const switchModes = () => {
+>            for (const ghost of this.ghosts.values()) {
+>                ghost.setMode(scatterMode ? SCATTER_MODE : CHASE_MODE);
+>            }
+>            scatterMode = !scatterMode;
+>
+>            const duration = scatterMode ? Game.SCATTER_MODE_DURATION : Game.CHASE_MODE_DURATION;
+>            this.scatterChaseModeTimer = setTimeout(switchModes, duration);
+>        };
+>
+>        if (this.scatterChaseModeTimer) {
+>            clearTimeout(this.scatterChaseModeTimer);
+>        }
+>
+>        switchModes();
+>    }
+>```
+>
+> - Wrong duration is picked. `scatterMode` flag is flipped between setting the mode and the duration.
+> - `startScatterChaseModeCycle()` is called from within `setLevel()` which starts the timer while the game waits for the palyer to start it.
+
+***Prompt:***
+There are two bugs in this code you must fix.
+
+  1. The `scatterMode` flag is flipped after setting the mode but before setting the duration.
+  2. `startScatterChaseModeCycle()` is called from within `setLevel()`. It starts the timer when the game is in `START` state, but `START` is followed by the `WAITING` state where the game waits for the user input to switch to `RUNNING` game state.
+
+***Answer (ChatGPT-4o, code removed):***
+>To fix the two identified bugs, we need to:
+>
+>1. Correctly flip the `scatterMode` flag after setting the duration.
+>2. Ensure `startScatterChaseModeCycle` is called only when the game actually starts running, not while it's waiting for user input.
+>
+>Here is the corrected code:
+>
+>### Fixes:
+>1. **`switchModes` Function**: Moved the `scatterMode` flag flip to after setting the mode duration.
+>2. **`startGame` Method**: Added a new `startGame` method that sets the game state to `RUNNING` and starts the scatter/chase mode cycle. This method should be called when the game starts instead of calling `startScatterChaseModeCycle` directly within `setLevel`.
+>
+>### Usage:
+>- Call `startGame()` from wherever you handle user input to start the game, ensuring the scatter/chase mode cycle begins correctly when the game starts running.
+
+> [!NOTE]
+>
+> 1. ChatGPT-4o fixed the `scatterMode` flag (as it mentioned)
+> 2. It fixed the timer reset when activating the frightened mode (which it DOESN'T mention)
+> 3. It created a non-used `startGame()` function that is not being called. Probably the LLM wasn't able to unserstand the game states, and thus created this function. Easier to fix it manually.
+> 4. Bug: timer is not cancelled when the game is over.
+
+***Prompt:***
+The game has the following "end" states that require stopping both timers: PACMAN_DEAD, LEVEL_COMPLETE, GAME_OVER. Fix the code to stop the timer there.
+
+***Answer (ChatGPT-4o, code removed):***
+>To ensure that the timers are stopped when the game transitions to the "end" states (PACMAN_DEAD, LEVEL_COMPLETE, GAME_OVER), we'll add logic to clear the timers in these cases. Here's the updated code:
+>
+>### Fixes:
+>1. **`switchModes` Function**: The `scatterMode` flag flip now occurs after setting the mode duration.
+>2. **`stopAllTimers` Function**: This function stops both timers and is called when entering the "end" states.
+>3. **State Transitions**: Added calls to `stopAllTimers` within the `setState` method for the "end" states (PACMAN_DEAD, LEVEL_COMPLETE, GAME_OVER).
+>4. **Starting the Game**: `startGame` method sets the game state to `RUNNING` and starts the scatter/chase mode cycle, ensuring it begins correctly when the game starts running.
+>
+>### Usage:
+>- Call `startGame()` from wherever you handle user input to start the game, ensuring the scatter/chase mode cycle begins correctly when the game starts running.
+
+> [!NOTE]
+> Indeed ChatGPT-4o can't recognize the game state logic. Adding timer stopping into `setState` is a bad decision.
+> ```javascript
+>    setState(newState) {
+>        console.log(`Game State Changed from ${this.state} to ${newState}`);
+>        this.state = newState;
+>
+>        // Stop timers when entering end states
+>        if ([Game.states.PACMAN_DEAD, Game.states.LEVEL_COMPLETE, Game.states.GAME_OVER].includes(newState)) {
+>            this.stopAllTimers();
+>        }
+>    }
+>```

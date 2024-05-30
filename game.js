@@ -12,6 +12,9 @@ class Game {
     static GHOST_SCORE = 200; // Score for eating a ghost
     static FRIGHTENED_MODE_DURATION = 7000; // 7 seconds
 
+    static SCATTER_MODE_DURATION = 7000; // 7 seconds
+    static CHASE_MODE_DURATION = 20000; // 20 seconds
+
     static states = {
         START: "START",
         WAITING: "WAITING",
@@ -43,6 +46,9 @@ class Game {
         this.pacman = null;
         this.ghosts = new Map();
         this.frightenedModeTimer = null; // Timer for frightened mode
+        this.scatterChaseModeTimer = null; // Timer for scatter and chase modes
+
+        this.isKeypress = false;
     }
 
     getCurrentLevel() {
@@ -54,6 +60,17 @@ class Game {
         this.state = newState;
     }
 
+    stopAllTimers() {
+        if (this.frightenedModeTimer) {
+            clearTimeout(this.frightenedModeTimer);
+            this.frightenedModeTimer = null;
+        }
+        if (this.scatterChaseModeTimer) {
+            clearTimeout(this.scatterChaseModeTimer);
+            this.scatterChaseModeTimer = null;
+        }
+    }
+
     main() {
         switch (this.state) {
             case Game.states.START:
@@ -62,7 +79,11 @@ class Game {
                 break;
 
             case Game.states.WAITING:
-                /* Waiting for a key press to switch to RUNNING, see keyPressed() */
+                if (this.isKeypress) {
+                    this.startScatterChaseModeCycle();
+                    this.isKeypress = false;
+                    this.setState(Game.states.RUNNING);
+                }
                 return;
 
             case Game.states.RUNNING:
@@ -123,6 +144,8 @@ class Game {
 
             case Game.states.PACMAN_DEAD:
                 // Handle Pacman death animation and options (restart, game over)
+                this.stopAllTimers();
+
                 this.lives--;
                 if (this.lives === 0) {
                     this.setState(Game.states.GAME_OVER);
@@ -136,6 +159,8 @@ class Game {
             case Game.states.LEVEL_COMPLETE:
                 // Handle level completion logic (restart, next level)
                 // TODO: add more logic here.
+                this.stopAllTimers();
+
                 this.currentLevelIndex++;
                 if (this.currentLevelIndex < this.levels.length) {
                     this.setLevel(this.currentLevelIndex);
@@ -151,6 +176,7 @@ class Game {
 
             case Game.states.GAME_OVER:
                 // Display final score and options (restart, exit)
+                this.stopAllTimers();
                 console.log("Game Over!");
                 break;
         }
@@ -163,24 +189,47 @@ class Game {
         if (this.frightenedModeTimer) {
             clearTimeout(this.frightenedModeTimer);
         }
+        if (this.scatterChaseModeTimer) {
+            clearTimeout(this.scatterChaseModeTimer);
+        }
         this.frightenedModeTimer = setTimeout(() => {
             this.deactivateFrightenedMode();
         }, Game.FRIGHTENED_MODE_DURATION);
+        console.log(`Ghosts ${FRIGHTENED_MODE} for ${Game.FRIGHTENED_MODE_DURATION / 1000}s`);
     }
 
     deactivateFrightenedMode() {
         for (const ghost of this.ghosts.values()) {
-            // Revert to previous mode; defaulting to CHASE_MODE for simplicity
-            // You might want to store the previous mode and revert back to it
-            ghost.setMode(CHASE_MODE);
+            ghost.setMode(SCATTER_MODE);
         }
         this.frightenedModeTimer = null;
+        this.startScatterChaseModeCycle();
+    }
+
+    startScatterChaseModeCycle() {
+        let scatterMode = true;
+
+        const switchModes = () => {
+            scatterMode = !scatterMode;
+            for (const ghost of this.ghosts.values()) {
+                ghost.setMode(scatterMode ? SCATTER_MODE : CHASE_MODE);
+            }
+            const duration = scatterMode ? Game.SCATTER_MODE_DURATION : Game.CHASE_MODE_DURATION;
+            this.scatterChaseModeTimer = setTimeout(switchModes, duration);
+            console.log(`Ghosts ${scatterMode ? SCATTER_MODE : CHASE_MODE} for ${duration / 1000}s`);
+        };
+
+        if (this.scatterChaseModeTimer) {
+            clearTimeout(this.scatterChaseModeTimer);
+        }
+
+        switchModes();
     }
 
     eatGhost(ghost) {
         this.score += Game.GHOST_SCORE;
         ghost.position = { x: (ghost.startCell.x + 0.5) * CELL_SIZE, y: (ghost.startCell.y + 0.5) * CELL_SIZE };
-        ghost.setMode(SCATTER_MODE); // Reset ghost to scatter mode after being eaten
+        ghost.setMode(SCATTER_MODE);
     }
 
     checkGameCompletion() {
