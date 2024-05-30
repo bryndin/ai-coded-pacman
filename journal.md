@@ -3452,7 +3452,7 @@ The game has the following "end" states that require stopping both timers: PACMA
 >    }
 >```
 
-## Step 59
+## Step 60
 
 **Problem:** Time to do more refactorings, as the code gets messy.
 
@@ -3490,4 +3490,7 @@ This is a Game class for the classic Pacman game implemented in Javascript. Sugg
 >This revised version aims to create more readable, maintainable, and extensible code. Further improvements could include adding more comments, unit tests, and potentially abstracting out more game logic into separate classes (like a `CollisionManager` or a `GameModeManager`). 
 
 > [!NOTE]
-> Refactoring results from both Gemini 1.5 Pro and ChatGPT-4o aren't that exciting. I don't like how they factor out state logic blindly into dedicated functions.
+> - Refactoring results from both Gemini 1.5 Pro and ChatGPT-4o aren't that exciting. I don't like how they factor out state logic blindly into dedicated functions.
+> - Gemini's formatting is ugly nd unreadable at places.
+> - Gemini's claim "Moved the `checkForOverlap` function outside the `Game` class" is a lie, it was already not part of the class.
+ 
