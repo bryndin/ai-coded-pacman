@@ -9,6 +9,7 @@ import level1 from './levels/1.js';
 
 class Game {
     static PELLET_SCORE = 1;
+    static GHOST_SCORE = 200; // Score for eating a ghost
     static FRIGHTENED_MODE_DURATION = 7000; // 7 seconds
 
     static states = {
@@ -99,14 +100,18 @@ class Game {
                     }
                 }
 
-                if (this.checkPacmanGhostCollision()) {
-                    this.setState(Game.states.PACMAN_DEAD);
-                    return;
+                const collidedGhost = this.checkPacmanGhostCollision();
+                if (collidedGhost) {
+                    if (collidedGhost.mode === FRIGHTENED_MODE) {
+                        this.eatGhost(collidedGhost);
+                    } else {
+                        this.setState(Game.states.PACMAN_DEAD);
+                        return;
+                    }
                 }
 
                 if (this.isLevelComplete()) {
                     this.setState(Game.states.LEVEL_COMPLETE);
-                    // TODO: add more logic here
                 }
 
                 if (this.checkGameCompletion()) {
@@ -132,7 +137,6 @@ class Game {
                 // Handle level completion logic (restart, next level)
                 // TODO: add more logic here.
                 this.currentLevelIndex++;
-
                 if (this.currentLevelIndex < this.levels.length) {
                     this.setLevel(this.currentLevelIndex);
                     this.setState(Game.states.START);
@@ -171,6 +175,12 @@ class Game {
             ghost.setMode(CHASE_MODE);
         }
         this.frightenedModeTimer = null;
+    }
+
+    eatGhost(ghost) {
+        this.score += Game.GHOST_SCORE;
+        ghost.position = { x: (ghost.startCell.x + 0.5) * CELL_SIZE, y: (ghost.startCell.y + 0.5) * CELL_SIZE };
+        ghost.setMode(SCATTER_MODE); // Reset ghost to scatter mode after being eaten
     }
 
     checkGameCompletion() {

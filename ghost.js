@@ -8,6 +8,7 @@ class Ghost {
     static name = "Ghost";
 
     constructor(color, startCell, scatterCell, level) {
+        this.startCell = startCell;
         this.color = color;
         this.scatterCell = scatterCell;
         this.mode = CHASE_MODE;

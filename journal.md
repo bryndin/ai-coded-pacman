@@ -3316,3 +3316,28 @@ The logic below is a Javascript implementation of class Game for the classic Pac
 >   - Added `FRIGHTENED_MODE_DURATION` to define the duration of frightened mode.
 >
 >These changes ensure that the ghosts return to their previous mode after the frightened mode duration expires.
+
+## Step 58
+
+**Problem:** Need functionality for Pacman to eat Ghosts.
+
+***Prompt:***
+Great, we have timer now, next implement the logic for pacman to eat Ghosts when the frightening mode is active.
+
+***Answer (ChatGPT-4o, code removed):***
+>To implement the logic for Pac-Man to eat ghosts when the frightened mode is active, we'll need to add the following:
+>
+>1. **Check for collision between Pac-Man and ghosts when in frightened mode.**
+>2. **Handle the collision by resetting the ghost's position to their starting position and increasing the player's score.**
+>
+>Here is the updated `Game` class with this logic added:
+>
+>### Key Additions:
+>1. **`GHOST_SCORE`**: Added a new constant to define the score increment when Pac-Man eats a ghost.
+>2. **`eatGhost` Method**:
+>   - Increases the score.
+>   - Resets the ghost's position to its starting position.
+>   - Sets the ghost mode back to `SCAT
+
+> [!NOTE]
+> Notice that ChatGPT-4o ran out of output context size
