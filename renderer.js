@@ -1,5 +1,5 @@
 import DIRECTIONS from './directions.js';
-import Game from './game.js';
+import { Game, GAME_STATES } from './game.js';
 import Level from './level.js';
 
 export const CELL_SIZE = 16;
@@ -41,7 +41,7 @@ export class Renderer {
             }
         }
 
-        if (game.state === Game.states.WAITING) {
+        if (game.state === GAME_STATES.WAITING) {
             this.displayWaitForKeyPressMessage();
         }
 

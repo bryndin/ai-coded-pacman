@@ -11,14 +11,20 @@ class Ghost {
         this.startCell = startCell;
         this.color = color;
         this.scatterCell = scatterCell;
+        this.position = null;
         this.mode = CHASE_MODE;
-        this.position = { x: (startCell.x + 0.5) * CELL_SIZE, y: (startCell.y + 0.5) * CELL_SIZE };
         this.speed = 2;
         this.path = []; // Store the calculated path
         this.level = level;
         this.size = CELL_SIZE;
         this.targetCell = startCell;
         this.lastDirection = null; // Store the last direction to prevent immediate reversals
+
+        this.resetPosition();
+    }
+
+    resetPosition() {
+        this.position = { x: (this.startCell.x + 0.5) * CELL_SIZE, y: (this.startCell.y + 0.5) * CELL_SIZE };
     }
 
     update(pacmanCell, pacmanDirection, blinkyCell) {

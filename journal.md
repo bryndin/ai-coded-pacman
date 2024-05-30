@@ -3451,3 +3451,43 @@ The game has the following "end" states that require stopping both timers: PACMA
 >        }
 >    }
 >```
+
+## Step 59
+
+**Problem:** Time to do more refactorings, as the code gets messy.
+
+**Prompt:**
+This is a Game class for the classic Pacman game implemented in Javascript. Suggest improvements to the code, and generate an updated code. Look for code reuse. Follow JavaScript style guides. Pay special attention to code readability and maintainability.
+
+**Answer (Gemini 1.5-Pro, excluding code):**
+>`**Improvements:**
+>
+>- **State Management:**
+>    - Replaced the nested `switch` statement with a clearer state machine pattern.
+>    - Each game state has its own handler function, making the logic more modular.
+>- **Code Organization:**
+>    - Grouped related methods and logic together (e.g., collision detection, ghost mode management).
+>    - Used helper methods to break down large functions into smaller, more manageable chunks.
+>- **Readability:**
+>    - Improved variable and function names for better clarity.
+>    - Added comments to explain important parts of the code.
+>- **Maintainability:**
+>    - Separated game logic from rendering concerns (assuming you have a separate renderer).
+>    - Made the code more adaptable to adding new levels or features.
+>- **Code Style:**
+>    - Followed JavaScript style guides for consistent formatting.
+>
+>**Specific Changes:**
+>
+>- **Game States:** Moved game states to constants for better organization and to avoid typos.
+>- **Timers:** Used `clearTimeout` to clear timers consistently when no longer needed.
+>- **Collision Detection:** Simplified the collision checks and reused logic where possible.
+>- **Level Management:** Added a `resetLevels` method to reset the state of levels when the game restarts or a new game is started.
+>- **Game Completion:** Added a placeholder `checkGameCompletion` method for future implementation of checking if all levels are completed.
+>- **Ghost Management:**  Improved the handling of ghost modes and the transition between them.
+>- **Helper Function:** Moved the `checkForOverlap` function outside the `Game` class as it's a general utility function.
+>
+>This revised version aims to create more readable, maintainable, and extensible code. Further improvements could include adding more comments, unit tests, and potentially abstracting out more game logic into separate classes (like a `CollisionManager` or a `GameModeManager`). 
+
+> [!NOTE]
+> Refactoring results from both Gemini 1.5 Pro and ChatGPT-4o aren't that exciting. I don't like how they factor out state logic blindly into dedicated functions.
