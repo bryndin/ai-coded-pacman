@@ -264,38 +264,21 @@ export class Game {
         return level.pelletCount === 0;
     }
 
-    setLevel(n) {
-        this.currentLevelIndex = n;
+    setLevel(levelIndex) {
+        this.currentLevelIndex = levelIndex;
 
         if (this.currentLevelIndex >= this.levels.length) {
-            throw new Error(`Invalid level index: Level ${n} doesn't exist`);
+            throw new Error(`Invalid level index: Level ${levelIndex} doesn't exist`);
         }
 
         const level = this.getCurrentLevel();
         this.pacman = new Pacman(level.pacmanStart, 2);
 
-        this.ghosts.set(
-            Blinky.name,
-            new Blinky(level.ghostStarts.get(Blinky.name).start, level.ghostStarts.get(Blinky.name).scatter, level)
-        );
-        this.ghosts.set(
-            Pinky.name,
-            new Pinky(level.ghostStarts.get(Pinky.name).start, level.ghostStarts.get(Pinky.name).scatter, level)
-        );
-        this.ghosts.set(
-            Inky.name,
-            new Inky(level.ghostStarts.get(Inky.name).start, level.ghostStarts.get(Inky.name).scatter, level)
-        );
-        this.ghosts.set(
-            Clyde.name,
-            new Clyde(level.ghostStarts.get(Clyde.name).start, level.ghostStarts.get(Clyde.name).scatter, level)
-        );
+        this.ghosts = new Map([
+            [Blinky.name, new Blinky(level.ghostStarts.get(Blinky.name).start, level.ghostStarts.get(Blinky.name).scatter, level)],
+            [Pinky.name, new Pinky(level.ghostStarts.get(Pinky.name).start, level.ghostStarts.get(Pinky.name).scatter, level)],
+            [Inky.name, new Inky(level.ghostStarts.get(Inky.name).start, level.ghostStarts.get(Inky.name).scatter, level)],
+            [Clyde.name, new Clyde(level.ghostStarts.get(Clyde.name).start, level.ghostStarts.get(Clyde.name).scatter, level)],
+        ]);
     }
-}
-
-function checkForOverlap(obj1Position, obj2Position, obj1Size, obj2Size) {
-    return (
-        (obj1Position.x < obj2Position.x + obj2Size && obj1Position.x + obj1Size > obj2Position.x) &&
-        (obj1Position.y < obj2Position.y + obj2Size && obj1Position.y + obj1Size > obj2Position.y)
-    );
 }

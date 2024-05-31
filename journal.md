@@ -3875,3 +3875,6 @@ Logic in `isPelletCollision` and `isPowerPelletCollision` is incorrect. `Pellet`
 >  - Collision box center is not calculated properly
 >  - Circular imports
 
+## Step 62
+
+**Problem:** Add more refactoring and code clean up from previus steps.
