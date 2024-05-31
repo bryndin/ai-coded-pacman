@@ -1,27 +1,18 @@
-import { CELL_SIZE } from "./renderer.js";
+import { Collidable } from "./collidable.js";
+import { CELL_SIZE } from "./constants.js";
 
-export class Pellet {
-    // TODO: size must be defined by the renderer
+export class Pellet extends Collidable {
     static size = CELL_SIZE / 8;
 
-    constructor(cellPosition) {
-        this.position = this.calculatePosition(cellPosition);
-    }
-
-    calculatePosition(cellPosition) {
-        const offset = (CELL_SIZE - Pellet.size) / 2;
-        return {
-            x: cellPosition.x + offset,
-            y: cellPosition.y + offset
-        };
+    constructor(cell) {
+        super(cell, Pellet.size);
     }
 }
 
-export class PowerPellet extends Pellet {
-    // TODO: size must be defined by the renderer
+export class PowerPellet extends Collidable {
     static size = CELL_SIZE / 1.6;
 
-    constructor(cellPosition) {
-        super(cellPosition);
+    constructor(cell) {
+        super(cell, PowerPellet.size);
     }
 }

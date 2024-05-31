@@ -1,14 +1,13 @@
+import { Collidable } from "./collidable.js";
 import Level from "./level.js";
-import { CELL_SIZE } from "./renderer.js";
+import { CELL_SIZE } from "./constants.js";
 import DIRECTIONS from "./directions.js";
 
-class Pacman {
-  constructor(startPosition, size, speed) {
-    this.position = {
-      x: (startPosition.x + 0.5) * CELL_SIZE,
-      y: (startPosition.y + 0.5) * CELL_SIZE
-    };
-    this.size = size;
+class Pacman extends Collidable {
+  static size = CELL_SIZE;
+
+  constructor(startCell, speed) {
+    super(startCell, Pacman.size);
     this.speed = speed;
     this.direction = DIRECTIONS.NONE;
     this.desiredDirection = DIRECTIONS.NONE;

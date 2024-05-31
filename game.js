@@ -1,21 +1,22 @@
+import { CELL_SIZE } from "./constants.js";
 import Level from './level.js';
 import Pacman from './pacman.js';
 import { Blinky, Pinky, Inky, Clyde, FRIGHTENED_MODE, SCATTER_MODE, CHASE_MODE } from './ghost.js';
 import { Pellet, PowerPellet } from './pellet.js';
-import { CELL_SIZE, getCell } from './renderer.js';
+import { getCell } from './renderer.js';
 
 // Import level data from individual files
 import level1 from './levels/1.js';
 
 export const GAME_STATES = {
-        START: "START",
-        WAITING: "WAITING",
-        RUNNING: "RUNNING",
-        PACMAN_DEAD: "PACMAN_DEAD",
-        LEVEL_COMPLETE: "LEVEL_COMPLETE",
-        PAUSED: "PAUSED",
-        GAME_OVER: "GAME_OVER",
-    };
+    START: "START",
+    WAITING: "WAITING",
+    RUNNING: "RUNNING",
+    PACMAN_DEAD: "PACMAN_DEAD",
+    LEVEL_COMPLETE: "LEVEL_COMPLETE",
+    PAUSED: "PAUSED",
+    GAME_OVER: "GAME_OVER",
+};
 
 const PELLET_SCORE = 1;
 const GHOST_SCORE = 200; // Score for eating a ghost
@@ -27,10 +28,10 @@ export class Game {
     constructor() {
         this.levels = [
             new Level(level1.layout, level1.pacman, new Map([
-                    ["Blinky", level1.blinky],
-                    ["Pinky", level1.pinky],
-                    ["Inky", level1.inky],
-                    ["Clyde", level1.clyde]
+                ["Blinky", level1.blinky],
+                ["Pinky", level1.pinky],
+                ["Inky", level1.inky],
+                ["Clyde", level1.clyde]
             ])),
         ];
         this.currentLevelIndex = 0;
@@ -41,8 +42,8 @@ export class Game {
         this.pacman = null;
         this.ghosts = new Map();
 
-        this.frightenedModeTimer = null; 
-        this.scatterChaseModeTimer = null; 
+        this.frightenedModeTimer = null;
+        this.scatterChaseModeTimer = null;
 
         this.isKeypress = false;
     }
@@ -231,22 +232,19 @@ export class Game {
 
     checkPacmanGhostCollision() {
         for (const ghost of this.ghosts.values()) {
-            if (checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
+            if (this.pacman.checkCollision(ghost)) {
                 return ghost;
             }
         }
-
         return null;
     }
 
     isPelletCollision(cellX, cellY) {
         const level = this.getCurrentLevel();
 
-        // Check if the cell coordinates are within the layout limits
         if (!level.isOutOfBounds(cellX, cellY) && level.layout[cellY][cellX] === Level.PELLET) {
-            // Compute its collision box in canvas coordinates
-            const pellet = new Pellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
-            return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, Pellet.size);
+            const pellet = new Pellet({ x: cellX, y: cellY });
+            return this.pacman.checkCollision(pellet);
         }
         return false;
     }
@@ -254,11 +252,9 @@ export class Game {
     isPowerPelletCollision(cellX, cellY) {
         const level = this.getCurrentLevel();
 
-        // Check if the cell coordinates are within the layout limits
         if (!level.isOutOfBounds(cellX, cellY) && level.layout[cellY][cellX] === Level.POWER_PELLET) {
-            // Compute its collision box in canvas coordinates
-            const pellet = new PowerPellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
-            return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, PowerPellet.size);
+            const powerPellet = new PowerPellet({ x: cellX, y: cellY });
+            return this.pacman.checkCollision(powerPellet);
         }
         return false;
     }
@@ -276,7 +272,7 @@ export class Game {
         }
 
         const level = this.getCurrentLevel();
-        this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
+        this.pacman = new Pacman(level.pacmanStart, 2);
 
         this.ghosts.set(
             Blinky.name,

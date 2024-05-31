@@ -3494,3 +3494,384 @@ This is a Game class for the classic Pacman game implemented in Javascript. Sugg
 > - Gemini's formatting is ugly nd unreadable at places.
 > - Gemini's claim "Moved the `checkForOverlap` function outside the `Game` class" is a lie, it was already not part of the class.
  
+## Step 61
+
+**Problem:** There is duplicate logic between Pellet entities defining the collision boxes, their rendering logic, and the collision checking functions.
+
+**Prompt:**
+The following snippets are of Javascript code implementing the clasic game Pacman. The snippets are separated by lines (e.g. // -- logic description (filename.js) -----). There is duplicate logic between Pellet entities defining the collision boxes, their rendering logic, and the collision checking functions. E.g. collision box is defined by classes Pellet, PowerPellet, Ghost, and in the renderer drawing these objects; dedicated collision functions duplicate logic too, e.g. checkPacmanGhostCollision, isPelletCollision, isPowerPelletCollision. 
+Suggest refactorings to optimize it. In particular, how to better separate the game structure logic from the game visual representation, do a better decoupling.
+
+// -- Pellet entities definining their collision boxes (pellet.js file) -----
+import { CELL_SIZE } from "./renderer.js";
+
+export class Pellet {
+    static size = CELL_SIZE / 8;
+
+    constructor(cellPosition) {
+        this.position = this.calculatePosition(cellPosition);
+    }
+
+    calculatePosition(cellPosition) {
+        const offset = (CELL_SIZE - Pellet.size) / 2;
+        return {
+            x: cellPosition.x + offset,
+            y: cellPosition.y + offset
+        };
+    }
+}
+
+export class PowerPellet extends Pellet {
+    static size = CELL_SIZE / 1.6;
+
+    constructor(cellPosition) {
+        super(cellPosition);
+    }
+}
+
+// -- Renderer class responsible for drawing game objects using the p5.js library (renderer.js file) -----
+import DIRECTIONS from './directions.js';
+import { Game, GAME_STATES } from './game.js';
+import Level from './level.js';
+
+export const CELL_SIZE = 16;
+
+export class Renderer {
+    constructor(cellWidth, cellHeight) {
+        this.canvasWidth = cellWidth * CELL_SIZE;
+        this.canvasHeight = cellHeight * CELL_SIZE;
+
+        createCanvas(this.canvasWidth, this.canvasHeight + HEADER_HEIGHT);
+    }
+
+    static drawPellet(x, y) {
+        const size = CELL_SIZE / 8;
+
+        fill(255, 255, 0);  // yellow
+        circle(x + CELL_SIZE / 2, y + CELL_SIZE / 2, size);
+    }
+
+    static drawPowerPellet(x, y) {
+        const size = CELL_SIZE / 1.6;
+
+        fill(255, 255, 0);  // yellow
+        circle(x + CELL_SIZE / 2, y + CELL_SIZE / 2, size);
+    }
+
+    // pos is a center of the cell
+    static drawGhost(pos, color) {
+        const size = CELL_SIZE;
+        translate(pos.x, pos.y);
+        circle(pos.x, pos.y, size);
+    }
+}
+
+// -- Game class that includes object collision logic (game.js file) -----
+export class Game {
+    constructor() {
+        this.levels = [
+            new Level(level1.layout, level1.pacman, new Map([
+                    ["Blinky", level1.blinky],
+                    ["Pinky", level1.pinky],
+                    ["Inky", level1.inky],
+                    ["Clyde", level1.clyde]
+            ])),
+        ];
+        this.currentLevelIndex = 0;
+        this.score = 0;
+        this.lives = 3;
+        this.state = GAME_STATES.START;
+
+        this.pacman = null;
+        this.ghosts = new Map();
+
+        this.frightenedModeTimer = null; 
+        this.scatterChaseModeTimer = null; 
+
+        this.isKeypress = false;
+    }
+
+    checkPacmanGhostCollision() {
+        for (const ghost of this.ghosts.values()) {
+            if (checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
+                return ghost;
+            }
+        }
+
+        return null;
+    }
+
+    isPelletCollision(cellX, cellY) {
+        const level = this.getCurrentLevel();
+
+        // Check if the cell coordinates are within the layout limits
+        if (level.layout[cellY][cellX] === Level.PELLET) {
+            // Compute its collision box in canvas coordinates
+            const pellet = new Pellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
+            return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, Pellet.size);
+        }
+        return false;
+    }
+
+    isPowerPelletCollision(cellX, cellY) {
+        const level = this.getCurrentLevel();
+
+        // Check if the cell coordinates are within the layout limits
+        if (level.layout[cellY][cellX] === Level.POWER_PELLET) {
+            // Compute its collision box in canvas coordinates
+            const pellet = new PowerPellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
+            return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, PowerPellet.size);
+        }
+        return false;
+    }
+}
+
+function checkForOverlap(obj1Position, obj2Position, obj1Size, obj2Size) {
+    return (
+        (obj1Position.x < obj2Position.x + obj2Size && obj1Position.x + obj1Size > obj2Position.x) &&
+        (obj1Position.y < obj2Position.y + obj2Size && obj1Position.y + obj1Size > obj2Position.y)
+    );
+}
+
+// -- Ghost class defines ghost position and size in the game (ghost.js file) -----
+class Ghost {
+    static name = "Ghost";
+
+    constructor(color, startCell, scatterCell, level) {
+        this.startCell = startCell;
+        this.position = null;
+        this.size = CELL_SIZE;
+        this.resetPosition();
+    }
+}
+
+**Answer (ChatGPT-4o):**
+To refactor the given code snippets for better separation of concerns and reduce duplication, we can take the following steps:
+
+### Step 1: Create a Base Class for Collidable Objects
+Define a base class for all collidable game entities, which includes common properties and methods for collision detection and position calculation.
+
+#### collidable.js
+```javascript
+import { CELL_SIZE } from "./renderer.js";
+
+export class Collidable {
+    constructor(cellPosition, size) {
+        this.size = size;
+        this.position = this.calculatePosition(cellPosition);
+    }
+
+    calculatePosition(cellPosition) {
+        const offset = (CELL_SIZE - this.size) / 2;
+        return {
+            x: cellPosition.x + offset,
+            y: cellPosition.y + offset
+        };
+    }
+
+    checkCollision(other) {
+        return (
+            this.position.x < other.position.x + other.size &&
+            this.position.x + this.size > other.position.x &&
+            this.position.y < other.position.y + other.size &&
+            this.position.y + this.size > other.position.y
+        );
+    }
+}
+```
+
+### Step 2: Update Pellet and PowerPellet Classes
+Inherit from the `Collidable` base class.
+
+#### pellet.js
+```javascript
+import { Collidable } from "./collidable.js";
+
+export class Pellet extends Collidable {
+    static size = CELL_SIZE / 8;
+
+    constructor(cellPosition) {
+        super(cellPosition, Pellet.size);
+    }
+}
+
+export class PowerPellet extends Collidable {
+    static size = CELL_SIZE / 1.6;
+
+    constructor(cellPosition) {
+        super(cellPosition, PowerPellet.size);
+    }
+}
+```
+
+### Step 3: Update Ghost Class
+Inherit from the `Collidable` base class and set the appropriate size.
+
+#### ghost.js
+```javascript
+import { Collidable } from "./collidable.js";
+
+export class Ghost extends Collidable {
+    static size = CELL_SIZE;
+
+    constructor(color, startCell, scatterCell, level) {
+        super(startCell, Ghost.size);
+        this.color = color;
+        this.scatterCell = scatterCell;
+        this.level = level;
+    }
+
+    resetPosition() {
+        this.position = this.calculatePosition(this.startCell);
+    }
+}
+```
+
+### Step 4: Refactor Renderer Class
+Simplify the drawing methods by using the size from the respective classes.
+
+#### renderer.js
+```javascript
+import { Pellet, PowerPellet } from './pellet.js';
+import { Ghost } from './ghost.js';
+import { CELL_SIZE } from './constants.js';
+
+export class Renderer {
+    constructor(cellWidth, cellHeight) {
+        this.canvasWidth = cellWidth * CELL_SIZE;
+        this.canvasHeight = cellHeight * CELL_SIZE;
+        createCanvas(this.canvasWidth, this.canvasHeight);
+    }
+
+    static drawEntity(entity, color) {
+        fill(color);
+        circle(entity.position.x + CELL_SIZE / 2, entity.position.y + CELL_SIZE / 2, entity.size);
+    }
+
+    static drawPellet(pellet) {
+        this.drawEntity(pellet, [255, 255, 0]);
+    }
+
+    static drawPowerPellet(powerPellet) {
+        this.drawEntity(powerPellet, [255, 255, 0]);
+    }
+
+    static drawGhost(ghost) {
+        this.drawEntity(ghost, ghost.color);
+    }
+}
+```
+
+### Step 5: Refactor Game Class
+Simplify the collision detection logic using the `checkCollision` method from the `Collidable` base class.
+
+#### game.js
+```javascript
+import { Pellet, PowerPellet } from './pellet.js';
+import { Ghost } from './ghost.js';
+import Level from './level.js';
+
+export class Game {
+    constructor() {
+        this.levels = [
+            new Level(level1.layout, level1.pacman, new Map([
+                ["Blinky", level1.blinky],
+                ["Pinky", level1.pinky],
+                ["Inky", level1.inky],
+                ["Clyde", level1.clyde]
+            ])),
+        ];
+        this.currentLevelIndex = 0;
+        this.score = 0;
+        this.lives = 3;
+        this.state = GAME_STATES.START;
+
+        this.pacman = null;
+        this.ghosts = new Map();
+
+        this.frightenedModeTimer = null; 
+        this.scatterChaseModeTimer = null; 
+
+        this.isKeypress = false;
+    }
+
+    checkPacmanGhostCollision() {
+        for (const ghost of this.ghosts.values()) {
+            if (this.pacman.checkCollision(ghost)) {
+                return ghost;
+            }
+        }
+        return null;
+    }
+
+    isPelletCollision(cellX, cellY) {
+        const level = this.getCurrentLevel();
+        if (level.layout[cellY][cellX] === Level.PELLET) {
+            const pellet = new Pellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
+            return this.pacman.checkCollision(pellet);
+        }
+        return false;
+    }
+
+    isPowerPelletCollision(cellX, cellY) {
+        const level = this.getCurrentLevel();
+        if (level.layout[cellY][cellX] === Level.POWER_PELLET) {
+            const powerPellet = new PowerPellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
+            return this.pacman.checkCollision(powerPellet);
+        }
+        return false;
+    }
+}
+```
+
+### Summary
+These refactorings introduce a `Collidable` base class to encapsulate common behavior and properties for collision detection and position calculation. This allows for better code reuse and separation of concerns, making the code more modular and easier to maintain.
+
+**Prompt:**
+In this code, `position` is the top left corner of the collision box, while in the existing game logic we use the center of the collision box. Adjust the code accordingly.
+
+**Answer (shortened):**
+>To adjust the code so that position represents the center of the collision box instead of the top-left corner, we need to update the position calculations and the collision detection logic accordingly. Here’s the revised code:
+>## Summary
+>This refactoring ensures that position represents the center of the collision box for all game entities, improving consistency and simplifying collision detection logic. The Collidable base class provides common functionality for all collidable entities, reducing code duplication and improving maintainability.
+
+**Prompt:**
+In collidable.js, do we need a `calculateCenterPosition` function? It's not being used anywhere else.
+
+**Answer (shortened):**
+>You're right, the calculateCenterPosition function is unnecessary since it's only used in the constructor. We can simplify the code by moving the logic directly into the constructor.
+
+**Prompt:**
+What are the reasons to keep `checkCollision(other)` as a method of class `Collidable` vs having a separate function with two objects as arguments? 
+
+**Answer (shortened):**
+>### Reasons to Keep `checkCollision` as a Method in `Collidable`
+>
+>#### Encapsulation and Object-Oriented Design:
+>1. **Encapsulation**: By keeping `checkCollision` as a method of `Collidable`, the collision logic is encapsulated within the object, promoting better data management and encapsulation of behavior.
+>2. **Object-Oriented Design**: Methods belong to the objects they operate on, making it clear that collision checking is a behavior of collidable objects. This aligns with the principles of object-oriented design.
+>
+>#### Code Readability and Maintenance:
+>3. **Readability**: It’s intuitive to call `object1.checkCollision(object2)` rather than a standalone function, improving code readability.
+>4. **Maintenance**: Encapsulating the method within the class makes it easier to maintain and update. Changes to collision logic are confined to the class.
+>
+>### Reasons for a Separate Function:
+>1. **Flexibility**: A standalone function can handle collisions between any two objects, not just instances of `Collidable`.
+>2. **Functional Programming**: Separating data from functions adheres to functional programming principles, making it easier to reason about code.
+>
+>### Conclusion:
+>For this specific scenario, keeping `checkCollision` as a method within `Collidable` enhances encapsulation and aligns with object-oriented principles, making the code more modular and maintainable.
+
+> [!NOTE]
+>
+> There is a bug in the code, where Pellet and PowerPellet instantiation is done via canvas coordinates, not the cell coordinates.
+
+**Prompt:**
+Logic in `isPelletCollision` and `isPowerPelletCollision` is incorrect. `Pellet` and `PowerPellet` constructors receive the cell position, not the canvas position that is based on the cell size (CELL_SIZE).
+
+> [!NOTE]
+>
+> More bugs:
+>  - Collision box center is not calculated properly
+>  - Circular imports
+

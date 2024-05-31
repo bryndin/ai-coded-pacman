@@ -1,8 +1,10 @@
+import { CELL_SIZE } from "./constants.js";
 import DIRECTIONS from './directions.js';
-import { Game, GAME_STATES } from './game.js';
+import { Ghost } from './ghost.js';
+import { GAME_STATES } from './game.js';
 import Level from './level.js';
+import { Pellet, PowerPellet } from './pellet.js';
 
-export const CELL_SIZE = 16;
 const HEADER_HEIGHT = 3 * CELL_SIZE;
 
 export class Renderer {
@@ -84,11 +86,11 @@ export class Renderer {
 
     // pos is a center of the cell
     static drawGhost(pos, color) {
-        const size = CELL_SIZE;
+        const size = Ghost.size;
 
-        push(); // Save current drawing style
+        push();
 
-        translate(pos.x, pos.y); // Move to the center of the ghost
+        translate(pos.x, pos.y);
 
         const endAngle = 3 * PI;
         const skirtHeight = size / 5;
@@ -115,7 +117,7 @@ export class Renderer {
         }
         endShape();
 
-        pop(); // Restore previous drawing style
+        pop();
     }
 
     // x,y are the top-left corner
@@ -127,14 +129,14 @@ export class Renderer {
     }
 
     static drawPellet(x, y) {
-        const size = CELL_SIZE / 8;
+        const size = Pellet.size;
 
         fill(255, 255, 0);  // yellow
         circle(x + CELL_SIZE / 2, y + CELL_SIZE / 2, size);
     }
 
     static drawPowerPellet(x, y) {
-        const size = CELL_SIZE / 1.6;
+        const size = PowerPellet.size;
 
         fill(255, 255, 0);  // yellow
         circle(x + CELL_SIZE / 2, y + CELL_SIZE / 2, size);
