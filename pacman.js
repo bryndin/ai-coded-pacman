@@ -1,7 +1,6 @@
 import { Collidable } from "./collidable.js";
 import Level from "./level.js";
-import { CELL_SIZE } from "./constants.js";
-import DIRECTIONS from "./directions.js";
+import { CELL_SIZE, DIRECTIONS } from "./constants.js";
 
 class Pacman extends Collidable {
   static size = CELL_SIZE;

@@ -3878,3 +3878,7 @@ Logic in `isPelletCollision` and `isPowerPelletCollision` is incorrect. `Pellet`
 ## Step 62
 
 **Problem:** Add more refactoring and code clean up from previus steps.
+
+## Step 63
+
+**Problem:** Consolidate global constants in constants.js

@@ -1,5 +1,4 @@
-import { CELL_SIZE } from "./constants.js";
-import DIRECTIONS from './directions.js';
+import { CELL_SIZE, DIRECTIONS } from "./constants.js";
 import { Ghost } from './ghost.js';
 import { GAME_STATES } from './game.js';
 import Level from './level.js';

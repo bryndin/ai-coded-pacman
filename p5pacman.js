@@ -1,5 +1,5 @@
 import { Game, GAME_STATES } from "./game.js";
-import DIRECTIONS from "./directions.js";
+import { DIRECTIONS } from "./constants.js";
 import { Renderer } from "./renderer.js";
 
 // Add setup and draw to the global scope
