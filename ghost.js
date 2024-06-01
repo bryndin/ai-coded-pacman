@@ -1,23 +1,31 @@
-import { getCell, CELL_SIZE } from "./renderer.js";
+import { CELL_SIZE } from "./constants.js";
+import { Collidable } from "./collidable.js";
+import { getCell } from "./renderer.js";
 
 export const SCATTER_MODE = 'scatter';
 export const CHASE_MODE = 'chase';
 export const FRIGHTENED_MODE = 'frightened';
 
-class Ghost {
+export class Ghost extends Collidable {
     static name = "Ghost";
+    static size = CELL_SIZE;
 
     constructor(color, startCell, scatterCell, level) {
+        super(startCell, Ghost.size);
+
+        this.startCell = startCell;
         this.color = color;
         this.scatterCell = scatterCell;
         this.mode = CHASE_MODE;
-        this.position = { x: (startCell.x + 0.5) * CELL_SIZE, y: (startCell.y + 0.5) * CELL_SIZE };
         this.speed = 2;
         this.path = []; // Store the calculated path
         this.level = level;
-        this.size = CELL_SIZE;
         this.targetCell = startCell;
         this.lastDirection = null; // Store the last direction to prevent immediate reversals
+    }
+
+    resetPosition() {
+        this.position = this.calculateCenterPosition(this.startCell);
     }
 
     update(pacmanCell, pacmanDirection, blinkyCell) {

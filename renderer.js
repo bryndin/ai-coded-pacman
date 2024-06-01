@@ -1,8 +1,9 @@
-import DIRECTIONS from './directions.js';
-import Game from './game.js';
+import { CELL_SIZE, DIRECTIONS } from "./constants.js";
+import { Ghost, FRIGHTENED_MODE } from './ghost.js';
+import { GAME_STATES } from './game.js';
 import Level from './level.js';
+import { Pellet, PowerPellet } from './pellet.js';
 
-export const CELL_SIZE = 16;
 const HEADER_HEIGHT = 3 * CELL_SIZE;
 
 export class Renderer {
@@ -30,7 +31,7 @@ export class Renderer {
 
         Renderer.drawPacman(game.pacman.position, game.pacman.direction);
         for (const ghost of game.ghosts.values()) {
-            Renderer.drawGhost(ghost.position, ghost.color);
+            Renderer.drawGhost(ghost.position, ghost.color, ghost.mode);
 
             if (this.showScatterCells) {
                 Renderer.drawScatterCells(ghost.scatterCell, ghost.color);
@@ -41,7 +42,7 @@ export class Renderer {
             }
         }
 
-        if (game.state === Game.states.WAITING) {
+        if (game.state === GAME_STATES.WAITING) {
             this.displayWaitForKeyPressMessage();
         }
 
@@ -83,41 +84,53 @@ export class Renderer {
     }
 
     // pos is a center of the cell
-    static drawGhost(pos, color) {
-        const size = CELL_SIZE;
+    static drawGhost(pos, color, mode) { // Add mode parameter
+        const size = Ghost.size;
 
-        push(); // Save current drawing style
+        push();
 
-        translate(pos.x, pos.y); // Move to the center of the ghost
+        translate(pos.x, pos.y);
 
-        const endAngle = 3 * PI;
-        const skirtHeight = size / 5;
-        const skirtShiftY = size / 2 - skirtHeight;
+        if (mode === FRIGHTENED_MODE) { // Check for frightened mode
+            // Draw frightened ghost
+            fill('blue');
+            arc(0, 0, size, size, 0, 2 * PI); // Blue circle
+            fill('white');
+            ellipse(-size / 4, -size / 6, size / 5, size / 3); // White eyes
+            ellipse(size / 4, -size / 6, size / 5, size / 3);
+            fill('red');
+            triangle(-size / 4, size / 4, 0, size / 2, size / 4, size / 4); // Red mouth
 
-        // Draw the body
-        fill(color);
-        arc(0, 0, size, size, PI, 2 * PI, CHORD);
-        rect(-size / 2, 0, size, size / 2 - skirtHeight);
+        } else {
+            // Draw normal ghost
+            const endAngle = 3 * PI;
+            const skirtHeight = size / 5;
+            const skirtShiftY = size / 2 - skirtHeight;
 
-        // Draw the eyes
-        fill(255); // White eyes
-        const eyeOffset = size / 5;
-        const eyeSize = size / 6;
-        ellipse(-eyeOffset, -eyeOffset, eyeSize, eyeSize);
-        ellipse(eyeOffset, -eyeOffset, eyeSize, eyeSize);
+            // Draw the body
+            fill(color);
+            arc(0, 0, size, size, PI, 2 * PI, CHORD);
+            rect(-size / 2, 0, size, size / 2 - skirtHeight);
 
-        // Draw the bottom "skirt"
-        fill(color);
-        beginShape();
-        for (let x = 0; x <= size; x++) {
-            let y = skirtShiftY + Math.abs(skirtHeight * sin(x * endAngle / size));
-            vertex(x - size / 2, y);
+            // Draw the eyes
+            fill(255); // White eyes
+            const eyeOffset = size / 5;
+            const eyeSize = size / 6;
+            ellipse(-eyeOffset, -eyeOffset, eyeSize, eyeSize);
+            ellipse(eyeOffset, -eyeOffset, eyeSize, eyeSize);
+
+            // Draw the bottom "skirt"
+            fill(color);
+            beginShape();
+            for (let x = 0; x <= size; x++) {
+                let y = skirtShiftY + Math.abs(skirtHeight * sin(x * endAngle / size));
+                vertex(x - size / 2, y);
+            }
+            endShape();
         }
-        endShape();
 
-        pop(); // Restore previous drawing style
+        pop();
     }
-
     // x,y are the top-left corner
     static drawWall(x, y) {
         const size = CELL_SIZE;
@@ -127,14 +140,14 @@ export class Renderer {
     }
 
     static drawPellet(x, y) {
-        const size = CELL_SIZE / 8;
+        const size = Pellet.size;
 
         fill(255, 255, 0);  // yellow
         circle(x + CELL_SIZE / 2, y + CELL_SIZE / 2, size);
     }
 
     static drawPowerPellet(x, y) {
-        const size = CELL_SIZE / 1.6;
+        const size = PowerPellet.size;
 
         fill(255, 255, 0);  // yellow
         circle(x + CELL_SIZE / 2, y + CELL_SIZE / 2, size);

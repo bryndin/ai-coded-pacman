@@ -1,4 +1,4 @@
-import DIRECTIONS from "./directions.js";
+import { DIRECTIONS } from "./constants.js";
 
 class Level {
     static WALL = "#";

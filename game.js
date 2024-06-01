@@ -1,47 +1,51 @@
+import { CELL_SIZE } from "./constants.js";
 import Level from './level.js';
 import Pacman from './pacman.js';
 import { Blinky, Pinky, Inky, Clyde, FRIGHTENED_MODE, SCATTER_MODE, CHASE_MODE } from './ghost.js';
 import { Pellet, PowerPellet } from './pellet.js';
-import { CELL_SIZE, getCell } from './renderer.js';
+import { getCell } from './renderer.js';
 
 // Import level data from individual files
 import level1 from './levels/1.js';
 
-class Game {
-    static PELLET_SCORE = 1;
-    static FRIGHTENED_MODE_DURATION = 7000; // 7 seconds
+export const GAME_STATES = {
+    START: "START",
+    WAITING: "WAITING",
+    RUNNING: "RUNNING",
+    PACMAN_DEAD: "PACMAN_DEAD",
+    LEVEL_COMPLETE: "LEVEL_COMPLETE",
+    PAUSED: "PAUSED",
+    GAME_OVER: "GAME_OVER",
+};
 
-    static states = {
-        START: "START",
-        WAITING: "WAITING",
-        RUNNING: "RUNNING",
-        PACMAN_DEAD: "PACMAN_DEAD",
-        LEVEL_COMPLETE: "LEVEL_COMPLETE",
-        PAUSED: "PAUSED",
-        GAME_OVER: "GAME_OVER",
-    };
+const PELLET_SCORE = 1;
+const GHOST_SCORE = 200; // Score for eating a ghost
+const FRIGHTENED_MODE_DURATION = 7000; // 7 seconds
+const SCATTER_MODE_DURATION = 7000; // 7 seconds
+const CHASE_MODE_DURATION = 20000; // 20 seconds
 
+export class Game {
     constructor() {
         this.levels = [
-            new Level(
-                level1.layout,
-                level1.pacman,
-                new Map([
-                    ["Blinky", level1.blinky],
-                    ["Pinky", level1.pinky],
-                    ["Inky", level1.inky],
-                    ["Clyde", level1.clyde]
-                ]),
-            )
+            new Level(level1.layout, level1.pacman, new Map([
+                ["Blinky", level1.blinky],
+                ["Pinky", level1.pinky],
+                ["Inky", level1.inky],
+                ["Clyde", level1.clyde]
+            ])),
         ];
+        this.currentLevelIndex = 0;
         this.score = 0;
         this.lives = 3;
-        this.state = Game.states.START;
+        this.state = GAME_STATES.START;
 
-        this.currentLevelIndex = 0;
         this.pacman = null;
         this.ghosts = new Map();
-        this.frightenedModeTimer = null; // Timer for frightened mode
+
+        this.frightenedModeTimer = null;
+        this.scatterChaseModeTimer = null;
+
+        this.isKeypress = false;
     }
 
     getCurrentLevel() {
@@ -53,18 +57,33 @@ class Game {
         this.state = newState;
     }
 
+    stopAllTimers() {
+        if (this.frightenedModeTimer) {
+            clearTimeout(this.frightenedModeTimer);
+            this.frightenedModeTimer = null;
+        }
+        if (this.scatterChaseModeTimer) {
+            clearTimeout(this.scatterChaseModeTimer);
+            this.scatterChaseModeTimer = null;
+        }
+    }
+
     main() {
         switch (this.state) {
-            case Game.states.START:
+            case GAME_STATES.START:
                 this.setLevel(this.currentLevelIndex);
-                this.setState(Game.states.WAITING);
+                this.setState(GAME_STATES.WAITING);
                 break;
 
-            case Game.states.WAITING:
-                /* Waiting for a key press to switch to RUNNING, see keyPressed() */
+            case GAME_STATES.WAITING:
+                if (this.isKeypress) {
+                    this.startScatterChaseModeCycle();
+                    this.isKeypress = false;
+                    this.setState(GAME_STATES.RUNNING);
+                }
                 return;
 
-            case Game.states.RUNNING:
+            case GAME_STATES.RUNNING:
                 const level = this.getCurrentLevel();
                 this.pacman.move(level.layout);
 
@@ -84,11 +103,11 @@ class Game {
                         const cellX = pacmanCell.x + dx;
                         const cellY = pacmanCell.y + dy;
                         if (this.isPelletCollision(cellX, cellY)) {
-                            this.score++;
+                            this.score += PELLET_SCORE;
                             level.removePellet(cellX, cellY);
 
                             if (level.pelletCount === 0) {
-                                this.setState(Game.states.LEVEL_COMPLETE);
+                                this.setState(GAME_STATES.LEVEL_COMPLETE);
                             }
                         }
 
@@ -99,78 +118,112 @@ class Game {
                     }
                 }
 
-                if (this.checkPacmanGhostCollision()) {
-                    this.setState(Game.states.PACMAN_DEAD);
-                    return;
+                const collidedGhost = this.checkPacmanGhostCollision();
+                if (collidedGhost) {
+                    if (collidedGhost.mode === FRIGHTENED_MODE) {
+                        this.eatGhost(collidedGhost);
+                    } else {
+                        this.setState(GAME_STATES.PACMAN_DEAD);
+                        return;
+                    }
                 }
 
                 if (this.isLevelComplete()) {
-                    this.setState(Game.states.LEVEL_COMPLETE);
-                    // TODO: add more logic here
+                    this.setState(GAME_STATES.LEVEL_COMPLETE);
                 }
 
                 if (this.checkGameCompletion()) {
-                    this.setState(Game.states.GAME_OVER);
+                    this.setState(GAME_STATES.GAME_OVER);
                     // TODO: reset all levels, as they could have removed pellets.
                 }
 
                 break;
 
-            case Game.states.PACMAN_DEAD:
+            case GAME_STATES.PACMAN_DEAD:
                 // Handle Pacman death animation and options (restart, game over)
+                this.stopAllTimers();
+
                 this.lives--;
                 if (this.lives === 0) {
-                    this.setState(Game.states.GAME_OVER);
+                    this.setState(GAME_STATES.GAME_OVER);
                 } else {
                     // Reset positions
                     this.setLevel(this.currentLevelIndex);
-                    this.setState(Game.states.START);
+                    this.setState(GAME_STATES.START);
                 }
                 break;
 
-            case Game.states.LEVEL_COMPLETE:
+            case GAME_STATES.LEVEL_COMPLETE:
                 // Handle level completion logic (restart, next level)
                 // TODO: add more logic here.
-                this.currentLevelIndex++;
+                this.stopAllTimers();
 
+                this.currentLevelIndex++;
                 if (this.currentLevelIndex < this.levels.length) {
                     this.setLevel(this.currentLevelIndex);
-                    this.setState(Game.states.START);
+                    this.setState(GAME_STATES.START);
                 } else {
-                    this.setState(Game.states.GAME_OVER);
+                    this.setState(GAME_STATES.GAME_OVER);
                 }
                 break;
 
-            case Game.states.PAUSED:
+            case GAME_STATES.PAUSED:
                 // Pause game loop and user interaction
                 break;
 
-            case Game.states.GAME_OVER:
+            case GAME_STATES.GAME_OVER:
                 // Display final score and options (restart, exit)
+                this.stopAllTimers();
                 console.log("Game Over!");
                 break;
         }
     }
 
     activateFrightenedMode() {
-        for (const ghost of this.ghosts.values()) {
-            ghost.setMode(FRIGHTENED_MODE);
-        }
+        this.ghosts.forEach(ghost => ghost.setMode(FRIGHTENED_MODE));
+
         if (this.frightenedModeTimer) {
             clearTimeout(this.frightenedModeTimer);
         }
+        if (this.scatterChaseModeTimer) {
+            clearTimeout(this.scatterChaseModeTimer);
+        }
         this.frightenedModeTimer = setTimeout(() => {
             this.deactivateFrightenedMode();
-        }, Game.FRIGHTENED_MODE_DURATION);
+        }, FRIGHTENED_MODE_DURATION);
+        console.log(`Ghosts ${FRIGHTENED_MODE} for ${FRIGHTENED_MODE_DURATION / 1000}s`);
     }
 
     deactivateFrightenedMode() {
-        for (const ghost of this.ghosts.values()) {
-            // Revert to previous mode; defaulting to CHASE_MODE for simplicity
-            // You might want to store the previous mode and revert back to it
-            ghost.setMode(CHASE_MODE);
-        }
+        this.ghosts.forEach(ghost => ghost.setMode(SCATTER_MODE));
         this.frightenedModeTimer = null;
+        this.startScatterChaseModeCycle();
+    }
+
+    startScatterChaseModeCycle() {
+        let scatterMode = true;
+
+        const switchModes = () => {
+            scatterMode = !scatterMode;
+            this.ghosts.forEach(ghost => ghost.setMode(scatterMode ? SCATTER_MODE : CHASE_MODE));
+
+            const duration = scatterMode ? SCATTER_MODE_DURATION : CHASE_MODE_DURATION;
+            this.scatterChaseModeTimer = setTimeout(switchModes, duration);
+
+            console.log(`Ghosts ${scatterMode ? SCATTER_MODE : CHASE_MODE} for ${duration / 1000}s`);
+        };
+
+        if (this.scatterChaseModeTimer) {
+            clearTimeout(this.scatterChaseModeTimer);
+        }
+
+        switchModes();
+    }
+
+    eatGhost(ghost) {
+        this.score += GHOST_SCORE;
+        ghost.position = { x: (ghost.startCell.x + 0.5) * CELL_SIZE, y: (ghost.startCell.y + 0.5) * CELL_SIZE };
+        ghost.setMode(SCATTER_MODE);
     }
 
     checkGameCompletion() {
@@ -179,22 +232,19 @@ class Game {
 
     checkPacmanGhostCollision() {
         for (const ghost of this.ghosts.values()) {
-            if (checkForOverlap(this.pacman.position, ghost.position, this.pacman.size, ghost.size)) {
+            if (this.pacman.checkCollision(ghost)) {
                 return ghost;
             }
         }
-
         return null;
     }
 
     isPelletCollision(cellX, cellY) {
         const level = this.getCurrentLevel();
 
-        // Check if the cell coordinates are within the layout limits
         if (!level.isOutOfBounds(cellX, cellY) && level.layout[cellY][cellX] === Level.PELLET) {
-            // Compute its collision box in canvas coordinates
-            const pellet = new Pellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
-            return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, Pellet.size);
+            const pellet = new Pellet({ x: cellX, y: cellY });
+            return this.pacman.checkCollision(pellet);
         }
         return false;
     }
@@ -202,11 +252,9 @@ class Game {
     isPowerPelletCollision(cellX, cellY) {
         const level = this.getCurrentLevel();
 
-        // Check if the cell coordinates are within the layout limits
         if (!level.isOutOfBounds(cellX, cellY) && level.layout[cellY][cellX] === Level.POWER_PELLET) {
-            // Compute its collision box in canvas coordinates
-            const pellet = new PowerPellet({ x: cellX * CELL_SIZE, y: cellY * CELL_SIZE });
-            return checkForOverlap(this.pacman.position, pellet.position, this.pacman.size, PowerPellet.size);
+            const powerPellet = new PowerPellet({ x: cellX, y: cellY });
+            return this.pacman.checkCollision(powerPellet);
         }
         return false;
     }
@@ -216,40 +264,21 @@ class Game {
         return level.pelletCount === 0;
     }
 
-    setLevel(n) {
-        this.currentLevelIndex = n;
+    setLevel(levelIndex) {
+        this.currentLevelIndex = levelIndex;
 
         if (this.currentLevelIndex >= this.levels.length) {
-            throw new Error(`Invalid level index: Level ${n} doesn't exist`);
+            throw new Error(`Invalid level index: Level ${levelIndex} doesn't exist`);
         }
 
         const level = this.getCurrentLevel();
-        this.pacman = new Pacman(level.pacmanStart, CELL_SIZE, 2);
+        this.pacman = new Pacman(level.pacmanStart, 2);
 
-        this.ghosts.set(
-            Blinky.name,
-            new Blinky(level.ghostStarts.get(Blinky.name).start, level.ghostStarts.get(Blinky.name).scatter, level)
-        );
-        this.ghosts.set(
-            Pinky.name,
-            new Pinky(level.ghostStarts.get(Pinky.name).start, level.ghostStarts.get(Pinky.name).scatter, level)
-        );
-        this.ghosts.set(
-            Inky.name,
-            new Inky(level.ghostStarts.get(Inky.name).start, level.ghostStarts.get(Inky.name).scatter, level)
-        );
-        this.ghosts.set(
-            Clyde.name,
-            new Clyde(level.ghostStarts.get(Clyde.name).start, level.ghostStarts.get(Clyde.name).scatter, level)
-        );
+        this.ghosts = new Map([
+            [Blinky.name, new Blinky(level.ghostStarts.get(Blinky.name).start, level.ghostStarts.get(Blinky.name).scatter, level)],
+            [Pinky.name, new Pinky(level.ghostStarts.get(Pinky.name).start, level.ghostStarts.get(Pinky.name).scatter, level)],
+            [Inky.name, new Inky(level.ghostStarts.get(Inky.name).start, level.ghostStarts.get(Inky.name).scatter, level)],
+            [Clyde.name, new Clyde(level.ghostStarts.get(Clyde.name).start, level.ghostStarts.get(Clyde.name).scatter, level)],
+        ]);
     }
 }
-
-function checkForOverlap(obj1Position, obj2Position, obj1Size, obj2Size) {
-    return (
-        (obj1Position.x < obj2Position.x + obj2Size && obj1Position.x + obj1Size > obj2Position.x) &&
-        (obj1Position.y < obj2Position.y + obj2Size && obj1Position.y + obj1Size > obj2Position.y)
-    );
-}
-
-export default Game;

@@ -1,5 +1,5 @@
-import Game from "./game.js";
-import DIRECTIONS from "./directions.js";
+import { Game, GAME_STATES } from "./game.js";
+import { DIRECTIONS } from "./constants.js";
 import { Renderer } from "./renderer.js";
 
 // Add setup and draw to the global scope
@@ -17,7 +17,7 @@ export function setup() {
 export function draw() {
     game.main();
 
-    if (game.state == Game.states.GAME_OVER) {
+    if (game.state == GAME_STATES.GAME_OVER) {
         return;
     }
 
@@ -25,8 +25,8 @@ export function draw() {
 }
 
 export function keyPressed() {
-    if (game.state === Game.states.WAITING) {
-        game.setState(Game.states.RUNNING);
+    if (game.state === GAME_STATES.WAITING) {
+        game.isKeypress = true;
     }
 
     switch (keyCode) {
